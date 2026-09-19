@@ -26,13 +26,28 @@ project and paste two keys.
    into the editor, and click **Run**.
 3. You should see a small results table listing `profiles`, `ledger`, `audit`.
 
-## 3. (Optional but recommended) Let people sign in instantly
+## 3. Point confirmation emails at the real site
+
+When Supabase sends a "confirm your email" link it is built from the project's
+**Site URL** setting. If that is left at `localhost:...`, the link in the email
+goes nowhere useful. Set it to the real address:
+
+1. Left sidebar → **Authentication → URL Configuration**.
+2. **Site URL** = `https://tholsothea5-lang.github.io/boq-app`
+3. **Redirect URLs** — add https://tholsothea5-lang.github.io/boq-app/**
+   (keep any `http://localhost:...` entries if you also test locally).
+4. Save. An already-sent email keeps its old link; you can either open it and
+   swap just the host part to `https://tholsothea5-lang.github.io/boq-app`
+   (keep everything from `/#/auth/confirm?` onward), or sign up again with the
+   same address to get a fresh email with the correct link.
+
+## 4. (Optional but recommended) Let people sign in instantly
 
 By default Supabase requires email confirmation, which adds a click for new
 users. To turn it off: **Authentication → Providers → Email → "Confirm email" =
 off → Save**.
 
-## 4. Copy the two keys
+## 5. Copy the two keys
 
 1. Left sidebar → **Project Settings → API**.
 2. Copy **Project URL** (looks like `https://xxxx.supabase.co`).
@@ -45,7 +60,7 @@ off → Save**.
 
 Once the keys are in place I'll push the finished version to GitHub Pages. 
 
-## 5. After it's live — your admin account
+## 6. After it's live — your admin account
 
 Open the site. The layout is the same one you hand builders/team members, but
 now it starts with a **sign-in screen**:
