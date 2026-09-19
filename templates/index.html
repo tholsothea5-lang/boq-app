@@ -63,6 +63,11 @@
   }
   .ledger-tree-row:hover .ledger-del { opacity: 1; }
   .ledger-del:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .ledger-badge {
+  margin-left: auto; margin-right: 18px; font-size: 10px; letter-spacing: 0.05em; line-height: 1;
+  color: var(--amber); border: 1px solid currentColor; border-radius: 4px;
+  padding: 2px 5px; text-transform: uppercase; background: none;
+  }
   .ledger-bill { padding-left: 38px; font-size: 12.5px; font-weight: 400; color: #93A7BB; }
   .ledger-bill.active { background: var(--amber); color: #1F2E3D; font-weight: 600; }
   .ledger-bill.active .ledger-mark { color: #1F2E3D; }
@@ -93,6 +98,7 @@
   padding: 7px 10px; font-family: var(--font-sans); font-size: 13.5px;
   background: var(--surface); color: var(--ink); min-width: 220px;
   }
+  .save-project-btn { margin-top: 8px; }
   .btn {
   border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
   border-radius: var(--radius); padding: 8px 14px; font-family: var(--font-sans);
@@ -476,6 +482,7 @@
     <div class="project-field">
     <label for="projectName">PROJECT</label>
     <input type="text" id="projectName" placeholder="Untitled project" value="">
+    <button type="button" class="btn btn-primary btn-sm save-project-btn" id="btnSaveProject" hidden title="Save this project and all of its information to the shared ledger">Save project information</button>
     </div>
   </div>
   <div class="summary-strip">
@@ -618,19 +625,30 @@
   return r.json();
   }
   async function persist() {
+  // Keep draft projects backed up in this browser before anything else, so a
+  // reload does not lose them.
+  const drafts = (state.projects || []).filter(function (p) { return p.draft; });
+  if (drafts.length) storeDrafts(drafts);
   try {
   const body = Object.assign({}, state);
   // state.boq is a live mirror of the active project's bill; the projects list
   // itself is what the server stores, so the mirror is not sent as a top-level key.
+  // Draft projects stay out of the stored ledger until "Save project information".
   delete body.boq;
+  body.projects = (body.projects || []).filter(function (p) { return !p.draft; });
+  if (body.projects.length && body.activeProjectId &&
+    body.projects.every(function (p) { return p.id !== body.activeProjectId; })) {
+    body.activeProjectId = body.projects[0].id;
+  }
   const r = await fetch("/api/data", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
-  if (r.status === 401) { showAuthScreen("login"); return; }
-  if (!r.ok) showToast("Could not save \u2014 check the server");
-  } catch (e) { showToast("Could not save \u2014 check the server"); }
+  if (r.status === 401) { showAuthScreen("login"); return false; }
+  if (!r.ok) { showToast("Could not save \u2014 check the server"); return false; }
+  return true;
+  } catch (e) { showToast("Could not save \u2014 check the server"); return false; }
   }
 
   let toastTimer = null;
@@ -986,6 +1004,45 @@
   /* ================= SITE LEDGER NAVIGATION ================= */
   let ledgerProjectOpen = true;
 
+  // Newly added projects start as drafts: they exist only in this browser
+  // (backed up to localStorage so a reload does not lose them) until the
+  // user clicks "Save project information", which publishes them to the
+  // shared ledger and the audit log.
+  const DRAFT_KEY = "boq_drafts_v1";
+  function loadDrafts() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (e) { return []; }
+  }
+  function storeDrafts(list) {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(list)); } catch (e) { /* storage unavailable */ }
+  }
+  function upsertDraft(p) {
+  const list = loadDrafts().filter(function (d) { return d.id !== p.id; });
+  list.push(p);
+  storeDrafts(list);
+  }
+  function dropDraft(id) {
+  storeDrafts(loadDrafts().filter(function (d) { return d.id !== id; }));
+  }
+  function mergeDrafts() {
+  const drafts = loadDrafts();
+  if (!drafts.length) return;
+  const byId = {};
+  (state.projects || []).forEach(function (p) { byId[p.id] = p; });
+  drafts.forEach(function (d) {
+    if (byId[d.id]) {
+      if (!byId[d.id].draft) dropDraft(d.id); // already saved elsewhere
+    } else {
+      state.projects = state.projects || [];
+      d.draft = true;
+      state.projects.push(d);
+    }
+  });
+  }
+
   function activeProject() {
   if (!state || !state.projects) return null;
   const list = state.projects;
@@ -1001,6 +1058,8 @@
   state.projectName = p ? p.name : "";
   const input = document.getElementById("projectName");
   if (input) input.value = state.projectName;
+  const saveBtn = document.getElementById("btnSaveProject");
+  if (saveBtn) saveBtn.hidden = !(p && p.draft);
   }
 
   function switchProject(id) {
@@ -1020,16 +1079,33 @@
   const names = list.map(function (p) { return p.name || ""; });
   let k = 1;
   while (names.indexOf(n) !== -1) { k += 1; n = "Project " + (list.length + k); }
-  const p = { id: uid("p"), name: n, boq: [] };
+  const p = { id: uid("p"), name: n, boq: [], draft: true };
   list.push(p);
+  upsertDraft(p);
   state.activeProjectId = p.id;
   ledgerProjectOpen = true;
   syncBoqRef();
   selectedIds.boq = null;
-  persist();
   setActiveTab("boq");
   renderAll();
-  showToast("New project added \u201C" + n + "\u201D");
+  showToast("New draft project added \u2014 fill it in, then click Save project information");
+  }
+
+  function saveProjectInfo() {
+  const p = activeProject();
+  if (!p) return;
+  const wasDraft = !!p.draft;
+  if (wasDraft) delete p.draft; // include it in the save
+  persist().then(function (ok) {
+    if (ok) {
+    dropDraft(p.id);
+    syncBoqRef();
+    renderLedger();
+    showToast("Project information saved");
+    } else {
+    if (wasDraft) { p.draft = true; upsertDraft(p); renderLedger(); }
+    }
+  });
   }
 
   function deleteProject(id) {
@@ -1039,6 +1115,7 @@
   const p = list[idx];
   if (!confirm("Delete the whole project \u201C" + (p.name || "untitled") +
   "\u201D and its bill of quantities? This cannot be undone.")) return;
+  dropDraft(id);
   list.splice(idx, 1);
   if (!list.length) {
   const fresh = { id: uid("p"), name: "Project 1", boq: [] };
@@ -1130,6 +1207,12 @@
     title: "Open \u201C" + (p.name || "Untitled project") + "\u201D",
     click: function () { switchProject(p.id); }
   });
+  if (p.draft) {
+    const tag = document.createElement("span");
+    tag.className = "ledger-badge";
+    tag.textContent = "draft";
+    pr.appendChild(tag);
+  }
 
   const del = document.createElement("button");
   del.type = "button";
@@ -1683,6 +1766,8 @@
   state.projectName = name;
   persist(); renderAll();
   });
+  const saveProjectBtn = document.getElementById("btnSaveProject");
+  if (saveProjectBtn) saveProjectBtn.addEventListener("click", saveProjectInfo);
   document.getElementById("btnExportCsv").addEventListener("click", () => {
   window.location.href = "/api/export.csv";
   });
@@ -1933,6 +2018,7 @@
   ensureAdminTab();
   loadState().then(function (data) {
   state = data;
+  mergeDrafts();
   syncBoqRef();
   bindRowToolbar("materials");
   bindRowToolbar("labor");
