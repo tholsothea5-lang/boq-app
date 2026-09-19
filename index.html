@@ -780,7 +780,8 @@
     }
     try {
       const shared = await loadSharedLedger();
-      if (shared && typeof shared === "object") return shared;
+      if (shared && typeof shared === "object" &&
+          (shared.projects || shared.materials || shared.labor)) return shared;
     } catch (e) { showToast("Could not read the shared ledger"); }
     const baseline = await fetchBaseline();
     try {
@@ -795,7 +796,7 @@
     // reload does not lose them.
     const drafts = (state.projects || []).filter(function (p) { return p.draft; });
     if (drafts.length) storeDrafts(drafts);
-    if (!supabase || !me) return true;
+    if (!supabase || !me) return false;
     try {
       const body = Object.assign({}, state);
       // state.boq is a live mirror of the active project's bill; the projects list
@@ -1226,7 +1227,7 @@
   const input = document.getElementById("projectName");
   if (input) input.value = state.projectName;
   const saveBtn = document.getElementById("btnSaveProject");
-  if (saveBtn) saveBtn.hidden = !(p && p.draft);
+  if (saveBtn && p) saveBtn.hidden = false;
   }
 
   function switchProject(id) {
@@ -1241,7 +1242,8 @@
   }
 
   function addProject() {
-  const list = state.projects || [];
+  state.projects = state.projects || [];
+  const list = state.projects;
   let n = "Project " + (list.length + 1);
   const names = list.map(function (p) { return p.name || ""; });
   let k = 1;
@@ -1261,6 +1263,7 @@
   function saveProjectInfo() {
   const p = activeProject();
   if (!p) return;
+  if (!me) { showToast("Sign in to save the project"); return; }
   const wasDraft = !!p.draft;
   if (wasDraft) delete p.draft; // include it in the save
   persist().then(function (ok) {
@@ -1271,6 +1274,7 @@
     showToast("Project information saved");
     } else {
     if (wasDraft) { p.draft = true; upsertDraft(p); renderLedger(); }
+    showToast("Could not save \u2014 check your connection, then try again");
     }
   });
   }
