@@ -2126,12 +2126,34 @@
       document.getElementById("loginSubmit").disabled = true;
       return;
     }
-    const { data } = await supabase.auth.getSession();
-    if (data && data.session) {
-      await enterApp(data.session);
+    const { data: sess } = await supabase.auth.getSession();
+    if (sess && sess.session) {
+      await enterApp(sess.session);
       return;
     }
+    // Email-confirmation links look like  .../#/auth/confirm?token_hash=...&type=signup
+    // supabase-js does not finish those on its own, so verify the token here.
+    const frag = window.location.hash || "";
+    let confirmMsg = null;
+    if (frag.indexOf("token_hash=") > -1 && frag.indexOf("?") > -1) {
+      const params = new URLSearchParams(frag.slice(frag.indexOf("?") + 1));
+      const token = params.get("token_hash");
+      const type = params.get("type") || "signup";
+      if (token) {
+        const res = await supabase.auth.verifyOtp({ token_hash: token, type: type });
+        if (res.error) {
+          confirmMsg = "Could not confirm your email: " + res.error.message;
+        } else if (res.data && res.data.session) {
+          try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) { /* keep hash */ }
+          await enterApp(res.data.session);
+          return;
+        } else {
+          confirmMsg = "Email confirmed \u2014 you can sign in now.";
+        }
+      }
+    }
     showAuthScreen("login");
+    if (confirmMsg) document.getElementById("loginErr").textContent = confirmMsg;
   }
 
   async function enterApp(session) {
