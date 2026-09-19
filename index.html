@@ -613,8 +613,8 @@
      then paste the "Project URL" and the "anon" public key below (the anon key is
      designed to be public — the security rules on the database are what protect
      the data). Until both are filled in, the site shows a setup notice. */
-  const SUPABASE_URL = "YOUR_SUPABASE_URL";
-  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const SUPABASE_URL = "https://dpcuuvgcdixwieruwvwi.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwY3V1dmdjZGl4d2llcnV3dndpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MzMxNjAsImV4cCI6MjEwNTQwOTE2MH0.rAaCRoOIrJyNYg1lG3uqk2MS0aa-7rKNKdrARy4a5YE";
   const SUPABASE_READY = SUPABASE_URL.indexOf("YOUR_") === -1 && SUPABASE_ANON_KEY.indexOf("YOUR_") === -1;
   const supabase = SUPABASE_READY && window.supabase
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
