@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+data/ledger.db
+data/ledger.db-wal
+data/ledger.db-shm
+data/secret_key.txt
+.venv/
+venv/
+gh-pages/
+
+# Local scratch / source files not needed by the app
+PO.2024-all-CS.xlsx
+import_po.py
+scope.py
+_patch_script.py
+_api.json
+_err.log
+_out.log
+_live.html
