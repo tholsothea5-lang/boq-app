@@ -385,7 +385,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>All changes are saved on the server and recorded per user.</span>
+  <span>All changes are saved on the server and recorded per user. · build 2026-09-20</span>
   </div>
   </aside>
   <main>
@@ -674,6 +674,20 @@
   });
   if (r.status === 401) { showAuthScreen("login"); return false; }
   if (!r.ok) { showToast("Could not save \u2014 check the server"); return false; }
+  // Verify the write landed: read the ledger back and confirm the project ids
+  // the server now stores are exactly the ones we just sent. Without this a
+  // silently failing save would look like success and the draft would be
+  // dropped, losing the project on refresh.
+  const v = await fetch("/api/data");
+  if (v.status === 401) { showAuthScreen("login"); return false; }
+  const saved = await v.json();
+  const ids = function (list) {
+    return JSON.stringify((list || []).map(function (p) { return String(p.id); }).sort());
+  };
+  if (ids(saved && saved.projects) !== ids(body.projects)) {
+    showToast("Could not save \u2014 the server copy did not match, draft kept");
+    return false;
+  }
   return true;
   } catch (e) { showToast("Could not save \u2014 check the server"); return false; }
   }
