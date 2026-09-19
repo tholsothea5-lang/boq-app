@@ -385,7 +385,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20b</span>
   </div>
   </aside>
   <main>
@@ -638,7 +638,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-20.1 (saves are verified before the draft is dropped)");
+  console.log("Site Ledger — build 2026-09-20.2 (saves verified via read-back; draft kept on failure)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -824,7 +824,7 @@
     // reload does not lose them.
     const drafts = (state.projects || []).filter(function (p) { return p.draft; });
     if (drafts.length) storeDrafts(drafts);
-    if (!supabase || !me) return false;
+    if (!supabase || !me) { showToast("Could not save \u2014 not signed in"); return false; }
     try {
       const body = Object.assign({}, state);
       // state.boq is a live mirror of the active project's bill; the projects list
@@ -838,22 +838,19 @@
       }
       const detail = summarizeSave(stateSaved, body);
       // Upsert (not a plain update) so the write lands even if the single
-      // ledger row is missing, and re-read exactly what the server stored.
-      // Only when it matches do we treat the save as done — otherwise the
-      // caller keeps the local draft instead of assuming success (the old
-      // code dropped the draft on any "no error" result, which lost data
-      // when the update silently matched zero rows).
+      // ledger row is missing. The verification does NOT trust the upsert's
+      // own return value (supabase-js returns data:null there on some hosts
+      // even when the write succeeded — which made every save look failed).
+      // Instead we read the row back through the SAME query the app uses on
+      // refresh, so we confirm exactly what a reload will show.
       const payload = { id: 1, state: body, updated_by: me.id, updated_at: new Date().toISOString() };
-      const { data, error } = await supabase.from("ledger")
-        .upsert(payload, { onConflict: "id" })
-        .select()
-        .single();
+      const { error } = await supabase.from("ledger").upsert(payload, { onConflict: "id" });
       if (error) throw new Error(error.message);
-      const got = data && data.state;
+      const got = await loadSharedLedger();
       const ids = function (list) {
         return JSON.stringify((list || []).map(function (p) { return String(p.id); }).sort());
       };
-      if (ids(got && got.projects) !== ids(body.projects)) {
+      if (!got || ids(got.projects) !== ids(body.projects)) {
         throw new Error("the saved copy did not match what was sent");
       }
       await logAudit("data.saved", detail);
@@ -1320,7 +1317,9 @@
     showToast("Project information saved");
     } else {
     if (wasDraft) { p.draft = true; upsertDraft(p); renderLedger(); }
-    showToast("Could not save \u2014 check your connection, then try again");
+    // persist() already showed the specific reason on screen; do not overwrite
+    // it with a generic "check your connection" message when the save actually
+    // landed but the verification was inconclusive.
     }
   });
   }
