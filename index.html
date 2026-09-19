@@ -258,6 +258,80 @@
   .rail-foot { display: none; }
   main { padding: 18px 14px 50px 14px; }
   }
+
+  /* ------- Accounts + admin ------- */
+  .auth-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-alt); padding: 16px;
+  }
+  .auth-overlay[hidden] { display: none; }
+  .auth-card {
+  width: 100%; max-width: 380px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 26px; box-shadow: 0 18px 50px rgba(15,36,56,0.18);
+  }
+  .auth-card .mark { font-family: var(--font-mono); font-size: 11px; color: var(--amber); letter-spacing: 0.08em; }
+  .auth-card h1 { margin: 6px 0 4px; font-size: 20px; }
+  .auth-card p { margin: 0 0 18px; color: var(--ink-muted); font-size: 13px; }
+  .auth-card label { display: block; font-size: 12.5px; font-weight: 600; margin: 12px 0 5px; color: var(--ink); }
+  .auth-card input {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius); background: var(--surface); color: var(--ink);
+  font-size: 14px;
+  }
+  .auth-card input:focus { outline: 2px solid var(--steel); outline-offset: -1px; }
+  .auth-card .btn {
+  width: 100%; margin-top: 18px; padding: 10px; border: none; cursor: pointer;
+  border-radius: var(--radius); background: var(--navy); color: #fff;
+  font-size: 14px; font-weight: 600;
+  }
+  .auth-card .btn:disabled { opacity: .55; cursor: default; }
+  .auth-card .btn:hover { background: var(--navy-deep); }
+  .auth-card .switch { margin-top: 14px; text-align: center; font-size: 13px; color: var(--ink-muted); }
+  .auth-card .switch button {
+  border: none; background: none; color: var(--steel); cursor: pointer;
+  font-size: 13px; font-weight: 600; padding: 0;
+  }
+  .auth-err { margin-top: 12px; color: var(--danger); font-size: 13px; }
+  .user-chip {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: rgba(255,255,255,0.07); border-radius: var(--radius);
+  padding: 8px 10px; margin-bottom: 10px; color: #D8E2EC; font-size: 12.5px;
+  }
+  .user-chip .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-chip .role { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--amber); flex: none; }
+  .user-chip button.signout {
+  border: none; cursor: pointer; background: rgba(255,255,255,0.12); color: #fff;
+  border-radius: 6px; padding: 4px 8px; font-size: 11.5px; flex: none;
+  }
+  .user-chip button.signout:hover { background: rgba(255,255,255,0.22); }
+  .admin-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: center; }
+  .admin-toolbar input {
+  padding: 8px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font-size: 13px; width: 260px; max-width: 100%;
+  }
+  .admin-block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .admin-block h3 { margin: 0 0 10px; font-size: 15px; }
+  .user-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .user-table th, .user-table td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line); }
+  .user-table th { color: var(--ink-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+  .tag-admin { color: var(--amber); font-weight: 700; }
+  .tag-user { color: var(--ink-muted); }
+  .user-table .mini {
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+  border-radius: 6px; padding: 3px 8px; font-size: 12px; cursor: pointer; margin: 2px 4px 2px 0;
+  }
+  .user-table .mini:hover { border-color: var(--navy); }
+  .user-table .mini.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .audit-list { max-height: 420px; overflow-y: auto; }
+  .audit-item { display: flex; gap: 10px; padding: 7px 2px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .audit-item:last-child { border-bottom: none; }
+  .audit-item .when { color: var(--ink-muted); flex: none; font-family: var(--font-mono); font-size: 11px; padding-top: 1px; }
+  .audit-item .who { color: var(--steel); flex: none; font-weight: 600; }
+  .audit-item .what { color: var(--ink); }
+  .audit-item .what .act { color: var(--ink-muted); text-transform: uppercase; font-size: 10px; letter-spacing: .05em; margin-right: 6px; }
+  .muted-note { color: var(--ink-muted); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -272,12 +346,13 @@
   <nav class="ledger" id="ledgerTree" aria-label="Site Ledger"></nav>
 
   <div class="rail-foot">
+  <div class="user-chip" id="userChip" hidden></div>
   <div class="theme-toggle" role="group" aria-label="Theme">
     <button data-theme-choice="auto" id="themeAuto">Auto</button>
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>This is the static build: the ledger loads from the bundled data, and edits are saved in this browser only.</span>
+  <span>Edits are saved to the shared ledger and recorded per user.</span>
   </div>
   </aside>
   <main>
@@ -469,13 +544,81 @@
     <span>The bill is arranged as a hierarchy: <strong>1</strong> → <strong>1.1</strong> → <strong>1.1.1</strong>. Headings roll up the totals of everything under them; only item rows take a unit, a quantity and rates. Click a row to select it, then use the big buttons above the list.</span>
   </footer>
   </section>
+  <!-- ADMIN -->
+  <section class="panel" id="panel-admin">
+  <div class="topline">
+    <div>
+    <h2>Admin</h2>
+    <p>Manage the people who can open this ledger and review every change anyone has made.</p>
+    </div>
+  </div>
+  <div class="admin-toolbar">
+    <input id="auditSearch" type="search" placeholder="Search the audit trail…">
+    <button class="btn btn-ghost btn-sm" type="button" id="btnReloadAdmin">Refresh</button>
+    <button class="btn btn-danger-ghost btn-sm" type="button" id="btnResetLedger">Reset ledger to baseline</button>
+  </div>
+  <div class="admin-block">
+    <h3>Users</h3>
+    <table class="user-table">
+    <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
+    <tbody id="adminUsersBody"></tbody>
+    </table>
+  </div>
+  <div class="admin-block">
+    <h3>Audit trail</h3>
+    <div class="audit-list" id="auditList"></div>
+  </div>
+  </section>
   </main>
 </div>
 <div class="toast" id="toast"></div>
+<div class="auth-overlay" id="authScreen" hidden>
+  <form class="auth-card" id="loginForm">
+  <span class="mark">📐 SITE LEDGER</span>
+  <h1>Sign in to Site Ledger</h1>
+  <p>The bill of quantities is shared by everyone with an account — every change is saved and tracked per user.</p>
+  <label for="loginEmail">Email</label>
+  <input id="loginEmail" type="email" autocomplete="email" required>
+  <label for="loginPassword">Password</label>
+  <input id="loginPassword" type="password" autocomplete="current-password" required>
+  <div class="auth-err" id="loginErr"></div>
+  <button class="btn" type="submit" id="loginSubmit">Sign in</button>
+  <div class="switch">New here? <button type="button" id="toRegister">Create an account</button></div>
+  </form>
+  <form class="auth-card" id="registerForm" hidden>
+  <span class="mark">📐 SITE LEDGER</span>
+  <h1 id="registerTitle">Create an account</h1>
+  <p id="registerHint">Anyone can open an account here; the admin can promote you to manage other users.</p>
+  <label for="regEmail">Email</label>
+  <input id="regEmail" type="email" autocomplete="email" required>
+  <label for="regPassword">Password</label>
+  <input id="regPassword" type="password" minlength="8" autocomplete="new-password" required>
+  <label for="regPassword2">Password (repeat)</label>
+  <input id="regPassword2" type="password" minlength="8" autocomplete="new-password" required>
+  <div class="auth-err" id="regErr"></div>
+  <button class="btn" type="submit" id="regSubmit">Create account</button>
+  <div class="switch">Already registered? <button type="button" id="toLogin">Sign in</button></div>
+  </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function () {
   "use strict";
   let state = null;
+  let me = null;
+  let stateSaved = null;
+
+  /* Supabase project settings.
+     Create a free project at https://supabase.com, open Project Settings -> API,
+     then paste the "Project URL" and the "anon" public key below (the anon key is
+     designed to be public — the security rules on the database are what protect
+     the data). Until both are filled in, the site shows a setup notice. */
+  const SUPABASE_URL = "YOUR_SUPABASE_URL";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const SUPABASE_READY = SUPABASE_URL.indexOf("YOUR_") === -1 && SUPABASE_ANON_KEY.indexOf("YOUR_") === -1;
+  const supabase = SUPABASE_READY && window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
   const collapsedIds = new Set();
 
   function toNum(v) { const n = parseFloat(v); return isFinite(n) && n >= 0 ? n : 0; }
@@ -483,25 +626,178 @@
   function uid(p) { return p + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4); }
   function isHeading(n) { return !!(n.children && n.children.length); }
 
-  async function loadState() {
-  // This static build has no server: the bundled ledger lives in data.json,
-  // and any changes made in this browser are kept as a local copy on top.
-  try {
-    const saved = localStorage.getItem("boq.state");
-    if (saved) return JSON.parse(saved);
-  } catch (e) { /* ignore storage errors */ }
-  const r = await fetch("data.json");
-  if (!r.ok) throw new Error("load failed");
-  return r.json();
+  /* ---------- shared ledger (Supabase) + change summary ---------- */
+  const FIELD_LABELS = {
+    boq: { name: "description", unit: "unit", quantity: "quantity", materialRef: "material",
+           laborRef: "labor", customMaterialPrice: "material price", customLaborPrice: "labor price" },
+    materials: { name: "name", unit: "unit", price: "unit price", quantity: "quantity", note: "note" },
+    labor: { name: "name", unit: "unit", price: "unit price" }
+  };
+
+  function treeIndex(rows) {
+    const out = {};
+    (rows || []).forEach(function (row) {
+      if (row && row.id != null) out[row.id] = row;
+      if (row) Object.assign(out, treeIndex(row.children || []));
+    });
+    return out;
   }
+
+  function rowPath(rows, id, trail) {
+    trail = trail || [];
+    for (let i = 0; i < (rows || []).length; i++) {
+      const row = rows[i];
+      if (row.id === id) return trail.concat([row.name || "?"]);
+      const hit = rowPath(row.children || [], id, trail.concat([row.name || "?"]));
+      if (hit.length) return hit;
+    }
+    return [];
+  }
+
+  function itemWord(kind) {
+    return kind === "boq" ? "bill row" : kind === "materials" ? "material" : "labor item";
+  }
+
+  function changedFields(kind, oldR, newR) {
+    const out = [];
+    const labels = FIELD_LABELS[kind] || {};
+    Object.keys(labels).forEach(function (field) {
+      if (field === "name") return;
+      const ov = oldR[field], nv = newR[field];
+      if (ov === nv) return;
+      let a = ov, b = nv;
+      if (kind === "boq" && (field === "materialRef" || field === "laborRef")) {
+        a = (ov && ov !== "none") ? ov : "\u2014";
+        b = (nv && nv !== "none") ? nv : "\u2014";
+      }
+      out.push(labels[field] + ": " + a + " \u2192 " + b);
+    });
+    return out;
+  }
+
+  function summarizeStateChange(oldRows, newRows, kind, label) {
+    const lines = [];
+    const oldIdx = treeIndex(oldRows), newIdx = treeIndex(newRows);
+    Object.keys(oldIdx).sort().forEach(function (id) {
+      if (newIdx[id] !== undefined) return;
+      const row = oldIdx[id];
+      lines.push("Removed " + itemWord(kind) + " '" + (row.name || "?") + "' from " +
+                 (rowPath(oldRows, id).join("/") || label));
+    });
+    Object.keys(newIdx).sort().forEach(function (id) {
+      if (oldIdx[id] !== undefined) return;
+      const row = newIdx[id];
+      lines.push("Added " + itemWord(kind) + " '" + (row.name || "?") + "' to " +
+                 (rowPath(newRows, id).join("/") || label));
+    });
+    Object.keys(newIdx).sort().forEach(function (id) {
+      if (oldIdx[id] === undefined) return;
+      const ov = oldIdx[id], nv = newIdx[id];
+      const changes = changedFields(kind, ov, nv);
+      if ((ov.name || "") !== (nv.name || "")) {
+        changes.unshift("renamed '" + (ov.name || "?") + "' \u2192 '" + (nv.name || "?") + "'");
+      }
+      changes.forEach(function (line) {
+        lines.push((rowPath(newRows, id).join("/") || label) + ": " + line);
+      });
+    });
+    return lines;
+  }
+
+  function summarizeSave(oldState, newState) {
+    const lines = [];
+    oldState = oldState || {};
+    newState = newState || {};
+    lines.push.apply(lines, summarizeStateChange(oldState.materials || [], newState.materials || [], "materials", "Materials"));
+    lines.push.apply(lines, summarizeStateChange(oldState.labor || [], newState.labor || [], "labor", "Labor"));
+    const oldP = {}, newP = {};
+    (oldState.projects || []).forEach(function (p) { oldP[p.id] = p; });
+    (newState.projects || []).forEach(function (p) { newP[p.id] = p; });
+    Object.keys(oldP).sort().forEach(function (pid) {
+      if (newP[pid] !== undefined) return;
+      lines.push("Deleted project '" + (oldP[pid].name || "?") + "'");
+    });
+    Object.keys(newP).sort().forEach(function (pid) {
+      if (oldP[pid] !== undefined) return;
+      lines.push("Added project '" + (newP[pid].name || "?") + "'");
+    });
+    Object.keys(newP).sort().forEach(function (pid) {
+      if (oldP[pid] === undefined) return;
+      if ((oldP[pid].name || "") !== (newP[pid].name || "")) {
+        lines.push("Renamed project '" + (oldP[pid].name || "?") + "' \u2192 '" + (newP[pid].name || "?") + "'");
+      }
+      lines.push.apply(lines, summarizeStateChange(oldP[pid].boq || [], newP[pid].boq || [], "boq",
+                                                   "BOQ \u00b7 " + (newP[pid].name || "?")));
+    });
+    if (!lines.length) return "No changes";
+    if (lines.length > 24) {
+      const more = lines.length - 24;
+      lines.length = 24;
+      lines.push("\u2026and " + more + " more");
+    }
+    return lines.join("; ");
+  }
+
+  async function fetchBaseline() {
+    const r = await fetch("data.json");
+    if (!r.ok) throw new Error("load failed");
+    return r.json();
+  }
+
+  async function loadSharedLedger() {
+    if (!supabase) return null;
+    const { data, error } = await supabase.from("ledger").select("state").eq("id", 1).maybeSingle();
+    if (error) throw new Error(error.message);
+    return data && data.state ? data.state : null;
+  }
+
+  async function seedSharedLedger(baseline) {
+    const { error } = await supabase.from("ledger").upsert({
+      id: 1, state: baseline, updated_by: me.id, updated_at: new Date().toISOString()
+    }, { onConflict: "id" });
+    if (error) throw new Error(error.message);
+  }
+
+  async function logAudit(action, detail) {
+    try {
+      await supabase.from("audit").insert({
+        user_id: me.id, email: me.email, action: action, detail: detail || ""
+      });
+    } catch (e) { console.error("audit insert failed", e); }
+  }
+
+  async function loadState() {
+    if (!supabase) {
+      // no backend configured yet: show the bundled baseline as a preview
+      return fetchBaseline();
+    }
+    try {
+      const shared = await loadSharedLedger();
+      if (shared && typeof shared === "object") return shared;
+    } catch (e) { showToast("Could not read the shared ledger"); }
+    const baseline = await fetchBaseline();
+    try {
+      await seedSharedLedger(baseline);
+      await logAudit("ledger.seeded", "Created the shared ledger from the bundled baseline");
+    } catch (e) { /* the baseline is still shown even if seeding failed */ }
+    return baseline;
+  }
+
   async function persist() {
-  try {
-  const body = Object.assign({}, state);
-  // state.boq is a live mirror of the active project's bill; the projects list
-  // itself is what is stored, so the mirror is not a top-level key.
-  delete body.boq;
-  localStorage.setItem("boq.state", JSON.stringify(body));
-  } catch (e) { showToast("Could not save — browser storage full or blocked"); }
+    if (!supabase || !me) return;
+    try {
+      const body = Object.assign({}, state);
+      // state.boq is a live mirror of the active project's bill; the projects list
+      // itself is what is stored, so the mirror is not a top-level key.
+      delete body.boq;
+      const detail = summarizeSave(stateSaved, body);
+      const { error } = await supabase.from("ledger").update({
+        state: body, updated_by: me.id, updated_at: new Date().toISOString()
+      }).eq("id", 1);
+      if (error) throw new Error(error.message);
+      await logAudit("data.saved", detail);
+      stateSaved = body;
+    } catch (e) { showToast("Could not save \u2014 check your connection"); }
   }
 
   let toastTimer = null;
@@ -959,6 +1255,12 @@
   active: activeTab === "labor",
   click: function () { setActiveTab("labor"); }
   }));
+  if (me && me.role === "admin") {
+  tree.appendChild(ledgerNode("\uD83D\uDEE1\uFE0F", "Admin", {
+    active: activeTab === "admin",
+    click: function () { setActiveTab("admin"); loadAdminPanel(); }
+  }));
+  }
 
   const group = document.createElement("div");
   group.className = "ledger-group" + (ledgerProjectOpen ? " open" : "");
@@ -1052,22 +1354,56 @@
   return ta;
   }
 
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+    const reader = new FileReader();
+    reader.onerror = function () { reject(new Error("read failed")); };
+    reader.onload = function () { resolve(reader.result); };
+    reader.readAsDataURL(file);
+    });
+  }
+
+  function shrinkImage(dataUrl) {
+    // Downscale photos so the shared ledger (stored in the database) stays small.
+    return new Promise(function (resolve) {
+    const img = new Image();
+    img.onerror = function () { resolve(dataUrl); };
+    img.onload = function () {
+      try {
+      const MAX = 1400;
+      let w = img.width, h = img.height;
+      if (!w || !h || (w <= MAX && h <= MAX)) { resolve(dataUrl); return; }
+      const scale = MAX / Math.max(w, h);
+      w = Math.round(w * scale);
+      h = Math.round(h * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.82));
+      } catch (e) { resolve(dataUrl); }
+    };
+    img.src = dataUrl;
+    });
+  }
+
   function uploadPhotoFile(id, index, file) {
-  // No server on a static build: the picture is read into a data URL and kept
-  // with the row in the browser's local copy of the ledger.
-  const reader = new FileReader();
-  reader.onload = function () {
+  // The picture is read into a (downscaled) data URL and stored with the row in
+  // the shared ledger, so everyone signed in sees it.
+  readFileAsDataUrl(file).then(function (dataUrl) {
+    return Promise.all([dataUrl, shrinkImage(dataUrl)]);
+  }).then(function (pair) {
     const loc = locate(state.materials, id);
     if (!loc) { showToast("Could not attach photo"); return; }
     const node = loc.siblings[loc.index];
     node.photos = node.photos || [];
-    if (index != null && node.photos[index]) node.photos[index] = reader.result;
-    else node.photos.push(reader.result);
+    if (index != null && node.photos[index]) node.photos[index] = pair[1];
+    else node.photos.push(pair[1]);
     persist(); renderAll();
-    showToast(index != null ? "Photo replaced (saved in this browser)" : "Photo inserted (saved in this browser)");
-  };
-  reader.onerror = function () { showToast("Could not read that image"); };
-  reader.readAsDataURL(file);
+    showToast(index != null ? "Photo replaced (saved to the shared ledger)" : "Photo inserted (saved to the shared ledger)");
+  }).catch(function () {
+    showToast("Could not read that image");
+  });
   }
 
   function pickPhoto(id, index) {
@@ -1577,12 +1913,7 @@
   showToast("CSV exported");
   }
   document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
-  document.getElementById("btnResetData").addEventListener("click", function () {
-  if (confirm("Discard the saved copy in this browser and reload the bundled ledger?")) {
-    try { localStorage.removeItem("boq.state"); } catch (e) {}
-    location.reload();
-  }
-  });
+  document.getElementById("btnResetData").addEventListener("click", resetSharedLedger);
   /* ---------------- Column layout ---------------- */
   // The tables never scroll sideways. Each column owns a percentage of the
   // table's width and the shares always add up to 100%, so the whole table —
@@ -1699,6 +2030,323 @@
   });
   }
 
+  /* ---------------- Accounts (Supabase) ---------------- */
+  function renderUserChip() {
+    const chip = document.getElementById("userChip");
+    if (!me || !chip) return;
+    chip.hidden = false;
+    chip.innerHTML = "";
+    const who = document.createElement("span");
+    who.className = "who";
+    who.textContent = me.email;
+    who.title = "Signed in as " + me.email;
+    const role = document.createElement("span");
+    role.className = "role";
+    role.textContent = me.role;
+    const out = document.createElement("button");
+    out.type = "button";
+    out.className = "signout";
+    out.textContent = "Sign out";
+    out.addEventListener("click", signOut);
+    chip.append(who, role, out);
+  }
+
+  function showAuthScreen(mode) {
+    const screen = document.getElementById("authScreen");
+    if (!screen) return;
+    screen.hidden = false;
+    document.getElementById("loginForm").hidden = (mode === "register");
+    document.getElementById("registerForm").hidden = (mode !== "register");
+    document.getElementById("loginErr").textContent = "";
+    document.getElementById("regErr").textContent = "";
+    const first = mode === "register" ? document.getElementById("regEmail") : document.getElementById("loginEmail");
+    if (first) first.focus();
+  }
+
+  function hideAuthScreen() {
+    const screen = document.getElementById("authScreen");
+    if (screen) screen.hidden = true;
+  }
+
+  function bindAuthForms() {
+    const loginErr = document.getElementById("loginErr");
+    const regErr = document.getElementById("regErr");
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (!supabase) return;
+      const btn = document.getElementById("loginSubmit");
+      btn.disabled = true;
+      loginErr.textContent = "";
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: document.getElementById("loginEmail").value.trim(),
+          password: document.getElementById("loginPassword").value
+        });
+        if (error) { loginErr.textContent = error.message; return; }
+        await enterApp(data.session);
+      } catch (ex) { loginErr.textContent = "Could not reach the server"; }
+      finally { btn.disabled = false; }
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (!supabase) return;
+      const pw = document.getElementById("regPassword").value;
+      const pw2 = document.getElementById("regPassword2").value;
+      regErr.textContent = "";
+      if (pw !== pw2) { regErr.textContent = "Passwords do not match"; return; }
+      const btn = document.getElementById("regSubmit");
+      btn.disabled = true;
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: document.getElementById("regEmail").value.trim(),
+          password: pw
+        });
+        if (error) { regErr.textContent = error.message; return; }
+        if (data && data.session) {
+          await enterApp(data.session);
+        } else {
+          // Email confirmation is enabled on this Supabase project.
+          regErr.textContent = "Account created. Check your inbox, confirm the email, then sign in.";
+          document.getElementById("toLogin").click();
+        }
+      } catch (ex) { regErr.textContent = "Could not reach the server"; }
+      finally { btn.disabled = false; }
+    });
+
+    document.getElementById("toRegister").addEventListener("click", function () { showAuthScreen("register"); });
+    document.getElementById("toLogin").addEventListener("click", function () { showAuthScreen("login"); });
+  }
+
+  async function bootAuth() {
+    if (!supabase) {
+      showAuthScreen("login");
+      document.getElementById("loginErr").textContent =
+        "This site is not connected yet \u2014 the owner needs to add the Supabase URL and anon key to index.html.";
+      document.getElementById("loginSubmit").disabled = true;
+      return;
+    }
+    const { data } = await supabase.auth.getSession();
+    if (data && data.session) {
+      await enterApp(data.session);
+      return;
+    }
+    showAuthScreen("login");
+  }
+
+  async function enterApp(session) {
+    const { data: prof, error } = await supabase
+      .from("profiles").select("id,email,role,is_active,created_at")
+      .eq("id", session.user.id).maybeSingle();
+    if (error || !prof || prof.is_active === false) {
+      await supabase.auth.signOut();
+      me = null;
+      showAuthScreen("login");
+      document.getElementById("loginErr").textContent =
+        error ? "Could not load your account." : (prof ? "This account has been deactivated." : "Account not found.");
+      return;
+    }
+    me = prof;
+    afterLogin();
+  }
+
+  async function signOut() {
+    if (supabase) await supabase.auth.signOut();
+    me = null;
+    location.reload();
+  }
+
+  function afterLogin() {
+    hideAuthScreen();
+    renderUserChip();
+    ensureAdminTab();
+    loadState().then(function (data) {
+      state = data;
+      const snap = Object.assign({}, state);
+      delete snap.boq;
+      stateSaved = snap;
+      syncBoqRef();
+      bindRowToolbar("materials");
+      bindRowToolbar("labor");
+      bindRowToolbar("boq");
+      initColumns();
+      applyTheme();
+      setActiveTab("boq");
+      renderAll();
+      if (me.role === "admin") loadAdminPanel();
+    }).catch(function () {
+      showToast("Could not load the ledger \u2014 check your connection");
+    });
+  }
+
+  /* ---------------- Admin ---------------- */
+  function ensureAdminTab() {
+    const idx = TABS.findIndex(function (t) { return t.id === "admin"; });
+    if (me && me.role === "admin" && idx === -1) TABS.push({ id: "admin", label: "Admin" });
+    if ((!me || me.role !== "admin") && idx !== -1) TABS.splice(idx, 1);
+    renderTabs();
+  }
+
+  function adminActionBtn(label, cls, title, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mini" + (cls ? " " + cls : "");
+    b.textContent = label;
+    b.title = title || "";
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  function patchUser(id, payload) {
+    const doRole = payload.role ? supabase.rpc("admin_set_role", { target_id: id, new_role: payload.role }) : Promise.resolve({ error: null });
+    const doActive = payload.isActive !== undefined ? supabase.rpc("admin_set_active", { target_id: id, new_active: payload.isActive }) : Promise.resolve({ error: null });
+    Promise.all([doRole, doActive]).then(function (results) {
+      const err = results.find(function (r) { return r && r.error; });
+      if (err) showToast(err.error.message);
+      loadAdminUsers();
+    });
+  }
+
+  function deleteUser(id) {
+    supabase.rpc("admin_delete_user", { target_id: id }).then(function (res) {
+      if (res.error) showToast(res.error.message);
+      loadAdminUsers();
+    });
+  }
+
+  function loadAdminUsers() {
+    const body = document.getElementById("adminUsersBody");
+    if (!body) return;
+    body.innerHTML = "";
+    supabase.from("profiles")
+      .select("id,email,role,is_active,created_at")
+      .order("created_at", { ascending: true })
+      .then(function (res) {
+        if (res.error) { body.innerHTML = '<tr><td colspan="5">Could not load users.</td></tr>'; return; }
+        res.data.forEach(function (u) {
+          const tr = document.createElement("tr");
+          const tdEmail = document.createElement("td");
+          tdEmail.textContent = u.email;
+          tdEmail.title = u.is_active ? "Active account" : "Deactivated account";
+          const tdRole = document.createElement("td");
+          const roleTag = document.createElement("span");
+          roleTag.className = u.role === "admin" ? "tag-admin" : "tag-user";
+          roleTag.textContent = u.role;
+          tdRole.appendChild(roleTag);
+          const tdStatus = document.createElement("td");
+          tdStatus.textContent = u.is_active ? "Active" : "Disabled";
+          const tdCreated = document.createElement("td");
+          tdCreated.textContent = (u.created_at || "").slice(0, 10);
+          const tdAct = document.createElement("td");
+          tdAct.style.whiteSpace = "nowrap";
+          if (u.role !== "admin") {
+            tdAct.appendChild(adminActionBtn("Make admin", "", "Give this user full control", function () {
+              patchUser(u.id, { role: "admin" });
+            }));
+          } else if (u.id !== me.id) {
+            tdAct.appendChild(adminActionBtn("Remove admin", "", "Demote this user", function () {
+              patchUser(u.id, { role: "user" });
+            }));
+          }
+          if (u.is_active) {
+            tdAct.appendChild(adminActionBtn("Disable", "danger", "Block this account (keeps its history)", function () {
+              patchUser(u.id, { isActive: false });
+            }));
+          } else {
+            tdAct.appendChild(adminActionBtn("Enable", "", "Re-activate this account", function () {
+              patchUser(u.id, { isActive: true });
+            }));
+          }
+          if (u.id !== me.id) {
+            tdAct.appendChild(adminActionBtn("Delete", "danger", "Permanently delete this account", function () {
+              if (confirm("Delete the account " + u.email + "? Its audit history is kept.")) deleteUser(u.id);
+            }));
+          }
+          tr.append(tdEmail, tdRole, tdStatus, tdCreated, tdAct);
+          body.appendChild(tr);
+        });
+      });
+  }
+
+  function loadAdminAudit(query) {
+    const list = document.getElementById("auditList");
+    if (!list) return;
+    list.innerHTML = "";
+    let q = supabase.from("audit")
+      .select("id,email,action,detail,created_at")
+      .order("id", { ascending: false })
+      .limit(300);
+    if (query) {
+      q = q.or("email.ilike.%" + query + "%,action.ilike.%" + query + "%,detail.ilike.%" + query + "%");
+    }
+    q.then(function (res) {
+      if (res.error) { list.innerHTML = '<span class="muted-note">Could not load the audit trail.</span>'; return; }
+      if (!res.data.length) { list.innerHTML = '<span class="muted-note">No activity recorded yet.</span>'; return; }
+      res.data.forEach(function (row) {
+        const item = document.createElement("div");
+        item.className = "audit-item";
+        const when = document.createElement("span");
+        when.className = "when";
+        when.textContent = (row.created_at || "").replace("T", " ").slice(0, 19);
+        const who = document.createElement("span");
+        who.className = "who";
+        who.textContent = row.email || "(unknown)";
+        const act = document.createElement("span");
+        act.className = "act";
+        act.textContent = row.action;
+        const txt = document.createElement("span");
+        txt.textContent = row.detail || "";
+        const what = document.createElement("span");
+        what.className = "what";
+        what.append(act, txt);
+        item.append(when, who, what);
+        list.appendChild(item);
+      });
+    });
+  }
+
+  function loadAdminPanel() {
+    loadAdminUsers();
+    loadAdminAudit();
+  }
+
+  function bindAdminPanel() {
+    const search = document.getElementById("auditSearch");
+    if (!search) return;
+    let timer = null;
+    search.addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { loadAdminAudit(search.value.trim()); }, 350);
+    });
+    document.getElementById("btnReloadAdmin").addEventListener("click", function () { loadAdminPanel(); });
+    document.getElementById("btnResetLedger").addEventListener("click", resetSharedLedger);
+  }
+
+  function resetSharedLedger() {
+    if (!supabase || !me) return;
+    if (me.role !== "admin") { showToast("Admins only"); return; }
+    if (!confirm("Reset the shared ledger to the bundled baseline? Every saved edit is lost. This is recorded in the audit trail.")) return;
+    fetchBaseline().then(function (baseline) {
+      return supabase.from("ledger").update({
+        state: baseline, updated_by: me.id, updated_at: new Date().toISOString()
+      }).eq("id", 1).then(function (res) {
+        if (res.error) throw new Error(res.error.message);
+        return logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
+      }).then(function () {
+        state = baseline;
+        const snap = Object.assign({}, state);
+        delete snap.boq;
+        stateSaved = snap;
+        syncBoqRef();
+        applyTheme();
+        renderAll();
+        showToast("Ledger reset");
+      });
+    }).catch(function () {
+      showToast("Could not reset the ledger");
+    });
+  }
+
   /* ---------------- Boot ---------------- */
   function renderAll() {
   renderLedger();
@@ -1708,19 +2356,9 @@
   }
 
   function init() {
-  loadState().then(function (data) {
-  state = data;
-  syncBoqRef();
-  bindRowToolbar("materials");
-  bindRowToolbar("labor");
-  bindRowToolbar("boq");
-  initColumns();
-  applyTheme();
-  setActiveTab("boq");
-  renderAll();
-  }).catch(function () {
-  showToast("Could not load the ledger \u2014 check the page address");
-  });
+  bindAuthForms();
+  bindAdminPanel();
+  bootAuth();
   }
 
   init();

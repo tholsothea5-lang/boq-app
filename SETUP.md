@@ -1,0 +1,73 @@
+# Putting accounts on the GitHub Pages site — setup guide (10 minutes)
+
+GitHub Pages can only serve static files, so the login accounts, the shared
+editable ledger and the audit log live in a free **Supabase** project. The site
+stays at its normal github.io address; Supabase runs in the background.
+
+You'll do this once. I've filled in all the code — you only create the free
+project and paste two keys.
+
+## 1. Create the free Supabase project
+
+1. Go to **https://supabase.com** and click **Start your project** (sign in
+   with Google/GitHub/email — free plan, no card required).
+2. **New project**:
+   - Organization: anything (e.g. your name).
+   - **Project name**: `site-ledger`
+   - **Database password**: click **Generate a password** and save it somewhere
+     safe (you won't need it for this setup, but keep it).
+   - **Region**: pick the closest one (e.g. Singapore).
+   - Click **Create new project**. It takes a minute or two.
+
+## 2. Run the one-time database setup
+
+1. In your project, open **SQL Editor** (left sidebar) → **New query**.
+2. Open the file `supabase.sql` from this folder, select everything, paste it
+   into the editor, and click **Run**.
+3. You should see a small results table listing `profiles`, `ledger`, `audit`.
+
+## 3. (Optional but recommended) Let people sign in instantly
+
+By default Supabase requires email confirmation, which adds a click for new
+users. To turn it off: **Authentication → Providers → Email → "Confirm email" =
+off → Save**.
+
+## 4. Copy the two keys
+
+1. Left sidebar → **Project Settings → API**.
+2. Copy **Project URL** (looks like `https://xxxx.supabase.co`).
+3. Copy the **anon public** key (a long `eyJ...` string). This key is _meant_
+   to be public — it only lets the site talk to your database through the rules
+   in step 2.
+4. Paste both to me (or, if you edit `index.html` yourself, replace the two
+   placeholders near the top of the script marked `YOUR_SUPABASE_URL` and
+   `YOUR_SUPABASE_ANON_KEY`).
+
+Once the keys are in place I'll push the finished version to GitHub Pages. 
+
+## 5. After it's live — your admin account
+
+Open the site. The layout is the same one you hand builders/team members, but
+now it starts with a **sign-in screen**:
+
+- Create the very first account → it automatically becomes the **admin**.
+- Everyone else can create their own account too, but as a plain user.
+- Sign in as admin → you'll see an **Admin** tab on the left. There you can:
+  - promote / demote / disable / delete users,
+  - read the full audit trail (every save: who changed which row and how, with
+    a search box),
+  - reset the ledger to the original bundled baseline.
+
+## How data is stored now
+
+| Thing       | Where                                                          |
+| ----------- | ------------------------------------------------------------- |
+| Ledger      | Supabase table `ledger` (one shared row, JSON)                |
+| Accounts    | Supabase authentication + `profiles` table                    |
+| Audit log   | Supabase table `audit` (only admins can read it)              |
+| Baseline    | `data.json` — the starting point for an empty database        |
+| Photos      | `photos/` folder (existing ones) + new photos saved with rows |
+
+**Note:** this replaces the old "saved in this browser only" behaviour — edits
+now go to the shared ledger, so everyone with an account sees the same numbers.
+That is exactly what an audit log depends on.
