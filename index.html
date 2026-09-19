@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site Ledger — Bill of Quantities</title>
+<style>
+  :root {
+  --navy: #16324F; --navy-deep: #0F2438; --steel: #4A7A9D; --steel-soft: #E3ECF3;
+  --amber: #E8A33D; --danger: #B4453B; --danger-soft: #F6E3E1;
+  --surface: #FFFFFF; --surface-alt: #F4F7FA; --line: #DDE5EC; --line-strong: #C3D0DC;
+  --ink: #1F2E3D; --ink-muted: #6B7C8E;
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, monospace;
+  --radius: 8px;
+  }
+  [data-theme="dark"] {
+  --navy: #0F2438; --navy-deep: #0A1A2A; --steel: #6FA3C7; --steel-soft: #1E3448;
+  --surface: #14283C; --surface-alt: #1B3349; --line: #2A4258; --line-strong: #3A5670;
+  --ink: #E4ECF4; --ink-muted: #93A7BB;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-sans); font-size: 14px; color: var(--ink); background: var(--surface-alt); }
+  .shell { display: flex; min-height: 100vh; }
+  .rail { width: 220px; flex: 0 0 220px; background: var(--navy); color: #D8E2EC; display: flex; flex-direction: column; padding: 18px 14px; }
+  .rail-brand .mark { font-family: var(--font-mono); font-size: 11px; color: var(--amber); letter-spacing: 0.08em; }
+  .rail-brand h1 { margin: 4px 0 18px 0; font-size: 19px; font-weight: 600; color: #fff; }
+  /* Site Ledger tree — the navigation in the left rail */
+  .ledger { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+  .ledger-node {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  background: none; border: none; text-align: left;
+  color: #A9B8CA; font-family: var(--font-sans); font-size: 13.5px;
+  padding: 9px 12px; border-radius: var(--radius); cursor: pointer;
+  white-space: nowrap;
+  }
+  .ledger-node:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .ledger-node.active { background: var(--amber); color: #1F2E3D; font-weight: 600; }
+  .ledger-node .ledger-mark { flex: 0 0 auto; width: 20px; text-align: center; font-size: 13px; }
+  .ledger-node .ledger-name { overflow: hidden; text-overflow: ellipsis; }
+  .ledger-cat {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  background: none; border: none; text-align: left;
+  color: #D8E2EC; font-family: var(--font-sans); font-size: 13.5px; font-weight: 600;
+  padding: 9px 12px; border-radius: var(--radius); cursor: pointer;
+  }
+  .ledger-cat:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .ledger-cat .ledger-caret {
+  flex: 0 0 auto; width: 10px; text-align: center; font-size: 11px;
+  color: var(--amber); transition: transform 0.15s ease;
+  }
+  .ledger-group.open .ledger-cat .ledger-caret { transform: rotate(90deg); }
+  .ledger-children { display: none; flex-direction: column; gap: 1px; }
+  .ledger-group.open .ledger-children { display: flex; }
+  .ledger-tree-row { display: flex; flex-direction: column; gap: 1px; position: relative; }
+  .ledger-project { padding-left: 22px; }
+  .ledger-project .ledger-name { font-weight: 400; }
+  .ledger-project.active .ledger-name { font-weight: 600; }
+  .ledger-del {
+  position: absolute; right: 8px; top: 4px; width: 20px; height: 20px;
+  border: none; background: none; color: #8FA3BC; font-size: 11px;
+  cursor: pointer; border-radius: 4px; opacity: 0; padding: 0; line-height: 1;
+  }
+  .ledger-tree-row:hover .ledger-del { opacity: 1; }
+  .ledger-del:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .ledger-bill { padding-left: 38px; font-size: 12.5px; font-weight: 400; color: #93A7BB; }
+  .ledger-bill.active { background: var(--amber); color: #1F2E3D; font-weight: 600; }
+  .ledger-bill.active .ledger-mark { color: #1F2E3D; }
+  .ledger-add {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: none; border: none; text-align: left;
+  color: #8FA3BC; font-family: var(--font-sans); font-size: 12.5px;
+  font-style: italic; padding: 8px 12px; border-radius: var(--radius); cursor: pointer;
+  }
+  .ledger-add:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .rail-foot { margin-top: auto; font-size: 11.5px; color: #8FA3BC; }
+  .theme-toggle { display: flex; gap: 4px; margin-bottom: 10px; }
+  .theme-toggle button {
+  flex: 1; background: rgba(255,255,255,0.08); border: none; color: #A9B8CA;
+  font-size: 11px; padding: 6px 4px; border-radius: 5px; cursor: pointer;
+  }
+  .theme-toggle button.active { background: var(--amber); color: #1F2E3D; font-weight: 600; }
+  main { flex: 1 1 auto; padding: 28px 32px 60px 32px; max-width: none; min-width: 0; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .topline h2 { margin: 0 0 4px 0; font-size: 21px; font-weight: 600; }
+  .topline p { margin: 0; color: var(--ink-muted); font-size: 13px; }
+  .project-field { text-align: right; }
+  .project-field label { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--ink-muted); margin-bottom: 4px; }
+  .project-field input {
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  padding: 7px 10px; font-family: var(--font-sans); font-size: 13.5px;
+  background: var(--surface); color: var(--ink); min-width: 220px;
+  }
+  .btn {
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+  border-radius: var(--radius); padding: 8px 14px; font-family: var(--font-sans);
+  font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--steel); color: var(--steel); }
+  .btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 600; }
+  .btn-primary:hover { background: var(--navy-deep); color: #fff; }
+  .btn-ghost { background: none; }
+  .btn-danger-ghost { background: none; border-color: var(--danger); color: var(--danger); }
+  .btn-danger-ghost:hover { background: var(--danger-soft); }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .toolbar .spacer { flex: 1; }
+  .search-input {
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  padding: 7px 10px; font-family: var(--font-sans); font-size: 13px;
+  background: var(--surface); color: var(--ink); min-width: 180px;
+  }
+  /* row toolbar: the seven row functions, standing at the top-right of the list */
+  .row-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .row-toolbar .row-toolbar-hint {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--ink-muted); margin-right: auto;
+  }
+  .btn-row { font-size: 13.5px; padding: 9px 16px; min-height: 38px; cursor: pointer; }
+  .btn-row:disabled { opacity: 0.45; cursor: not-allowed; }
+  tbody tr { cursor: pointer; }
+  tbody tr.selected > td { background: var(--steel-soft) !important; box-shadow: inset 3px 0 0 var(--steel); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .table-wrap { overflow-x: hidden; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead th {
+  position: relative; text-align: left; font-family: var(--font-mono);
+  font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink-muted); background: var(--surface-alt);
+  padding: 9px 10px; border-bottom: 1px solid var(--line-strong); user-select: none;
+  }
+  thead th.num { text-align: right; }
+  tbody td { padding: 5px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; overflow-wrap: break-word; word-break: break-word; }
+  td.num, .num { text-align: right; font-family: var(--font-mono); font-size: 12.5px; }
+  .cell-input {
+  width: 100%; border: 1px solid transparent; background: transparent;
+  font-family: var(--font-sans); font-size: 13.5px; color: var(--ink);
+  padding: 5px 6px; border-radius: var(--radius);
+  }
+  .cell-input:hover { border-color: var(--line); }
+  .cell-input:focus { border-color: var(--steel); outline: none; background: var(--surface); }
+  input.cell-input.num-in { font-family: var(--font-mono); text-align: right; }
+  textarea.cell-input.note-in { resize: vertical; min-height: 42px; line-height: 1.35; }
+  select.cell-input { font-family: var(--font-sans); cursor: pointer; }
+  .photo-cell { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+  .photo-thumb {
+  position: relative; width: 58px; height: 58px; flex: 0 0 58px;
+  border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+  background: var(--surface-alt);
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-actions {
+  position: absolute; inset: 0; display: flex; flex-direction: column; gap: 3px;
+  align-items: center; justify-content: center; padding: 4px;
+  background: rgba(15, 36, 56, 0.5); opacity: 0; transition: opacity 0.12s ease;
+  }
+  .photo-thumb:hover .photo-actions { opacity: 1; }
+  .photo-actions button {
+  width: 100%; background: rgba(255, 255, 255, 0.92); border: none;
+  color: #16324F; font-family: var(--font-sans); font-size: 10px;
+  padding: 2px 4px; border-radius: 4px; cursor: pointer;
+  }
+  .photo-actions button:hover { background: var(--amber); }
+  .photo-add {
+  width: 58px; height: 58px; flex: 0 0 58px;
+  border: 1px dashed var(--line-strong); border-radius: 6px;
+  background: none; color: var(--ink-muted); font-size: 15px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .photo-add:hover { border-color: var(--steel); color: var(--steel); }
+  .photo-lightbox {
+  position: fixed; inset: 0; z-index: 1000; display: none;
+  align-items: center; justify-content: center; padding: 32px;
+  background: rgba(10, 20, 30, 0.88);
+  }
+  .photo-lightbox.open { display: flex; }
+  .photo-lightbox img {
+  max-width: 100%; max-height: 100%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55); border-radius: 8px;
+  }
+  .photo-lightbox .lb-close {
+  position: absolute; top: 14px; right: 18px;
+  background: none; border: none; color: #e8eef4; font-size: 22px;
+  line-height: 1; cursor: pointer; padding: 6px;
+  }
+  .photo-lightbox .lb-close:hover { color: var(--amber); }
+  tr.heading-row > td { background: var(--surface-alt); }
+  tr.heading-row .cell-input { font-weight: 600; }
+  tr.context-row > td { opacity: 0.66; }
+  .subtotal-cell { font-weight: 600; }
+  .own-note { font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: var(--amber); margin-top: 2px; cursor: help; }
+  .th-grip { position: absolute; top: 0; right: -4px; bottom: 0; width: 8px; cursor: col-resize; z-index: 3; touch-action: none; }
+  .th-grip::after { content: ""; position: absolute; top: 20%; bottom: 20%; right: 3px; width: 2px; border-radius: 1px; background: transparent; }
+  .th-grip:hover::after { background: var(--steel); }
+  body.col-resizing, body.col-resizing * { cursor: col-resize !important; user-select: none !important; }
+  .ref-num { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-muted); white-space: nowrap; }
+  .ref-num.lvl1 { color: var(--ink); font-weight: 600; }
+  .tree-cell { display: flex; align-items: center; gap: 3px; }
+  .tree-caret {
+  flex: 0 0 16px; width: 16px; height: 16px; padding: 0;
+  border: none; background: none; cursor: pointer;
+  color: var(--ink-muted); font-size: 9px; line-height: 1; border-radius: 2px;
+  }
+  .tree-caret:hover { background: var(--line); color: var(--ink); }
+  .tree-caret.leaf { visibility: hidden; pointer-events: none; }
+  .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .filter-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-muted); min-width: 62px; }
+  .chip-filter { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-muted); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  .chip:hover { border-color: var(--steel); color: var(--steel); }
+  .chip.active { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 600; }
+  .empty-state { padding: 44px 20px; text-align: center; color: var(--ink-muted); }
+  .empty-state .glyph { font-size: 26px; margin-bottom: 8px; opacity: 0.6; }
+  .empty-state p { margin: 0 auto 14px auto; max-width: 34ch; font-size: 13px; }
+  .summary-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 16px;
+  }
+  @media (max-width: 700px) { .summary-strip { grid-template-columns: repeat(2, 1fr); } }
+  .summary-cell { background: var(--surface); padding: 13px 16px; }
+  .summary-cell .label { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted); letter-spacing: 0.03em; display: block; margin-bottom: 4px; }
+  .summary-cell .value { font-family: var(--font-mono); font-size: 19px; font-weight: 600; }
+  .summary-cell.hero { background: var(--navy); }
+  .summary-cell.hero .label { color: #8FA3BC; }
+  .summary-cell.hero .value { color: #fff; }
+  tfoot td {
+  padding: 11px 12px; font-family: var(--font-mono); font-weight: 600;
+  background: var(--surface-alt); border-top: 2px solid var(--line-strong);
+  }
+  footer.hint { margin-top: 16px; color: var(--ink-muted); font-size: 12px; display: flex; gap: 6px; align-items: flex-start; }
+  .mobile-tabs { display: none; position: sticky; top: 0; z-index: 5; background: var(--navy); }
+  @media (max-width: 780px) { .mobile-tabs { display: flex; } }
+  .mobile-tabs button {
+  flex: 1; background: none; border: none; color: #A9B8CA;
+  font-family: var(--font-sans); font-size: 12.5px; padding: 12px 4px;
+  border-bottom: 2px solid transparent;
+  }
+  .mobile-tabs button.active { color: #fff; border-bottom-color: var(--amber); }
+  .toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(8px);
+  background: var(--navy); color: #fff; padding: 10px 18px; border-radius: var(--radius);
+  font-size: 13px; opacity: 0; pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (max-width: 780px) {
+  .shell { flex-direction: column; }
+  .rail { width: 100%; flex: none; flex-direction: row; align-items: center; gap: 12px; padding: 10px 14px; }
+  .rail-brand h1 { margin: 0; font-size: 16px; }
+  .ledger { flex-direction: row; flex-wrap: wrap; column-gap: 2px; max-height: 220px; overflow-y: auto; align-items: flex-start; }
+  .ledger-node, .ledger-cat { width: auto; padding: 7px 10px; font-size: 12.5px; }
+  .ledger-children { margin-left: 14px; }
+  .ledger-tree-row { align-items: flex-start; }
+  .ledger-del { display: none; }
+  .rail-foot { display: none; }
+  main { padding: 18px 14px 50px 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="mobile-tabs" id="mobileTabs"></nav>
+  <aside class="rail">
+  <div class="rail-brand">
+  <span class="mark">📐 SITE LEDGER</span>
+  <h1>Site Ledger</h1>
+  </div>
+
+  <nav class="ledger" id="ledgerTree" aria-label="Site Ledger"></nav>
+
+  <div class="rail-foot">
+  <div class="theme-toggle" role="group" aria-label="Theme">
+    <button data-theme-choice="auto" id="themeAuto">Auto</button>
+    <button data-theme-choice="light" id="themeLight">Light</button>
+    <button data-theme-choice="dark" id="themeDark">Dark</button>
+  </div>
+  <span>This is the static build: the ledger loads from the bundled data, and edits are saved in this browser only.</span>
+  </div>
+  </aside>
+  <main>
+  <!-- MATERIALS -->
+  <section class="panel" id="panel-materials">
+  <div class="topline">
+    <div>
+    <h2>Material rates</h2>
+    <p>Unit prices used to cost material against each line of the bill of quantities.</p>
+    </div>
+    <button class="btn btn-primary" id="btnAddMaterial">+ Add level 1 row</button>
+  </div>
+  <div class="toolbar">
+    <div class="filter-row">
+    <span class="filter-label">Level 1</span>
+    <div class="chip-filter" id="materialBranchFilter"></div>
+    </div>
+    <div class="spacer"></div>
+    <input type="text" class="search-input" id="materialSearch" placeholder="Search materials…">
+    <button class="btn btn-ghost btn-sm" id="btnMaterialExpand">Expand all</button>
+    <button class="btn btn-ghost btn-sm" id="btnMaterialCollapse">Collapse all</button>
+  </div>
+  <div class="toolbar row-toolbar" id="materialRowTools">
+    <span class="row-toolbar-hint">Select a row, then:</span>
+    <button type="button" class="btn btn-ghost btn-row" data-act="sub">+ Sub item</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="new">+ New row</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="up">&#9650; Move up</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="down">&#9660; Move down</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="out">&#8676; Move out one level</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="in">&#8677; Move in under</button>
+    <button type="button" class="btn btn-danger-ghost btn-row" data-act="del">&#10005; Delete row</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+    <table id="materialsTable">
+      <thead>
+      <tr>
+        <th>Ref</th>
+        <th>Material</th>
+        <th>Unit</th>
+        <th class="num">Q'ty</th>
+        <th class="num">Unit price</th>
+        <th class="num">Amount</th>
+        <th>Photos</th>
+        <th>Note</th>
+      </tr>
+      </thead>
+      <tbody id="materialsBody"></tbody>
+    </table>
+    </div>
+    <div class="empty-state" id="materialsEmpty" style="display:none;">
+    <div class="glyph">◻︎</div>
+    <p>No materials match. Clear the filters or add a new material rate.</p>
+    </div>
+  </div>
+  <footer class="hint">
+    <span>ⓘ</span>
+    <span>Rates are arranged as a hierarchy: <strong>1</strong> → <strong>1.1</strong> → <strong>1.1.1</strong>. A row with sub-items is a heading and takes no rate; only the deepest rows (<em>items</em>) carry a unit and a price. Click a row to select it, then use the big buttons above the list.</span>
+  </footer>
+  </section>
+  <!-- LABOR -->
+  <section class="panel" id="panel-labor">
+  <div class="topline">
+    <div>
+    <h2>Labor rates</h2>
+    <p>Crew or trade rates used to cost labor against each line of the bill of quantities.</p>
+    </div>
+    <button class="btn btn-primary" id="btnAddLabor">+ Add level 1 row</button>
+  </div>
+  <div class="toolbar">
+    <div class="filter-row">
+    <span class="filter-label">Level 1</span>
+    <div class="chip-filter" id="laborBranchFilter"></div>
+    </div>
+    <div class="spacer"></div>
+    <input type="text" class="search-input" id="laborSearch" placeholder="Search labor…">
+    <button class="btn btn-ghost btn-sm" id="btnLaborExpand">Expand all</button>
+    <button class="btn btn-ghost btn-sm" id="btnLaborCollapse">Collapse all</button>
+  </div>
+  <div class="toolbar row-toolbar" id="laborRowTools">
+    <span class="row-toolbar-hint">Select a row, then:</span>
+    <button type="button" class="btn btn-ghost btn-row" data-act="sub">+ Sub item</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="new">+ New row</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="up">&#9650; Move up</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="down">&#9660; Move down</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="out">&#8676; Move out one level</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="in">&#8677; Move in under</button>
+    <button type="button" class="btn btn-danger-ghost btn-row" data-act="del">&#10005; Delete row</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+    <table id="laborTable">
+      <thead>
+      <tr>
+        <th>Ref</th>
+        <th>Labor item</th>
+        <th>Unit</th>
+        <th class="num">Unit price</th>
+      </tr>
+      </thead>
+      <tbody id="laborBody"></tbody>
+    </table>
+    </div>
+    <div class="empty-state" id="laborEmpty" style="display:none;">
+    <div class="glyph">◻︎</div>
+    <p>No labor items match. Clear the filters or add a new labor rate.</p>
+    </div>
+  </div>
+  <footer class="hint">
+    <span>ⓘ</span>
+    <span>Labor follows the same hierarchy: <strong>1</strong> → <strong>1.1</strong> → <strong>1.1.1</strong>. Only the deepest rows (<em>items</em>) carry a unit and a price. Click a row to select it, then use the big buttons above the list.</span>
+  </footer>
+  </section>
+  <!-- BOQ -->
+  <section class="panel" id="panel-boq">
+  <div class="topline">
+    <div>
+    <h2>Bill of quantities</h2>
+    <p>Every work item, priced from the material and labor rates, or a custom price you enter directly.</p>
+    </div>
+    <div class="project-field">
+    <label for="projectName">PROJECT</label>
+    <input type="text" id="projectName" placeholder="Untitled project" value="">
+    </div>
+  </div>
+  <div class="summary-strip">
+    <div class="summary-cell"><span class="label">WORK ITEMS</span><span class="value" id="sumItems">0</span></div>
+    <div class="summary-cell"><span class="label">MATERIAL COST</span><span class="value" id="sumMaterial">0.00</span></div>
+    <div class="summary-cell"><span class="label">LABOR COST</span><span class="value" id="sumLabor">0.00</span></div>
+    <div class="summary-cell hero"><span class="label">GRAND TOTAL</span><span class="value" id="sumTotal">0.00</span></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-primary" id="btnAddBoqRow">+ Add level 1 row</button>
+    <div class="spacer"></div>
+    <input type="text" class="search-input" id="boqSearch" placeholder="Search descriptions…">
+    <button class="btn btn-ghost btn-sm" id="btnBoqExpand">Expand all</button>
+    <button class="btn btn-ghost btn-sm" id="btnBoqCollapse">Collapse all</button>
+    <button class="btn btn-ghost" id="btnExportCsv" title="Download this project's bill as a spreadsheet">Export CSV</button>
+    <button class="btn btn-ghost btn-sm" id="btnResetData" title="Discard changes saved in this browser and reload the bundled ledger">Reset saved copy</button>
+    <button class="btn btn-danger-ghost" id="btnClearBoq">Clear all</button>
+  </div>
+  <div class="toolbar row-toolbar" id="boqRowTools">
+    <span class="row-toolbar-hint">Select a row, then:</span>
+    <button type="button" class="btn btn-ghost btn-row" data-act="sub">+ Sub item</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="new">+ New row</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="up">&#9650; Move up</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="down">&#9660; Move down</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="out">&#8676; Move out one level</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="in">&#8677; Move in under</button>
+    <button type="button" class="btn btn-danger-ghost btn-row" data-act="del">&#10005; Delete row</button>
+  </div>
+  <div class="toolbar">
+    <div class="filter-row">
+    <span class="filter-label">Level 1</span>
+    <div class="chip-filter" id="boqBranchFilter"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+    <table id="boqTable">
+      <thead>
+      <tr>
+        <th>Ref</th>
+        <th>Work description</th>
+        <th>Unit</th>
+        <th class="num">Qty</th>
+        <th class="num">Material price</th>
+        <th class="num">Labor price</th>
+        <th class="num">Total unit price</th>
+        <th class="num">Total price</th>
+      </tr>
+      </thead>
+      <tbody id="boqBody"></tbody>
+      <tfoot>
+      <tr>
+        <td colspan="7" style="text-align:right;">Grand total</td>
+        <td class="num" id="boqFootTotal">0.00</td>
+      </tr>
+      </tfoot>
+    </table>
+    </div>
+    <div class="empty-state" id="boqEmpty" style="display:none;">
+    <div class="glyph">◻︎</div>
+    <p>No work items match. Clear the filters or add a new row to the bill.</p>
+    </div>
+  </div>
+  <footer class="hint">
+    <span>ⓘ</span>
+    <span>The bill is arranged as a hierarchy: <strong>1</strong> → <strong>1.1</strong> → <strong>1.1.1</strong>. Headings roll up the totals of everything under them; only item rows take a unit, a quantity and rates. Click a row to select it, then use the big buttons above the list.</span>
+  </footer>
+  </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(function () {
+  "use strict";
+  let state = null;
+  const collapsedIds = new Set();
+
+  function toNum(v) { const n = parseFloat(v); return isFinite(n) && n >= 0 ? n : 0; }
+  function fmt(v) { return "$" + (Math.round(toNum(v) * 100) / 100).toFixed(2); }
+  function uid(p) { return p + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4); }
+  function isHeading(n) { return !!(n.children && n.children.length); }
+
+  async function loadState() {
+  // This static build has no server: the bundled ledger lives in data.json,
+  // and any changes made in this browser are kept as a local copy on top.
+  try {
+    const saved = localStorage.getItem("boq.state");
+    if (saved) return JSON.parse(saved);
+  } catch (e) { /* ignore storage errors */ }
+  const r = await fetch("data.json");
+  if (!r.ok) throw new Error("load failed");
+  return r.json();
+  }
+  async function persist() {
+  try {
+  const body = Object.assign({}, state);
+  // state.boq is a live mirror of the active project's bill; the projects list
+  // itself is what is stored, so the mirror is not a top-level key.
+  delete body.boq;
+  localStorage.setItem("boq.state", JSON.stringify(body));
+  } catch (e) { showToast("Could not save — browser storage full or blocked"); }
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2200);
+  }
+
+  function walkTree(nodes, depth, cb, parent, refPrefix) {
+  (nodes || []).forEach(function (n, i) {
+  const ref = (refPrefix || []).concat([i + 1]);
+  cb(n, { depth: depth, parent: parent || null, index: i, siblings: nodes, ref: ref });
+  walkTree(n.children || [], depth + 1, cb, n, ref);
+  });
+  }
+
+  function locate(nodes, id, parent) {
+  const list = nodes || [];
+  for (let i = 0; i < list.length; i++) {
+  if (list[i].id === id) return { siblings: list, index: i, parent: parent || null };
+  const found = locate(list[i].children || [], id, list[i]);
+  if (found) return found;
+  }
+  return null;
+  }
+
+  function allLeaves(nodes, path, out) {
+  const here = path || [];
+  const acc = out || [];
+  (nodes || []).forEach(function (n) {
+  const trail = here.concat([n.name || "(untitled)"]);
+  if (isHeading(n)) allLeaves(n.children, trail, acc);
+  else acc.push({ node: n, path: trail });
+  });
+  return acc;
+  }
+
+  function blankNode(kind) {
+  if (kind === "boq") {
+  return {
+    id: uid("b"), name: "", unit: "", quantity: 0,
+    materialRef: "none", laborRef: "none",
+    customMaterialPrice: 0, customLaborPrice: 0, children: []
+  };
+  }
+  return { id: uid(kind === "materials" ? "m" : "l"), name: "", unit: "", price: 0, children: [] };
+  }
+  function addChild(n, kind) {
+  n.children = n.children || [];
+  n.children.push(blankNode(kind));
+  collapsedIds.delete(n.id);
+  selectedIds[kind] = n.children[n.children.length - 1].id;
+  persist(); renderAll();
+  showToast("Sub-item added under \u201C" + (n.name || "untitled") + "\u201D");
+  }
+
+  function addSibling(n, list, kind) {
+  const loc = locate(list, n.id);
+  if (!loc) return;
+  loc.siblings.splice(loc.index + 1, 0, blankNode(kind));
+  selectedIds[kind] = loc.siblings[loc.index + 1].id;
+  persist(); renderAll();
+  showToast("New row added at the same level");
+  }
+
+  function moveNode(n, list, delta) {
+  const loc = locate(list, n.id);
+  if (!loc) return;
+  const to = loc.index + delta;
+  if (to < 0 || to >= loc.siblings.length) {
+  showToast("Already at the end of its own level");
+  return;
+  }
+  loc.siblings.splice(loc.index, 1);
+  loc.siblings.splice(to, 0, n);
+  persist(); renderAll();
+  }
+
+  function indentNode(n, list) {
+  const loc = locate(list, n.id);
+  if (!loc) return;
+  if (loc.index === 0) { showToast("Nothing above it at this level to move under"); return; }
+  const above = loc.siblings[loc.index - 1];
+  loc.siblings.splice(loc.index, 1);
+  above.children = above.children || [];
+  above.children.push(n);
+  collapsedIds.delete(above.id);
+  persist(); renderAll();
+  showToast("Moved in under \u201C" + (above.name || "untitled") + "\u201D");
+  }
+
+  function outdentNode(n, list) {
+  const loc = locate(list, n.id);
+  if (!loc) return;
+  if (!loc.parent) { showToast("This row is already at level 1"); return; }
+  const parentLoc = locate(list, loc.parent.id);
+  loc.siblings.splice(loc.index, 1);
+  parentLoc.siblings.splice(parentLoc.index + 1, 0, n);
+  persist(); renderAll();
+  showToast("Moved out one level");
+  }
+
+  function removeNode(n, list, kind) {
+  const loc = locate(list, n.id);
+  if (!loc) return;
+  const kids = (n.children || []).length;
+  let msg = "Delete \u201C" + (n.name || "untitled") + "\u201D";
+  if (kids) msg += " and the " + kids + " sub-item" + (kids === 1 ? "" : "s") + " under it";
+  msg += "?";
+  if (kind !== "boq") {
+  msg += " Bill lines priced from it will show a zero rate until reassigned.";
+  }
+  if (!confirm(msg)) return;
+  loc.siblings.splice(loc.index, 1);
+  persist(); renderAll();
+  showToast("Row deleted");
+  }
+
+  function collapseAll() {
+  [state.materials, state.labor, state.boq].forEach(function (list) {
+  walkTree(list, 0, function (n) { if (isHeading(n)) collapsedIds.add(n.id); });
+  });
+  renderAll();
+  }
+  const selectedIds = { materials: null, labor: null, boq: null };
+  const TOOLBAR_IDS = { materials: "materialRowTools", labor: "laborRowTools", boq: "boqRowTools" };
+
+  function applySelection(kind) {
+  const body = document.getElementById(
+  kind === "materials" ? "materialsBody" : kind === "labor" ? "laborBody" : "boqBody");
+  if (!body) return;
+  Array.prototype.forEach.call(body.rows, function (tr) {
+  tr.classList.toggle("selected", tr.dataset.id === selectedIds[kind]);
+  });
+  }
+
+  function rowToolsDisabled(kind, node) {
+  const list = kind === "materials" ? state.materials : kind === "labor" ? state.labor : state.boq;
+  const loc = node ? locate(list, node.id) : null;
+  if (!node || !loc) {
+  return { sub: true, up: true, down: true, out: true, del: true, in: true, "new": false };
+  }
+  return {
+  sub: false,
+  up: loc.index === 0,
+  down: loc.index === loc.siblings.length - 1,
+  out: !loc.parent,
+  del: false,
+  in: loc.index === 0,
+  "new": false
+  };
+  }
+
+  function setToolState(kind, node) {
+  const bar = document.getElementById(TOOLBAR_IDS[kind]);
+  if (!bar) return;
+  const dis = rowToolsDisabled(kind, node);
+  Array.prototype.forEach.call(bar.querySelectorAll("button[data-act]"), function (b) {
+  b.disabled = !!dis[b.dataset.act];
+  });
+  }
+
+  function bindRowToolbar(kind) {
+  const bar = document.getElementById(TOOLBAR_IDS[kind]);
+  if (!bar) return;
+  bar.addEventListener("click", function (e) {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn || btn.disabled) return;
+  const id = selectedIds[kind];
+  if (!id && btn.dataset.act !== "new") { showToast("Select a row first"); return; }
+  const list = kind === "materials" ? state.materials : kind === "labor" ? state.labor : state.boq;
+  let node = null;
+  if (id) { const loc = locate(list, id); if (loc) node = loc.siblings[loc.index]; }
+  if (!node && btn.dataset.act !== "new") { selectedIds[kind] = null; setToolState(kind, null); return; }
+  switch (btn.dataset.act) {
+    case "sub": addChild(node, kind); break;
+    case "new":
+    if (node) addSibling(node, list, kind);
+    else { list.push(blankNode(kind)); persist(); renderAll(); showToast("New row added at level 1"); }
+    break;
+    case "up": moveNode(node, list, -1); break;
+    case "down": moveNode(node, list, 1); break;
+    case "out": outdentNode(node, list); break;
+    case "in": indentNode(node, list); break;
+    case "del": removeNode(node, list, kind); selectedIds[kind] = null; break;
+  }
+  });
+  }
+  function textInput(owner, key, placeholder) {
+  const input = document.createElement("input");
+  input.className = "cell-input";
+  input.value = owner[key] || "";
+  input.placeholder = placeholder || "";
+  input.addEventListener("change", function (e) {
+  owner[key] = e.target.value;
+  persist(); renderAll();
+  });
+  return input;
+  }
+
+  function numberInput(owner, key) {
+  const input = document.createElement("input");
+  input.type = "number"; input.step = "0.01"; input.min = "0";
+  input.className = "cell-input num-in";
+  input.value = toNum(owner[key]);
+  input.addEventListener("change", function (e) {
+  owner[key] = toNum(e.target.value);
+  persist(); renderAll();
+  });
+  return input;
+  }
+
+  function refCell(ref, depth) {
+  const td = document.createElement("td");
+  td.className = "ref-num" + (depth === 0 ? " lvl1" : "");
+  td.textContent = ref.join(".");
+  return td;
+  }
+
+  function nameCell(n, depth) {
+  const td = document.createElement("td");
+  const wrap = document.createElement("div");
+  wrap.className = "tree-cell";
+  wrap.style.paddingLeft = (depth * 18) + "px";
+  const caret = document.createElement("button");
+  caret.type = "button";
+  caret.className = "tree-caret" + (isHeading(n) ? "" : " leaf");
+  const shut = collapsedIds.has(n.id);
+  caret.textContent = shut ? "\u25B6" : "\u25BC";
+  caret.title = isHeading(n) ? (shut ? "Show sub-items" : "Hide sub-items") : "";
+  caret.addEventListener("click", function () {
+  if (collapsedIds.has(n.id)) collapsedIds.delete(n.id);
+  else collapsedIds.add(n.id);
+  renderAll();
+  });
+  wrap.appendChild(caret);
+  const input = document.createElement("input");
+  input.className = "cell-input";
+  input.value = n.name;
+  input.placeholder = depth === 0 ? "Main item…" : "Sub-item…";
+  input.addEventListener("change", function (e) {
+  n.name = e.target.value;
+  persist(); renderAll();
+  });
+  wrap.appendChild(input);
+  td.appendChild(wrap);
+  return td;
+  }
+
+  // Click a row to make it the one the big toolbar acts on. Clicks on inputs,
+  // selects and buttons are typing, not picking, so they are ignored.
+  function bindRowClick(tr, n, kind) {
+  tr.dataset.id = n.id;
+  if (selectedIds[kind] === n.id) tr.classList.add("selected");
+  tr.addEventListener("click", function (e) {
+  if (e.target.closest("input, select, button")) return;
+  selectedIds[kind] = n.id;
+  applySelection(kind); setToolState(kind, n);
+  });
+  }
+
+  function refreshToolbar(kind, list) {
+  const sel = selectedIds[kind] ? locate(list, selectedIds[kind]) : null;
+  setToolState(kind, sel ? sel.siblings[sel.index] : null);
+  }
+
+  function renderBranchFilter(wrapId, nodes, active, onPick) {
+  const wrap = document.getElementById(wrapId);
+  wrap.innerHTML = "";
+  const names = ["All"].concat((nodes || []).map(function (n) { return n.name || "(untitled)"; }));
+  names.forEach(function (name) {
+  const chip = document.createElement("button");
+  chip.type = "button";
+  chip.className = "chip" + (name === active ? " active" : "");
+  chip.textContent = name;
+  chip.title = name === "All" ? "Show every branch" : "Show only this branch";
+  chip.addEventListener("click", function () { onPick(name); });
+  wrap.appendChild(chip);
+  });
+  }
+
+  function resolveBranch(nodes, active) {
+  if (!active || active === "All") return "All";
+  const found = (nodes || []).some(function (n) { return (n.name || "(untitled)") === active; });
+  return found ? active : "All";
+  }
+
+  function subtreeMatches(n, term, match) {
+  if (match(n, term)) return true;
+  return (n.children || []).some(function (c) { return subtreeMatches(c, term, match); });
+  }
+
+  function visibleRows(nodes, opts) {
+  const rows = [];
+  (function walk(list, depth, prefix) {
+  (list || []).forEach(function (n, i) {
+    const ref = prefix.concat([i + 1]);
+    if (depth === 0 && opts.branch !== "All" && (n.name || "(untitled)") !== opts.branch) return;
+    if (opts.term && !subtreeMatches(n, opts.term, opts.match)) return;
+    rows.push({ node: n, depth: depth, ref: ref, hit: opts.term ? opts.match(n, opts.term) : true });
+    if (collapsedIds.has(n.id)) return;
+    walk(n.children || [], depth + 1, ref);
+  });
+  })(nodes, 0, []);
+  return rows;
+  }
+  const TABS = [
+  { id: "materials", label: "Materials" },
+  { id: "labor", label: "Labor" },
+  { id: "boq", label: "Bill of quantities" }
+  ];
+  let activeTab = "boq";
+
+  function renderTabs() {
+  const mobile = document.getElementById("mobileTabs");
+  if (!mobile) return;
+  mobile.innerHTML = "";
+  TABS.forEach(function (t) {
+  const mb = document.createElement("button");
+  mb.className = t.id === activeTab ? "active" : "";
+  mb.textContent = t.label;
+  mb.addEventListener("click", function () { setActiveTab(t.id); });
+  mobile.appendChild(mb);
+  });
+  }
+
+  function setActiveTab(id) {
+  activeTab = id;
+  document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+  const panel = document.getElementById("panel-" + id);
+  if (panel) panel.classList.add("active");
+  renderTabs();
+  renderLedger();
+  }
+
+  function applyTheme() {
+  const t = state.theme || "auto";
+  if (t === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", t);
+  ["themeAuto", "themeLight", "themeDark"].forEach(id => {
+  document.getElementById(id).classList.remove("active");
+  });
+  document.getElementById("theme" + t.charAt(0).toUpperCase() + t.slice(1)).classList.add("active");
+  }
+  ["auto", "light", "dark"].forEach(choice => {
+  document.getElementById("theme" + choice.charAt(0).toUpperCase() + choice.slice(1))
+  .addEventListener("click", () => { state.theme = choice; persist(); applyTheme(); });
+  });
+
+  /* ================= SITE LEDGER NAVIGATION ================= */
+  let ledgerProjectOpen = true;
+
+  function activeProject() {
+  if (!state || !state.projects) return null;
+  const list = state.projects;
+  return list.find(function (p) { return p.id === state.activeProjectId; }) || list[0] || null;
+  }
+
+  // The page edits one bill at a time: the active project's. state.boq is a
+  // live mirror of that project's boq array, so the whole existing table code
+  // keeps working while the projects list holds the real data.
+  function syncBoqRef() {
+  const p = activeProject();
+  state.boq = p ? p.boq : [];
+  state.projectName = p ? p.name : "";
+  const input = document.getElementById("projectName");
+  if (input) input.value = state.projectName;
+  }
+
+  function switchProject(id) {
+  const p = (state.projects || []).find(function (x) { return x.id === id; });
+  if (!p) return;
+  state.activeProjectId = p.id;
+  syncBoqRef();
+  selectedIds.boq = null;
+  persist();
+  setActiveTab("boq");
+  renderAll();
+  }
+
+  function addProject() {
+  const list = state.projects || [];
+  let n = "Project " + (list.length + 1);
+  const names = list.map(function (p) { return p.name || ""; });
+  let k = 1;
+  while (names.indexOf(n) !== -1) { k += 1; n = "Project " + (list.length + k); }
+  const p = { id: uid("p"), name: n, boq: [] };
+  list.push(p);
+  state.activeProjectId = p.id;
+  ledgerProjectOpen = true;
+  syncBoqRef();
+  selectedIds.boq = null;
+  persist();
+  setActiveTab("boq");
+  renderAll();
+  showToast("New project added \u201C" + n + "\u201D");
+  }
+
+  function deleteProject(id) {
+  const list = state.projects || [];
+  const idx = list.findIndex(function (x) { return x.id === id; });
+  if (idx < 0) return;
+  const p = list[idx];
+  if (!confirm("Delete the whole project \u201C" + (p.name || "untitled") +
+  "\u201D and its bill of quantities? This cannot be undone.")) return;
+  list.splice(idx, 1);
+  if (!list.length) {
+  const fresh = { id: uid("p"), name: "Project 1", boq: [] };
+  list.push(fresh);
+  state.activeProjectId = fresh.id;
+  } else if (state.activeProjectId === id) {
+  state.activeProjectId = list[0].id;
+  }
+  syncBoqRef();
+  selectedIds.boq = null;
+  persist();
+  renderAll();
+  showToast("Project deleted");
+  }
+
+  function ledgerNode(mark, label, opts) {
+  const o = opts || {};
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "ledger-node";
+  const markEl = document.createElement("span");
+  markEl.className = "ledger-mark";
+  markEl.textContent = mark;
+  b.appendChild(markEl);
+  const nameEl = document.createElement("span");
+  nameEl.className = "ledger-name";
+  nameEl.textContent = label;
+  b.appendChild(nameEl);
+  if (o.cls) b.classList.add(o.cls);
+  if (o.active) b.classList.add("active");
+  if (o.title) b.title = o.title;
+  if (o.click) b.addEventListener("click", o.click);
+  return b;
+  }
+
+  function renderLedger() {
+  const tree = document.getElementById("ledgerTree");
+  if (!tree) return;
+  tree.innerHTML = "";
+  const projects = state && state.projects ? state.projects : [];
+
+  tree.appendChild(ledgerNode("\uD83D\uDCE6", "Materials", {
+  active: activeTab === "materials",
+  click: function () { setActiveTab("materials"); }
+  }));
+  tree.appendChild(ledgerNode("\uD83D\uDC77", "Labor", {
+  active: activeTab === "labor",
+  click: function () { setActiveTab("labor"); }
+  }));
+
+  const group = document.createElement("div");
+  group.className = "ledger-group" + (ledgerProjectOpen ? " open" : "");
+
+  const cat = document.createElement("button");
+  cat.type = "button";
+  cat.className = "ledger-cat";
+  const caret = document.createElement("span");
+  caret.className = "ledger-caret";
+  caret.textContent = "\u25B8";
+  const catMark = document.createElement("span");
+  catMark.className = "ledger-mark";
+  catMark.textContent = "\uD83D\uDDC2\uFE0F";
+  const catLabel = document.createElement("span");
+  catLabel.textContent = "Project";
+  cat.append(caret, catMark, catLabel);
+  cat.addEventListener("click", function () {
+  ledgerProjectOpen = !ledgerProjectOpen;
+  renderLedger();
+  });
+  group.appendChild(cat);
+
+  const children = document.createElement("div");
+  children.className = "ledger-children";
+
+  projects.forEach(function (p) {
+  const row = document.createElement("div");
+  row.className = "ledger-tree-row";
+  const isActive = activeTab === "boq" && p.id === state.activeProjectId;
+
+  const pr = ledgerNode("\uD83D\uDCC4", p.name || "Untitled project", {
+    cls: "ledger-project",
+    active: isActive,
+    title: "Open \u201C" + (p.name || "Untitled project") + "\u201D",
+    click: function () { switchProject(p.id); }
+  });
+
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "ledger-del";
+  del.textContent = "\u2715";
+  del.title = "Delete this project";
+  del.addEventListener("click", function (e) {
+    e.stopPropagation();
+    deleteProject(p.id);
+  });
+
+  const boq = ledgerNode("\uD83D\uDCCB", "Bill of Quantities (BOQ)", {
+    cls: "ledger-bill",
+    active: isActive,
+    title: "Open the bill of quantities for \u201C" + (p.name || "Untitled project") + "\u201D",
+    click: function () { switchProject(p.id); }
+  });
+
+  row.appendChild(pr);
+  row.appendChild(del);
+  row.appendChild(boq);
+  children.appendChild(row);
+  });
+
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "ledger-add";
+  add.textContent = "＋ Add New Project";
+  add.addEventListener("click", addProject);
+  children.appendChild(add);
+
+  group.appendChild(children);
+  tree.appendChild(group);
+  }
+
+  /* ================= MATERIALS ================= */
+  let materialBranchActive = "All";
+  let materialSearchTerm = "";
+
+  function materialMatches(n, term) {
+  return (n.name || "").toLowerCase().indexOf(term) !== -1
+  || (!isHeading(n) && (n.unit || "").toLowerCase().indexOf(term) !== -1);
+  }
+
+  function noteInput(owner) {
+  const ta = document.createElement("textarea");
+  ta.className = "cell-input note-in";
+  ta.rows = 2;
+  ta.value = owner.note || "";
+  ta.placeholder = "Note…";
+  ta.addEventListener("change", function (e) {
+  owner.note = e.target.value;
+  persist(); renderAll();
+  });
+  return ta;
+  }
+
+  function uploadPhotoFile(id, index, file) {
+  // No server on a static build: the picture is read into a data URL and kept
+  // with the row in the browser's local copy of the ledger.
+  const reader = new FileReader();
+  reader.onload = function () {
+    const loc = locate(state.materials, id);
+    if (!loc) { showToast("Could not attach photo"); return; }
+    const node = loc.siblings[loc.index];
+    node.photos = node.photos || [];
+    if (index != null && node.photos[index]) node.photos[index] = reader.result;
+    else node.photos.push(reader.result);
+    persist(); renderAll();
+    showToast(index != null ? "Photo replaced (saved in this browser)" : "Photo inserted (saved in this browser)");
+  };
+  reader.onerror = function () { showToast("Could not read that image"); };
+  reader.readAsDataURL(file);
+  }
+
+  function pickPhoto(id, index) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.style.display = "none";
+  document.body.appendChild(input);
+  input.addEventListener("change", function () {
+  const f = input.files && input.files[0];
+  if (f) uploadPhotoFile(id, index, f);
+  document.body.removeChild(input);
+  });
+  input.click();
+  }
+
+  let photoLightbox = null;
+  function openPhotoLightbox(url) {
+  if (!photoLightbox) {
+    photoLightbox = document.createElement("div");
+    photoLightbox.className = "photo-lightbox";
+    photoLightbox.addEventListener("click", closePhotoLightbox);
+    const img = document.createElement("img");
+    img.alt = "";
+    photoLightbox.appendChild(img);
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "lb-close";
+    close.textContent = "\u2715";
+    close.title = "Close";
+    close.addEventListener("click", closePhotoLightbox);
+    photoLightbox.appendChild(close);
+    document.body.appendChild(photoLightbox);
+  }
+  const img = photoLightbox.querySelector("img");
+  const big = new Image();
+  big.onload = function () { img.src = big.src; };
+  big.src = url;
+  photoLightbox.classList.add("open");
+  }
+  function closePhotoLightbox() {
+  if (photoLightbox) photoLightbox.classList.remove("open");
+  }
+  document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closePhotoLightbox();
+  });
+
+  function photoCell(n) {
+  const wrap = document.createElement("div");
+  wrap.className = "photo-cell";
+  const photos = n.photos || [];
+  photos.forEach(function (url, i) {
+  const thumb = document.createElement("div");
+  thumb.className = "photo-thumb";
+  const img = document.createElement("img");
+  img.src = url;
+  img.alt = "";
+  img.title = "Click an action to view, replace or remove";
+  thumb.appendChild(img);
+  const actions = document.createElement("div");
+  actions.className = "photo-actions";
+  const view = document.createElement("button");
+  view.type = "button";
+  view.textContent = "View";
+  view.title = "Open photo";
+  view.addEventListener("click", function () { openPhotoLightbox(url); });
+  const rep = document.createElement("button");
+  rep.type = "button";
+  rep.textContent = "Replace";
+  rep.addEventListener("click", function () { pickPhoto(n.id, i); });
+  const del = document.createElement("button");
+  del.type = "button";
+  del.textContent = "\u2715";
+  del.title = "Remove photo";
+  del.addEventListener("click", function () {
+    n.photos.splice(i, 1);
+    persist(); renderAll();
+  });
+  actions.append(view, rep, del);
+  thumb.appendChild(actions);
+  wrap.appendChild(thumb);
+  });
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "photo-add";
+  add.textContent = "+";
+  add.title = "Insert photo";
+  add.addEventListener("click", function () { pickPhoto(n.id); });
+  wrap.appendChild(add);
+  return wrap;
+  }
+
+  function renderMaterials() {
+  const branch = resolveBranch(state.materials, materialBranchActive);
+  renderBranchFilter("materialBranchFilter", state.materials, branch, function (name) {
+  materialBranchActive = name; renderAll();
+  });
+  const rows = visibleRows(state.materials, {
+  branch: branch, term: materialSearchTerm.trim().toLowerCase(), match: materialMatches
+  });
+  document.getElementById("materialsEmpty").style.display = rows.length ? "none" : "block";
+  const body = document.getElementById("materialsBody");
+  body.innerHTML = "";
+
+  rows.forEach(function (entry) {
+  const n = entry.node;
+  const heading = isHeading(n);
+  const tr = document.createElement("tr");
+  if (heading) tr.classList.add("heading-row");
+  if (!entry.hit) tr.classList.add("context-row");
+
+  const tdUnit = document.createElement("td");
+  const tdQty = document.createElement("td");
+  const tdPrice = document.createElement("td");
+  const tdAmount = document.createElement("td");
+  const tdPhotos = document.createElement("td");
+  const tdNote = document.createElement("td");
+
+  if (heading) {
+    tdQty.className = "num";
+    tdPrice.className = "num";
+    tdAmount.className = "num";
+    tdQty.textContent = "\u2014";
+    tdPrice.textContent = "\u2014";
+    tdAmount.textContent = "\u2014";
+    if (n.unit || toNum(n.price)) {
+    const note = document.createElement("span");
+    note.className = "own-note";
+    note.textContent = "\u2022";
+    note.title = "This heading still holds a unit/rate from when it was an item. " +
+      "A heading only groups rows, so it is not used as a rate.";
+    tdUnit.appendChild(note);
+    }
+  } else {
+    tdUnit.appendChild(textInput(n, "unit", "unit"));
+    tdQty.className = "num";
+    tdQty.appendChild(numberInput(n, "quantity"));
+    tdPrice.className = "num";
+    tdPrice.appendChild(numberInput(n, "price"));
+    tdAmount.className = "num";
+    tdAmount.textContent = fmt(toNum(n.quantity) * toNum(n.price));
+    tdPhotos.appendChild(photoCell(n));
+    tdNote.appendChild(noteInput(n));
+  }
+
+  bindRowClick(tr, n, "materials");
+  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth),
+        tdUnit, tdQty, tdPrice, tdAmount, tdPhotos, tdNote);
+  body.appendChild(tr);
+  });
+
+  refreshToolbar("materials", state.materials);
+  }
+
+  document.getElementById("btnAddMaterial").addEventListener("click", function () {
+  state.materials.push(blankNode("materials"));
+  selectedIds.materials = state.materials[state.materials.length - 1].id;
+  persist(); renderAll();
+  showToast("Main material added");
+  });
+  document.getElementById("btnMaterialExpand").addEventListener("click", function () {
+  collapsedIds.clear(); renderAll();
+  });
+  document.getElementById("btnMaterialCollapse").addEventListener("click", collapseAll);
+  document.getElementById("materialSearch").addEventListener("input", function (e) {
+  materialSearchTerm = e.target.value; renderMaterials();
+  });
+  /* ================= LABOR ================= */
+  let laborBranchActive = "All";
+  let laborSearchTerm = "";
+
+  function laborMatches(n, term) {
+  return (n.name || "").toLowerCase().indexOf(term) !== -1
+  || (!isHeading(n) && (n.unit || "").toLowerCase().indexOf(term) !== -1);
+  }
+
+  function renderLabor() {
+  const branch = resolveBranch(state.labor, laborBranchActive);
+  renderBranchFilter("laborBranchFilter", state.labor, branch, function (name) {
+  laborBranchActive = name; renderAll();
+  });
+  const rows = visibleRows(state.labor, {
+  branch: branch, term: laborSearchTerm.trim().toLowerCase(), match: laborMatches
+  });
+  document.getElementById("laborEmpty").style.display = rows.length ? "none" : "block";
+  const body = document.getElementById("laborBody");
+  body.innerHTML = "";
+
+  rows.forEach(function (entry) {
+  const n = entry.node;
+  const heading = isHeading(n);
+  const tr = document.createElement("tr");
+  if (heading) tr.classList.add("heading-row");
+  if (!entry.hit) tr.classList.add("context-row");
+
+  const tdUnit = document.createElement("td");
+  const tdPrice = document.createElement("td");
+  tdPrice.className = "num";
+
+  if (heading) {
+    tdPrice.textContent = "\u2014";
+    if (n.unit || toNum(n.price)) {
+    const note = document.createElement("span");
+    note.className = "own-note";
+    note.textContent = "\u2022";
+    note.title = "This heading still holds a unit/rate from when it was an item. " +
+      "A heading only groups rows, so it is not used as a rate.";
+    tdUnit.appendChild(note);
+    }
+  } else {
+    tdUnit.appendChild(textInput(n, "unit", "unit"));
+    tdPrice.appendChild(numberInput(n, "price"));
+  }
+
+  bindRowClick(tr, n, "labor");
+  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdPrice);
+  body.appendChild(tr);
+  });
+
+  refreshToolbar("labor", state.labor);
+  }
+
+  document.getElementById("btnAddLabor").addEventListener("click", function () {
+  state.labor.push(blankNode("labor"));
+  selectedIds.labor = state.labor[state.labor.length - 1].id;
+  persist(); renderAll();
+  showToast("Main labor item added");
+  });
+  document.getElementById("btnLaborExpand").addEventListener("click", function () {
+  collapsedIds.clear(); renderAll();
+  });
+  document.getElementById("btnLaborCollapse").addEventListener("click", collapseAll);
+  document.getElementById("laborSearch").addEventListener("input", function (e) {
+  laborSearchTerm = e.target.value; renderLabor();
+  });
+  /* ================= BILL OF QUANTITIES ================= */
+  let boqBranchActive = "All";
+  let boqSearchTerm = "";
+
+  function materialPriceFor(n) {
+  if (toNum(n.customMaterialPrice) > 0) return toNum(n.customMaterialPrice);
+  return refRate(state.materials, n.materialRef);
+  }
+
+  function laborPriceFor(n) {
+  if (toNum(n.customLaborPrice) > 0) return toNum(n.customLaborPrice);
+  return refRate(state.labor, n.laborRef);
+  }
+
+  // Unit rate a bill row inherits from the rate lists. Rows with sub-rows are
+  // headings, so they are skipped: a heading is never used as a rate.
+  function refRate(tree, id) {
+  if (!id || id === "none" || id === "custom") return 0;
+  let hit = 0;
+  walkTree(tree, 0, function (n) {
+  if (!isHeading(n) && n.id === id) hit = toNum(n.price);
+  });
+  return hit;
+  }
+
+  function ownAmount(n) {
+  const qty = toNum(n.quantity);
+  return qty ? (materialPriceFor(n) + laborPriceFor(n)) * qty : 0;
+  }
+
+  function nodeTotal(n) {
+  let total = ownAmount(n);
+  (n.children || []).forEach(function (c) { total += nodeTotal(c); });
+  return total;
+  }
+
+  function boqTotals() {
+  let material = 0, labor = 0, grand = 0, items = 0;
+  walkTree(state.boq, 0, function (n) {
+  const qty = toNum(n.quantity);
+  if (qty) {
+    const m = materialPriceFor(n), l = laborPriceFor(n);
+    material += m * qty;
+    labor += l * qty;
+    grand += (m + l) * qty;
+  }
+  if (!isHeading(n)) items += 1;
+  });
+  return { material: material, labor: labor, grand: grand, items: items };
+  }
+
+  function boqMatches(n, term) {
+  if ((n.name || "").toLowerCase().indexOf(term) !== -1) return true;
+  return (n.unit || "").toLowerCase().indexOf(term) !== -1;
+  }
+  // Standard civil-engineering units, grouped the way they are chosen on site.
+  // The stored value is the symbol (m3, m2, nr …) so it stays ASCII-safe in the
+  // saved data; the dropdown shows the full label.
+  const UNIT_GROUPS = [
+  ["Volume", [
+  ["m3", "cubic meter (m\u00B3)"], ["cm3", "cubic centimeter (cm\u00B3)"],
+  ["mm3", "cubic millimeter (mm\u00B3)"], ["L", "liter (L)"], ["mL", "milliliter (mL)"]
+  ]],
+  ["Area", [
+  ["m2", "square meter (m\u00B2)"], ["cm2", "square centimeter (cm\u00B2)"],
+  ["mm2", "square millimeter (mm\u00B2)"], ["ha", "hectare (ha)"]
+  ]],
+  ["Length (Linear)", [
+  ["m", "meter (m)"], ["cm", "centimeter (cm)"],
+  ["mm", "millimeter (mm)"], ["km", "kilometer (km)"]
+  ]],
+  ["Count / Number", [
+  ["nr", "number (nr / no.)"], ["ea", "each (ea)"], ["pc", "piece (pc)"],
+  ["set", "set (set)"], ["pr", "pair (pr)"], ["item", "item (item)"]
+  ]],
+  ["Weight / Mass", [
+  ["kg", "kilogram (kg)"], ["t", "metric ton / tonne (t)"],
+  ["g", "gram (g)"], ["mg", "milligram (mg)"]
+  ]],
+  ["Lump Sum / Special", [
+  ["LS", "lump sum (LS / sum)"], ["PS", "provisional sum (PS)"],
+  ["PC", "prime cost sum (PC)"]
+  ]],
+  ["Time-Based (Labor / Equipment)", [
+  ["hr", "hour (hr)"], ["day", "day (day)"],
+  ["wk", "week (wk)"], ["mo", "month (mo)"]
+  ]]
+  ];
+
+  function buildUnitSelect(row) {
+  const select = document.createElement("select");
+  select.className = "cell-input";
+  const blank = document.createElement("option");
+  blank.value = ""; blank.textContent = "\u2014 unit \u2014";
+  select.appendChild(blank);
+  UNIT_GROUPS.forEach(function (group) {
+  const og = document.createElement("optgroup");
+  og.label = group[0];
+  group[1].forEach(function (u) {
+    const opt = document.createElement("option");
+    opt.value = u[0];
+    opt.textContent = u[1];
+    og.appendChild(opt);
+  });
+  select.appendChild(og);
+  });
+  // A unit typed before the dropdown existed, or a custom one, is kept as a
+  // trailing option so nothing the user saved is ever lost.
+  const known = UNIT_GROUPS.every(function (g) {
+  return !g[1].some(function (u) { return u[0] === row.unit; });
+  });
+  if (row.unit && known) {
+  const other = document.createElement("option");
+  other.value = row.unit;
+  other.textContent = row.unit + " (custom)";
+  select.appendChild(other);
+  }
+  select.value = row.unit || "";
+  if (select.value !== (row.unit || "")) select.value = "";
+  select.addEventListener("change", function (e) {
+  row.unit = e.target.value;
+  persist(); renderAll();
+  });
+  return select;
+  }
+
+  function renderBoq() {
+  const branch = resolveBranch(state.boq, boqBranchActive);
+  renderBranchFilter("boqBranchFilter", state.boq, branch, function (name) {
+  boqBranchActive = name; renderAll();
+  });
+  const rows = visibleRows(state.boq, {
+  branch: branch, term: boqSearchTerm.trim().toLowerCase(), match: boqMatches
+  });
+  document.getElementById("boqEmpty").style.display = rows.length ? "none" : "block";
+  const body = document.getElementById("boqBody");
+  body.innerHTML = "";
+
+  rows.forEach(function (entry) {
+  const n = entry.node;
+  const heading = isHeading(n);
+  const tr = document.createElement("tr");
+  if (heading) tr.classList.add("heading-row");
+  if (!entry.hit) tr.classList.add("context-row");
+
+  const tdUnit = document.createElement("td");
+  const tdQty = document.createElement("td");
+  const tdMatPrice = document.createElement("td");
+  const tdLabPrice = document.createElement("td");
+  const tdUnitPrice = document.createElement("td");
+  const tdTotal = document.createElement("td");
+
+  if (heading) {
+    tdMatPrice.className = "num";
+    tdLabPrice.className = "num";
+    tdUnitPrice.className = "num";
+    tdMatPrice.textContent = "\u2014";
+    tdLabPrice.textContent = "\u2014";
+    tdUnitPrice.textContent = "\u2014";
+    tdTotal.className = "num subtotal-cell";
+    tdTotal.textContent = fmt(nodeTotal(n));
+    const own = ownAmount(n);
+    if (own) {
+    const note = document.createElement("div");
+    note.className = "own-note";
+    note.textContent = "incl. own " + fmt(own);
+    note.title = "This heading also carries a quantity and rate of its own, " +
+      "which is added to the subtotal of its sub-items.";
+    tdTotal.appendChild(note);
+    }
+  } else {
+    const matPrice = toNum(n.customMaterialPrice);
+    const labPrice = toNum(n.customLaborPrice);
+    const unitPrice = matPrice + labPrice;
+    const lineTotal = unitPrice * toNum(n.quantity);
+
+    tdUnit.appendChild(buildUnitSelect(n));
+    tdQty.className = "num";
+    tdQty.appendChild(numberInput(n, "quantity"));
+    tdMatPrice.className = "num";
+    tdMatPrice.appendChild(numberInput(n, "customMaterialPrice"));
+    tdLabPrice.className = "num";
+    tdLabPrice.appendChild(numberInput(n, "customLaborPrice"));
+    tdUnitPrice.className = "num"; tdUnitPrice.textContent = fmt(unitPrice);
+    tdTotal.className = "num subtotal-cell"; tdTotal.textContent = fmt(lineTotal);
+  }
+
+  bindRowClick(tr, n, "boq");
+  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdQty,
+        tdMatPrice, tdLabPrice, tdUnitPrice, tdTotal);
+  body.appendChild(tr);
+  });
+
+  const totals = boqTotals();
+  document.getElementById("sumItems").textContent = totals.items;
+  document.getElementById("sumMaterial").textContent = fmt(totals.material);
+  document.getElementById("sumLabor").textContent = fmt(totals.labor);
+  document.getElementById("sumTotal").textContent = fmt(totals.grand);
+  document.getElementById("boqFootTotal").textContent = fmt(totals.grand);
+
+  refreshToolbar("boq", state.boq);
+  }
+  function addBoqRoot() {
+  state.boq.push(blankNode("boq"));
+  selectedIds.boq = state.boq[state.boq.length - 1].id;
+  persist(); renderAll();
+  showToast("New level 1 row added");
+  }
+  document.getElementById("btnAddBoqRow").addEventListener("click", addBoqRoot);
+  document.getElementById("btnBoqExpand").addEventListener("click", function () {
+  collapsedIds.clear(); renderAll();
+  });
+  document.getElementById("btnBoqCollapse").addEventListener("click", collapseAll);
+  document.getElementById("boqSearch").addEventListener("input", function (e) {
+  boqSearchTerm = e.target.value; renderBoq();
+  });
+  document.getElementById("btnClearBoq").addEventListener("click", () => {
+  const p = activeProject();
+  if (!p || !p.boq.length) return;
+  if (confirm("Remove all work items from the bill of quantities? This cannot be undone.")) {
+  p.boq = [];
+  syncBoqRef();
+  persist(); renderAll();
+  showToast("Bill of quantities cleared");
+  }
+  });
+  document.getElementById("projectName").addEventListener("change", e => {
+  const p = activeProject();
+  const name = e.target.value;
+  if (p) p.name = name;
+  state.projectName = name;
+  persist(); renderAll();
+  });
+  function csvCell(v) {
+  const s = String(v == null ? "" : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCsv() {
+  const p = activeProject();
+  if (!p) { showToast("Nothing to export yet"); return; }
+  const lines = [];
+  lines.push(["Ref", "Level", "Work description", "Unit", "Quantity",
+    "Material unit price", "Labor unit price", "Total unit price", "Total price"]
+    .map(csvCell).join(","));
+  walkTree(p.boq, 0, function (n, meta) {
+    const level = meta.depth + 1;
+    const refText = meta.ref.join(".");
+    const description = Array(level).join("    ") + (n.name || "");
+    if (isHeading(n)) {
+      lines.push([refText, level, description, "", "", "", "", "", fmt(nodeTotal(n))].map(csvCell).join(","));
+      return;
+    }
+    const matPrice = materialPriceFor(n);
+    const labPrice = laborPriceFor(n);
+    const quantity = toNum(n.quantity);
+    const unitPrice = matPrice + labPrice;
+    lines.push([refText, level, description, n.unit || "", quantity,
+      fmt(matPrice), fmt(labPrice), fmt(unitPrice), fmt(unitPrice * quantity)]
+      .map(csvCell).join(","));
+  });
+  let grand = 0;
+  (p.boq || []).forEach(function (row) { grand += nodeTotal(row); });
+  lines.push(["", "", "GRAND TOTAL", "", "", "", "", "", fmt(grand)].map(csvCell).join(","));
+  const filename = ((p.name || "").replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/ /g, "-") || "bill-of-quantities");
+  const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  showToast("CSV exported");
+  }
+  document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
+  document.getElementById("btnResetData").addEventListener("click", function () {
+  if (confirm("Discard the saved copy in this browser and reload the bundled ledger?")) {
+    try { localStorage.removeItem("boq.state"); } catch (e) {}
+    location.reload();
+  }
+  });
+  /* ---------------- Column layout ---------------- */
+  // The tables never scroll sideways. Each column owns a percentage of the
+  // table's width and the shares always add up to 100%, so the whole table —
+  // and every column in it — fits inside the window at any size.
+  const COL_STORE = "boq.cols.";
+  const COL_MIN_PX = 46;
+  const COL_DEFAULTS = {
+  materialsTable: [6, 34, 8, 7, 9, 9, 14, 13],
+  laborTable:     [7, 58, 15, 20],
+  boqTable:       [7, 28, 8, 8, 12, 12, 11, 14]
+  };
+  const colWeights = {};
+
+  function clampPct(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+  function normalizePct(w) {
+  const sum = w.reduce(function (a, b) { return a + b; }, 0);
+  return sum > 0 ? w.map(function (x) { return x * 100 / sum; }) : null;
+  }
+
+  function loadColWeights(id) {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(COL_STORE + id)); } catch (e) { saved = null; }
+  const defaults = COL_DEFAULTS[id];
+  if (Array.isArray(saved) && saved.length === defaults.length) {
+  const w = normalizePct(saved);
+  if (w && w.every(function (x) { return x >= 1; })) return w;
+  }
+  return defaults.slice();
+  }
+
+  function saveColWeights(id) {
+  try { localStorage.setItem(COL_STORE + id, JSON.stringify(colWeights[id])); } catch (e) { /* storage unavailable */ }
+  }
+
+  function applyColWidths(id) {
+  const table = document.getElementById(id);
+  if (!table) return;
+  let group = table.querySelector("colgroup");
+  if (!group) {
+  group = document.createElement("colgroup");
+  table.insertBefore(group, table.firstChild);
+  }
+  while (group.firstChild) group.removeChild(group.firstChild);
+  colWeights[id].forEach(function (pct) {
+  const col = document.createElement("col");
+  col.style.width = pct.toFixed(3) + "%";
+  group.appendChild(col);
+  });
+  }
+
+  function shiftedWeights(w, index, d, minPct) {
+  const out = w.slice();
+  const before = out[index];
+  out[index] = clampPct(before + d, minPct, 100 - (out.length - 1) * minPct);
+  const delta = out[index] - before;
+  if (delta !== 0 && out.length > 1) {
+  let room = 0;
+  for (let j = 0; j < out.length; j++) if (j !== index) room += out[j] - minPct;
+  if (room > 0) {
+    for (let j = 0; j < out.length; j++) {
+    if (j === index) continue;
+    out[j] += -delta * ((out[j] - minPct) / room);
+    }
+  }
+  }
+  return normalizePct(out) || out;
+  }
+
+  function initColumns() {
+  Object.keys(COL_DEFAULTS).forEach(function (id) {
+  const table = document.getElementById(id);
+  if (!table || !table.tHead) return;
+  colWeights[id] = loadColWeights(id);
+  applyColWidths(id);
+  const headRow = table.tHead.rows[0];
+  Array.prototype.forEach.call(headRow.cells, function (th, i) {
+    if (i >= colWeights[id].length) return;
+    const grip = document.createElement("span");
+    grip.className = "th-grip";
+    grip.title = "Drag to resize \u2014 double-click to reset";
+    grip.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    const tableW = table.getBoundingClientRect().width || 1;
+    const minPct = Math.max(1, (COL_MIN_PX / tableW) * 100);
+    const start = colWeights[id].slice();
+    document.body.classList.add("col-resizing");
+    try { grip.setPointerCapture(e.pointerId); } catch (err) { /* older browsers ignore */ }
+    let lastX = startX;
+    const onMove = function (ev) {
+      const dx = ev.clientX - lastX;
+      lastX = ev.clientX;
+      colWeights[id] = shiftedWeights(colWeights[id], i, (dx / tableW) * 100, minPct);
+      applyColWidths(id);
+    };
+    const onUp = function () {
+      document.body.classList.remove("col-resizing");
+      saveColWeights(id);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    });
+    grip.addEventListener("dblclick", function () {
+    colWeights[id] = COL_DEFAULTS[id].slice();
+    applyColWidths(id);
+    saveColWeights(id);
+    });
+    th.appendChild(grip);
+  });
+  });
+  }
+
+  /* ---------------- Boot ---------------- */
+  function renderAll() {
+  renderLedger();
+  renderMaterials();
+  renderLabor();
+  renderBoq();
+  }
+
+  function init() {
+  loadState().then(function (data) {
+  state = data;
+  syncBoqRef();
+  bindRowToolbar("materials");
+  bindRowToolbar("labor");
+  bindRowToolbar("boq");
+  initColumns();
+  applyTheme();
+  setActiveTab("boq");
+  renderAll();
+  }).catch(function () {
+  showToast("Could not load the ledger \u2014 check the page address");
+  });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
