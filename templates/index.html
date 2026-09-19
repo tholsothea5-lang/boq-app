@@ -385,7 +385,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>All changes are saved on the server and recorded per user. · build 2026-09-20</span>
+  <span>All changes are saved on the server and recorded per user. · build 2026-09-20b</span>
   </div>
   </aside>
   <main>
@@ -1147,7 +1147,8 @@
     showToast("Project information saved");
     } else {
     if (wasDraft) { p.draft = true; upsertDraft(p); renderLedger(); }
-    showToast("Could not save \u2014 check your connection, then try again");
+    // persist() already showed the specific reason on screen; do not overwrite
+    // it with a generic "check your connection" message.
     }
   });
   }
