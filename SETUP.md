@@ -26,6 +26,10 @@ project and paste two keys.
    into the editor, and click **Run**.
 3. You should see a small results table listing `profiles`, `ledger`, `audit`.
 
+> **Already ran this script before?** Just run it again — it is written to be
+> re-run safely, and the latest copy adds the **Moderator** role (three titles:
+> Admin, Moderator, User) and the online presence box.
+
 ## 3. Point confirmation emails at the real site
 
 When Supabase sends a "confirm your email" link it is built from the project's
@@ -67,11 +71,17 @@ now it starts with a **sign-in screen**:
 
 - Create the very first account → it automatically becomes the **admin**.
 - Everyone else can create their own account too, but as a plain user.
+- Each account has a title — **Admin**, **Moderator** or **User** — shown in
+  the bottom-left corner and in the **Online** box in the left rail. The box
+  lists every account with a **green dot** when that person is online, and each
+  person's title next to their name.
 - Sign in as admin → you'll see an **Admin** tab on the left. There you can:
-  - promote / demote / disable / delete users,
+  - promote / demote / disable / delete users (roles: Admin, Moderator, User),
   - read the full audit trail (every save: who changed which row and how, with
     a search box),
   - reset the ledger to the original bundled baseline.
+- Moderators can open the Admin tab too, but read-only: they see the user list
+  and the audit trail without the manage/reset buttons.
 
 ## How data is stored now
 
@@ -79,7 +89,8 @@ now it starts with a **sign-in screen**:
 | ----------- | ------------------------------------------------------------- |
 | Ledger      | Supabase table `ledger` (one shared row, JSON)                |
 | Accounts    | Supabase authentication + `profiles` table                    |
-| Audit log   | Supabase table `audit` (only admins can read it)              |
+| Audit log   | Supabase table `audit` (admins and moderators can read it)        |
+| Online box  | Supabase Realtime presence — who is online + their role title     |
 | Baseline    | `data.json` — the starting point for an empty database        |
 | Photos      | `photos/` folder (existing ones) + new photos saved with rows |
 
