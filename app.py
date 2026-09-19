@@ -9,11 +9,13 @@ audit trail of every change each user makes.
 Features added on top of the base version:
   - Email + password accounts (werkzeug password hashing, Flask sessions).
   - Roles: "admin" (can do anything, including managing users and viewing the
-    audit log) and "user".
+    audit log), "moderator" (can view the user list and audit log), and "user".
   - First account created on an empty server becomes the admin (setup).
   - Audit log in SQLite: login/logout/register, every data save with a summary
     of exactly what changed, photo uploads, and user management actions.
-  - Admin-only APIs to manage users and read the audit log.
+  - Online box: heartbeat tracking so the app can show who is online and each
+    person's role title (Admin / Moderator / User).
+  - Admin-only APIs to manage users; staff (admin + moderator) read audit.
 
 Run:
     pip install -r requirements.txt
@@ -48,6 +50,12 @@ DB_FILE = os.path.join(BASE_DIR, "data", "ledger.db")
 SECRET_FILE = os.path.join(BASE_DIR, "data", "secret_key.txt")
 ALLOWED_PHOTO_EXT = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".jfif"}
 MAX_PHOTO_BYTES = 8 * 1024 * 1024
+
+# Roles that may read the user list + audit log (admin can also manage users).
+STAFF_ROLES = ("admin", "moderator")
+# Online presence: user_id -> last heartbeat (epoch seconds). Kept in memory,
+# so it resets on restart — fine for a local tool.
+ONLINE = {}
 
 os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
 if os.path.exists(SECRET_FILE):
@@ -177,6 +185,21 @@ def admin_required(view):
             return redirect("/")
         if user.get("role") not in ("admin",):
             return jsonify({"error": "Admins only"}), 403
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def staff_required(view):
+    """Admin or moderator may pass (read-only panels: users list + audit)."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        user = current_user()
+        if user is None:
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Not signed in"}), 401
+            return redirect("/")
+        if user.get("role") not in STAFF_ROLES:
+            return jsonify({"error": "Admin or moderator only"}), 403
         return view(*args, **kwargs)
     return wrapped
 
@@ -829,10 +852,50 @@ def upload_photo():
     return jsonify({"url": "/api/photo/" + name})
 
 
+# ------------------------------------------------- online box (presence)
+
+ONLINE_TIMEOUT = 20  # seconds since last heartbeat before someone is "offline"
+
+def prune_online(now=None):
+    now = now or time.time()
+    stale = [uid for uid, seen in ONLINE.items() if now - seen > ONLINE_TIMEOUT]
+    for uid in stale:
+        ONLINE.pop(uid, None)
+
+
+@app.route("/api/heartbeat", methods=["POST"])
+@login_required
+def api_heartbeat():
+    me = current_user()
+    ONLINE[me["id"]] = time.time()
+    prune_online()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/online")
+@login_required
+def api_online():
+    me = current_user()
+    ONLINE[me["id"]] = time.time()  # you are online too
+    prune_online()
+    conn = db_connect()
+    rows = conn.execute(
+        "SELECT id, email, role, is_active, created_at FROM users ORDER BY id"
+    ).fetchall()
+    conn.close()
+    now = time.time()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["is_online"] = now - ONLINE.get(d["id"], 0) <= ONLINE_TIMEOUT
+        out.append(d)
+    return jsonify(out)
+
+
 # ----------------------------------------------------------- admin routes
 
 @app.route("/api/admin/users")
-@admin_required
+@staff_required
 def admin_users():
     conn = db_connect()
     rows = conn.execute(
@@ -851,7 +914,7 @@ def admin_update_user(uid):
         return jsonify({"error": "No such user"}), 404
     payload = request.get_json(force=True, silent=True) or {}
     conn = db_connect()
-    if "role" in payload and payload["role"] in ("admin", "user"):
+    if "role" in payload and payload["role"] in ("admin", "moderator", "user"):
         if uid == actor["id"] and payload["role"] != "admin":
             conn.close()
             return jsonify({"error": "You cannot remove your own admin role"}), 400
@@ -889,7 +952,7 @@ def admin_delete_user(uid):
 
 
 @app.route("/api/admin/audit")
-@admin_required
+@staff_required
 def admin_audit():
     q = request.args.get("q") or ""
     conn = db_connect()

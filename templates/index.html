@@ -312,6 +312,27 @@
   border-radius: 6px; padding: 4px 8px; font-size: 11.5px; flex: none;
   }
   .user-chip button.signout:hover { background: rgba(255,255,255,0.22); }
+  .online-box {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--radius); padding: 9px 10px; margin-bottom: 10px; flex: none;
+  max-height: 230px; overflow-y: auto;
+  }
+  .online-head { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #A9B8CA; margin-bottom: 6px; }
+  .online-head .online-count { color: var(--amber); font-weight: 700; }
+  .online-list { display: flex; flex-direction: column; gap: 4px; }
+  .online-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #D8E2EC; min-width: 0; }
+  .online-row .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: #5A6E82; }
+  .online-row .dot.on { background: #3FBF6F; animation: dotPulse 2s infinite; }
+  @keyframes dotPulse {
+  0% { box-shadow: 0 0 0 0 rgba(63,191,111,0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(63,191,111,0); }
+  100% { box-shadow: 0 0 0 0 rgba(63,191,111,0); }
+  }
+  .online-row .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; }
+  .online-row .rol { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; flex: none; }
+  .online-row .rol.admin { color: var(--amber); }
+  .online-row .rol.moderator { color: var(--steel); }
+  .online-row .rol.user { color: #93A7BB; }
   .admin-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: center; }
   .admin-toolbar input {
   padding: 8px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius);
@@ -323,6 +344,7 @@
   .user-table th, .user-table td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line); }
   .user-table th { color: var(--ink-muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
   .tag-admin { color: var(--amber); font-weight: 700; }
+  .tag-moderator { color: var(--steel); font-weight: 700; }
   .tag-user { color: var(--ink-muted); }
   .user-table .mini {
   border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
@@ -350,6 +372,11 @@
   </div>
 
   <nav class="ledger" id="ledgerTree" aria-label="Site Ledger"></nav>
+
+  <div class="online-box" id="onlineBox" hidden>
+    <div class="online-head">Online <span class="online-count" id="onlineCount">0</span></div>
+    <div class="online-list" id="onlineList"></div>
+  </div>
 
   <div class="rail-foot">
   <div class="user-chip" id="userChip" hidden></div>
@@ -1168,7 +1195,7 @@
   active: activeTab === "labor",
   click: function () { setActiveTab("labor"); }
   }));
-  if (me && me.role === "admin") {
+  if (me && (me.role === "admin" || me.role === "moderator")) {
   tree.appendChild(ledgerNode("\uD83D\uDEE1\uFE0F", "Admin", {
     active: activeTab === "admin",
     click: function () { setActiveTab("admin"); loadAdminPanel(); }
@@ -1891,6 +1918,12 @@
   }
 
   /* ---------------- Accounts ---------------- */
+  function roleInfo(r) {
+  if (r === "admin") return { label: "Admin", cls: "tag-admin" };
+  if (r === "moderator") return { label: "Moderator", cls: "tag-moderator" };
+  return { label: "User", cls: "tag-user" };
+  }
+
   function renderUserChip() {
   const chip = document.getElementById("userChip");
   if (!me || !chip) return;
@@ -1902,7 +1935,7 @@
   who.title = "Signed in as " + me.email;
   const role = document.createElement("span");
   role.className = "role";
-  role.textContent = me.role;
+  role.textContent = roleInfo(me.role).label;
   const out = document.createElement("button");
   out.type = "button";
   out.className = "signout";
@@ -2010,6 +2043,7 @@
   }
 
   async function signOut() {
+  stopOnlineBox();
   try { await fetch("/logout", { method: "POST" }); } catch (e) {}
   me = null;
   location.reload();
@@ -2030,16 +2064,74 @@
   applyTheme();
   setActiveTab("boq");
   renderAll();
+  if (me.role === "admin" || me.role === "moderator") loadAdminPanel();
+  startOnlineBox();
   }).catch(function () {
   showToast("Could not load the ledger \u2014 check the server");
   });
   }
 
+  /* ---------------- Online box (presence) ---------------- */
+  let onlineTimer = null;
+
+  function startOnlineBox() {
+  stopOnlineBox();
+  fetchOnline();
+  onlineTimer = setInterval(function () {
+    fetch("/api/heartbeat", { method: "POST" }).catch(function () {});
+    fetchOnline();
+  }, 8000);
+  }
+
+  function stopOnlineBox() {
+  if (onlineTimer) { clearInterval(onlineTimer); onlineTimer = null; }
+  const box = document.getElementById("onlineBox");
+  if (box) box.hidden = true;
+  }
+
+  function fetchOnline() {
+  fetch("/api/online").then(async function (r) {
+    if (r.status === 401) return;
+    if (!r.ok) return;
+    const users = await r.json();
+    drawOnlineList(users || []);
+  }).catch(function () {});
+  }
+
+  function drawOnlineList(users) {
+  const box = document.getElementById("onlineBox");
+  const list = document.getElementById("onlineList");
+  const count = document.getElementById("onlineCount");
+  if (!box || !list || !count || !me) return;
+  box.hidden = false;
+  let online = 0;
+  list.innerHTML = "";
+  users.forEach(function (u) {
+    if (!u.is_active) return;
+    if (u.is_online) online += 1;
+    const row = document.createElement("div");
+    row.className = "online-row";
+    const dot = document.createElement("span");
+    dot.className = "dot" + (u.is_online ? " on" : "");
+    dot.title = u.is_online ? "Online now" : "Offline";
+    const who = document.createElement("span");
+    who.className = "who";
+    who.textContent = u.email;
+    const ri = roleInfo(u.role);
+    const rol = document.createElement("span");
+    rol.className = "rol " + (u.role || "user");
+    rol.textContent = ri.label;
+    row.append(dot, who, rol);
+    list.appendChild(row);
+  });
+  count.textContent = online;
+  }
+
   /* ---------------- Admin ---------------- */
   function ensureAdminTab() {
   const idx = TABS.findIndex(function (t) { return t.id === "admin"; });
-  if (me && me.role === "admin" && idx === -1) TABS.push({ id: "admin", label: "Admin" });
-  if ((!me || me.role !== "admin") && idx !== -1) TABS.splice(idx, 1);
+  if (me && (me.role === "admin" || me.role === "moderator") && idx === -1) TABS.push({ id: "admin", label: "Admin" });
+  if ((!me || (me.role !== "admin" && me.role !== "moderator")) && idx !== -1) TABS.splice(idx, 1);
   renderTabs();
   }
 
@@ -2091,8 +2183,9 @@
     tdEmail.title = u.is_active ? "Active account" : "Deactivated account";
     const tdRole = document.createElement("td");
     const roleTag = document.createElement("span");
-    roleTag.className = u.role === "admin" ? "tag-admin" : "tag-user";
-    roleTag.textContent = u.role;
+    const ri = roleInfo(u.role);
+    roleTag.className = ri.cls;
+    roleTag.textContent = ri.label;
     tdRole.appendChild(roleTag);
     const tdStatus = document.createElement("td");
     tdStatus.textContent = u.is_active ? "Active" : "Disabled";
@@ -2100,10 +2193,20 @@
     tdCreated.textContent = (u.created_at || "").slice(0, 10);
     const tdAct = document.createElement("td");
     tdAct.style.whiteSpace = "nowrap";
+    if (me.role === "admin") {
     if (u.role !== "admin") {
     tdAct.appendChild(adminActionBtn("Make admin", "", "Give this user full control", function () {
       patchUser(u.id, { role: "admin" }).then(loadAdminUsers);
     }));
+    if (u.role === "moderator") {
+    tdAct.appendChild(adminActionBtn("Make user", "", "Demote this user to a regular user", function () {
+      patchUser(u.id, { role: "user" }).then(loadAdminUsers);
+    }));
+    } else {
+    tdAct.appendChild(adminActionBtn("Make moderator", "", "Middle tier: can see users and the audit log", function () {
+      patchUser(u.id, { role: "moderator" }).then(loadAdminUsers);
+    }));
+    }
     } else if (u.id !== me.id) {
     tdAct.appendChild(adminActionBtn("Remove admin", "", "Demote this user", function () {
       patchUser(u.id, { role: "user" }).then(loadAdminUsers);
@@ -2123,6 +2226,7 @@
       if (confirm("Delete the account " + u.email + "? Its audit history is kept."))
       deleteUser(u.id).then(loadAdminUsers);
     }));
+    }
     }
     tr.append(tdEmail, tdRole, tdStatus, tdCreated, tdAct);
     body.appendChild(tr);
@@ -2171,6 +2275,8 @@
   function loadAdminPanel() {
   loadAdminUsers();
   loadAdminAudit();
+  const resetBtn = document.getElementById("btnResetLedger");
+  if (resetBtn) resetBtn.hidden = me.role !== "admin";
   }
 
   function bindAdminPanel() {
