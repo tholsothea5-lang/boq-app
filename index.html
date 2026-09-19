@@ -385,7 +385,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user.</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20</span>
   </div>
   </aside>
   <main>
@@ -638,6 +638,7 @@
 <script>
 (function () {
   "use strict";
+  console.log("Site Ledger — build 2026-09-20.1 (saves are verified before the draft is dropped)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -836,14 +837,32 @@
         body.activeProjectId = body.projects[0].id;
       }
       const detail = summarizeSave(stateSaved, body);
-      const { error } = await supabase.from("ledger").update({
-        state: body, updated_by: me.id, updated_at: new Date().toISOString()
-      }).eq("id", 1);
+      // Upsert (not a plain update) so the write lands even if the single
+      // ledger row is missing, and re-read exactly what the server stored.
+      // Only when it matches do we treat the save as done — otherwise the
+      // caller keeps the local draft instead of assuming success (the old
+      // code dropped the draft on any "no error" result, which lost data
+      // when the update silently matched zero rows).
+      const payload = { id: 1, state: body, updated_by: me.id, updated_at: new Date().toISOString() };
+      const { data, error } = await supabase.from("ledger")
+        .upsert(payload, { onConflict: "id" })
+        .select()
+        .single();
       if (error) throw new Error(error.message);
+      const got = data && data.state;
+      const ids = function (list) {
+        return JSON.stringify((list || []).map(function (p) { return String(p.id); }).sort());
+      };
+      if (ids(got && got.projects) !== ids(body.projects)) {
+        throw new Error("the saved copy did not match what was sent");
+      }
       await logAudit("data.saved", detail);
       stateSaved = body;
       return true;
-    } catch (e) { showToast("Could not save \u2014 check your connection"); return false; }
+    } catch (e) {
+      showToast("Could not save \u2014 " + (e && e.message ? e.message : "check your connection").slice(0, 70));
+      return false;
+    }
   }
 
   let toastTimer = null;
