@@ -18,10 +18,16 @@
 create table if not exists public.profiles (
   id         uuid primary key references auth.users (id) on delete cascade,
   email      text not null,
-  role       text not null default 'user' check (role in ('admin', 'user')),
+  role       text not null default 'user' check (role in ('admin', 'moderator', 'user')),
   is_active  boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+-- (In case this script was run before "moderator" existed:) replace the old
+-- role check with the three-tier version. Safe to run more than once.
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check
+  check (role in ('admin', 'moderator', 'user'));
 
 -- The very first person to register becomes the admin; everyone after is a
 -- plain user (the admin can promote them from the Admin panel).
@@ -107,14 +113,15 @@ create policy ledger_update_auth on public.ledger
   for update to authenticated with check (id = 1 and auth.uid() = updated_by);
 
 -- audit: anyone may add THEIR OWN entry (the user_id is forced inside postgres
--- so nobody can log a change as somebody else), and only admins may read it.
+-- so nobody can log a change as somebody else), and only admins and moderators
+-- may read it.
 drop policy if exists audit_insert_auth on public.audit;
 create policy audit_insert_auth on public.audit
   for insert to authenticated with check (auth.uid() = user_id);
 drop policy if exists audit_select_admin on public.audit;
 create policy audit_select_admin on public.audit
   for select to authenticated
-  using ((select role from public.profiles where id = auth.uid()) = 'admin');
+  using ((select role from public.profiles where id = auth.uid()) in ('admin', 'moderator'));
 
 -- ---------------------------------------------------------------------------
 -- 5. admin-only actions (checks run on the server, bypassing client access)
@@ -127,7 +134,7 @@ begin
   if (select role from public.profiles where id = auth.uid()) <> 'admin' then
     raise exception 'Admins only';
   end if;
-  if new_role not in ('admin', 'user') then
+  if new_role not in ('admin', 'moderator', 'user') then
     raise exception 'Invalid role';
   end if;
   if target_id = auth.uid() and new_role <> 'admin' then
