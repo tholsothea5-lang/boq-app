@@ -386,7 +386,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20c (saves now sync every project across devices)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20d (saves merge every account's projects)</span>
   </div>
   </aside>
   <main>
@@ -639,7 +639,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-20.3 (shared ledger sync)");
+  console.log("Site Ledger — build 2026-09-20d (shared ledger sync)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -827,6 +827,18 @@
       // state.boq is a live mirror of the active project's bill; the projects list
       // itself is what is stored, so the mirror is not a top-level key.
       delete body.boq;
+      // Merge with the shared ledger before writing, so one account's save never
+      // clobbers a project another account just added: keep every project the
+      // ledger has, local copies win on the same id, and save the union.
+      try {
+        const fresh = await loadSharedLedger();
+        if (fresh && Array.isArray(fresh.projects)) {
+          const byId = {};
+          (fresh.projects || []).forEach(function (p) { byId[p.id] = p; });
+          (body.projects || []).forEach(function (p) { delete byId[p.id]; });
+          body.projects = (body.projects || []).concat(Object.keys(byId).map(function (id) { return byId[id]; }));
+        }
+      } catch (e) { /* offline: still save what we have */ }
       (body.projects || []).forEach(function (p) { delete p.draft; });
       if (body.projects.length && body.activeProjectId &&
           body.projects.every(function (p) { return p.id !== body.activeProjectId; })) {
