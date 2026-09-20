@@ -386,7 +386,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20e (RPC-ledger saves + truthful toasts)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20f (reset fix)</span>
   </div>
   </aside>
   <main>
@@ -639,7 +639,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-20e (shared ledger sync)");
+  console.log("Site Ledger — build 2026-09-20f (shared ledger sync)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -2568,11 +2568,12 @@
     document.getElementById("btnResetLedger").addEventListener("click", resetSharedLedger);
   }
 
-  function resetSharedLedger() {
+  async function resetSharedLedger() {
     if (!supabase || !me) return;
     if (me.role !== "admin") { showToast("Admins only"); return; }
     if (!confirm("Reset the shared ledger to the bundled baseline? Every saved edit is lost. This is recorded in the audit trail.")) return;
-    fetchBaseline().then(async function (baseline) {
+    try {
+      const baseline = await fetchBaseline();
       const rpc = await supabase.rpc("ledger_save", { new_state: baseline });
       let err = rpc.error;
       if (err) {
@@ -2582,20 +2583,18 @@
         err = fb.error;
       }
       if (err) throw new Error(err.message);
-      return logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
-    }).then(function () {
-        state = baseline;
-        const snap = Object.assign({}, state);
-        delete snap.boq;
-        stateSaved = snap;
-        syncBoqRef();
-        applyTheme();
-        renderAll();
-        showToast("Ledger reset");
-      });
-    }).catch(function () {
+      await logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
+      state = baseline;
+      const snap = Object.assign({}, state);
+      delete snap.boq;
+      stateSaved = snap;
+      syncBoqRef();
+      applyTheme();
+      renderAll();
+      showToast("Ledger reset");
+    } catch (e) {
       showToast("Could not reset the ledger");
-    });
+    }
   }
 
   /* ---------------- Boot ---------------- */
