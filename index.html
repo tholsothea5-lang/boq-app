@@ -386,7 +386,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20d (saves merge every account's projects)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20e (RPC-ledger saves + truthful toasts)</span>
   </div>
   </aside>
   <main>
@@ -639,7 +639,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-20d (shared ledger sync)");
+  console.log("Site Ledger — build 2026-09-20e (shared ledger sync)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -782,12 +782,16 @@
 
   async function loadSharedLedger() {
     if (!supabase) return null;
+    const rpc = await supabase.rpc("ledger_get");
+    if (!rpc.error && rpc.data && typeof rpc.data === "object") return rpc.data;
     const { data, error } = await supabase.from("ledger").select("state").eq("id", 1).maybeSingle();
     if (error) throw new Error(error.message);
     return data && data.state ? data.state : null;
   }
 
   async function seedSharedLedger(baseline) {
+    const rpc = await supabase.rpc("ledger_save", { new_state: baseline });
+    if (!rpc.error) return;
     const { error } = await supabase.from("ledger").upsert({
       id: 1, state: baseline, updated_by: me.id, updated_at: new Date().toISOString()
     }, { onConflict: "id" });
@@ -845,14 +849,14 @@
         body.activeProjectId = body.projects[0].id;
       }
       const detail = summarizeSave(stateSaved, body);
-      // Upsert (not a plain update) so the write lands even if the single
-      // ledger row is missing. The verification does NOT trust the upsert's
-      // own return value (supabase-js returns data:null there on some hosts
-      // even when the write succeeded — which made every save look failed).
-      // Instead we read the row back through the SAME query the app uses on
-      // refresh, so we confirm exactly what a reload will show.
-      const payload = { id: 1, state: body, updated_by: me.id, updated_at: new Date().toISOString() };
-      const { error } = await supabase.from("ledger").upsert(payload, { onConflict: "id" });
+      // Try the RPC first (bypasses RLS). If the function doesn't exist yet
+      // (old SQL), fall back to the table upsert.
+      const rpc = await supabase.rpc("ledger_save", { new_state: body });
+      let error = rpc.error;
+      if (error) {
+        const fb = await supabase.from("ledger").upsert(payload, { onConflict: "id" });
+        error = fb.error;
+      }
       if (error) throw new Error(error.message);
       const got = await loadSharedLedger();
       const ids = function (list) {
@@ -1294,9 +1298,8 @@
   syncBoqRef();
   selectedIds.boq = null;
   setActiveTab("boq");
-  persist();
+  persist().then(function (ok) { if (ok) showToast("New project added and saved to the shared ledger"); });
   renderAll();
-  showToast("New project added and saved to the shared ledger");
   }
 
   function saveProjectInfo() {
@@ -2569,13 +2572,18 @@
     if (!supabase || !me) return;
     if (me.role !== "admin") { showToast("Admins only"); return; }
     if (!confirm("Reset the shared ledger to the bundled baseline? Every saved edit is lost. This is recorded in the audit trail.")) return;
-    fetchBaseline().then(function (baseline) {
-      return supabase.from("ledger").update({
-        state: baseline, updated_by: me.id, updated_at: new Date().toISOString()
-      }).eq("id", 1).then(function (res) {
-        if (res.error) throw new Error(res.error.message);
-        return logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
-      }).then(function () {
+    fetchBaseline().then(async function (baseline) {
+      const rpc = await supabase.rpc("ledger_save", { new_state: baseline });
+      let err = rpc.error;
+      if (err) {
+        const fb = await supabase.from("ledger").update({
+          state: baseline, updated_by: me.id, updated_at: new Date().toISOString()
+        }).eq("id", 1);
+        err = fb.error;
+      }
+      if (err) throw new Error(err.message);
+      return logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
+    }).then(function () {
         state = baseline;
         const snap = Object.assign({}, state);
         delete snap.boq;
