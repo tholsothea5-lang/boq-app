@@ -386,7 +386,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20f (reset fix)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20g (payload fix)</span>
   </div>
   </aside>
   <main>
@@ -851,6 +851,7 @@
       const detail = summarizeSave(stateSaved, body);
       // Try the RPC first (bypasses RLS). If the function doesn't exist yet
       // (old SQL), fall back to the table upsert.
+      const payload = { id: 1, state: body, updated_by: me.id, updated_at: new Date().toISOString() };
       const rpc = await supabase.rpc("ledger_save", { new_state: body });
       let error = rpc.error;
       if (error) {
