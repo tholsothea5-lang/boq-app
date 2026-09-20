@@ -386,7 +386,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20g (payload fix)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20h (RLS error guidance)</span>
   </div>
   </aside>
   <main>
@@ -858,7 +858,13 @@
         const fb = await supabase.from("ledger").upsert(payload, { onConflict: "id" });
         error = fb.error;
       }
-      if (error) throw new Error(error.message);
+      if (error) {
+        const msg = error.message || "";
+        if (msg.includes("row-level security") || msg.includes("policy")) {
+          throw new Error("Save blocked by database policy — run the updated gh-pages/supabase.sql in Supabase SQL Editor to fix");
+        }
+        throw new Error(error.message);
+      }
       const got = await loadSharedLedger();
       const ids = function (list) {
         return JSON.stringify((list || []).map(function (p) { return String(p.id); }).sort());
@@ -2583,7 +2589,13 @@
         }).eq("id", 1);
         err = fb.error;
       }
-      if (err) throw new Error(err.message);
+      if (err) {
+        const msg = err.message || "";
+        if (msg.includes("row-level security") || msg.includes("policy")) {
+          throw new Error("Reset blocked by database policy — run the updated gh-pages/supabase.sql in Supabase SQL Editor to fix");
+        }
+        throw new Error(err.message);
+      }
       await logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
       state = baseline;
       const snap = Object.assign({}, state);
@@ -2594,7 +2606,7 @@
       renderAll();
       showToast("Ledger reset");
     } catch (e) {
-      showToast("Could not reset the ledger");
+      showToast("Could not reset the ledger — " + (e && e.message ? e.message : "check your connection").slice(0, 70));
     }
   }
 
