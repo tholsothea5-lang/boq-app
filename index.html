@@ -386,7 +386,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20b</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20c (saves now sync every project across devices)</span>
   </div>
   </aside>
   <main>
@@ -639,7 +639,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-20.2 (saves verified via read-back; draft kept on failure)");
+  console.log("Site Ledger — build 2026-09-20.3 (shared ledger sync)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -821,18 +821,13 @@
   }
 
   async function persist() {
-    // Keep draft projects backed up in this browser before anything else, so a
-    // reload does not lose them.
-    const drafts = (state.projects || []).filter(function (p) { return p.draft; });
-    if (drafts.length) storeDrafts(drafts);
     if (!supabase || !me) { showToast("Could not save \u2014 not signed in"); return false; }
     try {
       const body = Object.assign({}, state);
       // state.boq is a live mirror of the active project's bill; the projects list
-      // itself is what is stored, so the mirror is not a top-level key. Draft
-      // projects stay out of the shared ledger until "Save project information".
+      // itself is what is stored, so the mirror is not a top-level key.
       delete body.boq;
-      body.projects = (body.projects || []).filter(function (p) { return !p.draft; });
+      (body.projects || []).forEach(function (p) { delete p.draft; });
       if (body.projects.length && body.activeProjectId &&
           body.projects.every(function (p) { return p.id !== body.activeProjectId; })) {
         body.activeProjectId = body.projects[0].id;
@@ -1216,43 +1211,31 @@
   /* ================= SITE LEDGER NAVIGATION ================= */
   let ledgerProjectOpen = true;
 
-  // Newly added projects start as drafts: they exist only in this browser
-  // (backed up to localStorage so a reload does not lose them) until the
-  // user clicks "Save project information", which publishes them to the
-  // shared ledger and the audit log.
+  // Every change — including new projects — is written straight to the shared
+  // Supabase ledger from this device and read back from it on every load, so
+  // the same account on any device sees the same projects. There used to be a
+  // per-browser "draft pool" in localStorage; on first load any drafts left
+  // over from that are promoted into the shared ledger once, then forgotten.
   const DRAFT_KEY = "boq_drafts_v1";
-  function loadDrafts() {
+  function promoteLocalDrafts() {
+  let drafts = [];
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
-    const list = raw ? JSON.parse(raw) : [];
-    return Array.isArray(list) ? list : [];
-  } catch (e) { return []; }
-  }
-  function storeDrafts(list) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(list)); } catch (e) { /* storage unavailable */ }
-  }
-  function upsertDraft(p) {
-  const list = loadDrafts().filter(function (d) { return d.id !== p.id; });
-  list.push(p);
-  storeDrafts(list);
-  }
-  function dropDraft(id) {
-  storeDrafts(loadDrafts().filter(function (d) { return d.id !== id; }));
-  }
-  function mergeDrafts() {
-  const drafts = loadDrafts();
-  if (!drafts.length) return;
+    drafts = raw ? JSON.parse(raw) : [];
+  } catch (e) { drafts = []; }
+  if (!Array.isArray(drafts) || !drafts.length) return;
   const byId = {};
   (state.projects || []).forEach(function (p) { byId[p.id] = p; });
+  let changed = false;
   drafts.forEach(function (d) {
-    if (byId[d.id]) {
-      if (!byId[d.id].draft) dropDraft(d.id); // already saved elsewhere
-    } else {
-      state.projects = state.projects || [];
-      d.draft = true;
-      state.projects.push(d);
-    }
+    if (!d || !d.id || byId[d.id] !== undefined) return;
+    delete d.draft;
+    state.projects = state.projects || [];
+    state.projects.push(d);
+    changed = true;
   });
+  try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* noop */ }
+  if (changed) persist();
   }
 
   function activeProject() {
@@ -1292,36 +1275,27 @@
   const names = list.map(function (p) { return p.name || ""; });
   let k = 1;
   while (names.indexOf(n) !== -1) { k += 1; n = "Project " + (list.length + k); }
-  const p = { id: uid("p"), name: n, boq: [], draft: true };
+  const p = { id: uid("p"), name: n, boq: [] };
   list.push(p);
-  upsertDraft(p);
   state.activeProjectId = p.id;
   ledgerProjectOpen = true;
   syncBoqRef();
   selectedIds.boq = null;
   setActiveTab("boq");
+  persist();
   renderAll();
-  showToast("New draft project added \u2014 fill it in, then click Save project information");
+  showToast("New project added and saved to the shared ledger");
   }
 
   function saveProjectInfo() {
   const p = activeProject();
   if (!p) return;
   if (!me) { showToast("Sign in to save the project"); return; }
-  const wasDraft = !!p.draft;
-  if (wasDraft) delete p.draft; // include it in the save
   persist().then(function (ok) {
-    if (ok) {
-    dropDraft(p.id);
+    if (!ok) return; // persist() already explained the failure
     syncBoqRef();
     renderLedger();
     showToast("Project information saved");
-    } else {
-    if (wasDraft) { p.draft = true; upsertDraft(p); renderLedger(); }
-    // persist() already showed the specific reason on screen; do not overwrite
-    // it with a generic "check your connection" message when the save actually
-    // landed but the verification was inconclusive.
-    }
   });
   }
 
@@ -1332,7 +1306,6 @@
   const p = list[idx];
   if (!confirm("Delete the whole project \u201C" + (p.name || "untitled") +
   "\u201D and its bill of quantities? This cannot be undone.")) return;
-  dropDraft(id);
   list.splice(idx, 1);
   if (!list.length) {
   const fresh = { id: uid("p"), name: "Project 1", boq: [] };
@@ -1424,12 +1397,6 @@
     title: "Open \u201C" + (p.name || "Untitled project") + "\u201D",
     click: function () { switchProject(p.id); }
   });
-  if (p.draft) {
-    const tag = document.createElement("span");
-    tag.className = "ledger-badge";
-    tag.textContent = "draft";
-    pr.appendChild(tag);
-  }
 
   const del = document.createElement("button");
   del.type = "button";
@@ -2332,10 +2299,9 @@
     ensureAdminTab();
     loadState().then(function (data) {
       state = data;
-      mergeDrafts();
+      promoteLocalDrafts();
       const snap = Object.assign({}, state);
       delete snap.boq;
-      snap.projects = (snap.projects || []).filter(function (p) { return !p.draft; });
       stateSaved = snap;
       syncBoqRef();
       bindRowToolbar("materials");
@@ -2599,7 +2565,6 @@
         return logAudit("data.reset", "Admin reset the shared ledger to the bundled baseline");
       }).then(function () {
         state = baseline;
-        storeDrafts([]); // drafts are based on the old ledger; drop them too
         const snap = Object.assign({}, state);
         delete snap.boq;
         stateSaved = snap;
