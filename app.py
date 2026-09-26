@@ -911,64 +911,285 @@ def _collect_bills(boq):
     return groups
 
 
-def _write_bill_header(ws, name, sum_row):
+# ---- Excel visual style layer (mirrors the reference workbook's look) ----
+# Arial at every size, red labels on the green "input" columns, yellow header
+# bands, an orange GRAND TOTAL band and the black address band on the cover.
+# The fills are written as literal RGB values equal to what the reference's
+# theme fills resolve to (theme9 + 70AD47 => E2EFDA, theme5 + ED7D31 => FBE5D6,
+# theme0 => black), so every engine renders the colours exactly like the
+# original.
+AR = "Arial"
+TNR = "Times New Roman"
+RED = "FFFF0000"
+YELLOW = "FFFFFF00"
+T = "thin"
+M = "medium"
+# F,G,I,J,K,L are the green "input" columns (quantity / rate / mark-up).
+GRAY_F = "FFE2EFDA"     # F/G/I/J/K/L body + header fill
+GRAND_F = "FFFBE5D6"    # GRAND TOTAL band fill
+BLACK_F = "FF000000"    # cover address band fill (black)
+GRAY_COLS = [6, 7, 9, 10, 11, 12]
+
+
+
+def _paint(ws, r, c, font=None, sz=10, bold=False, color=None, fill=None,
+           fill_theme=None, z=None, top=None, bottom=None, left=None,
+           right=None, hal=None, val=None, wrap=False, calibri=False,
+           underline=False):
+    """Layer font/fill/border/alignment onto a cell without touching its value
+    or number format.  Creates the cell when the coordinate has nothing yet.
+    Every painted cell carries an explicit font (Calibri 11 when `calibri`,
+    otherwise Arial at the requested size - never the engine default).
+    `fill_theme` is a literal RGB fill colour; `z` sets the number format
+    (useful for styled-empty cells)."""
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+
+    cell = ws.cell(row=r, column=c)
+    if calibri:
+        cell.font = Font(name="Calibri", sz=11)
+    else:
+        cell.font = Font(name=font or AR, sz=sz, bold=bold, color=color,
+                         underline="single" if underline else None)
+    if fill_theme:
+        cell.fill = PatternFill(patternType="solid", fgColor=fill_theme)
+    elif fill:
+        cell.fill = PatternFill(patternType="solid", fgColor=fill)
+    sides = {}
+    for style, side in ((top, "top"), (bottom, "bottom"),
+                        (left, "left"), (right, "right")):
+        if style:
+            sides[side] = Side(style=style)
+    if sides:
+        cell.border = Border(**sides)
+    if hal or val or wrap:
+        cell.alignment = Alignment(horizontal=hal, vertical=val, wrap_text=wrap)
+    if z:
+        cell.number_format = z
+    return cell
+
+
+def _set_h(ws, r, hpt):
+    ws.row_dimensions[r].height = hpt
+
+
+def _paint_body_row(ws, r, kind, skip_uaa=False, band_fmt=False, x_money=False,
+                    money_colors=None):
+    """Paints one table row of a detail sheet (B..R grid + U..AA analysis
+    block) for a given kind, reproducing the reference template row-for-row:
+    section / leaf / spacer / spacerB / subtotal / grand / bottom.  The green
+    input cells carry red text on the theme-9 fill; SUB-TOTAL rows are all-bold
+    with no fill and underlined money cells; GRAND TOTAL is all-bold on the
+    orange band.  The stray band passes `skip_uaa` because the reference leaves
+    its budget block empty.  `band_fmt` applies the ACCT number formats to the
+    first band block only (rows 10-12 of the reference), later section bands
+    and echoes carry none - exactly as the template is built."""
+    is_grand = kind == "grand"
+    money = kind in ("subtotal", "grand")
+    leafy = kind in ("section", "leaf")
+    band = leafy or kind in ("spacer", "spacerB", "bottom")
+    _paint(ws, r, 2, bold=money or kind == "section" or kind == "spacerB",
+           fill_theme=GRAND_F if is_grand else None,
+           left=M, right=T, bottom=M if kind == "bottom" else None, hal="left")
+    _paint(ws, r, 18, bold=money, fill_theme=GRAND_F if is_grand else None,
+           left=T, right=M, bottom=M if kind == "bottom" else None)
+    for c in range(3, 18):  # C..Q
+        fmt = None
+        bold = money
+        color = RED if c in GRAY_COLS else None
+        fill_t = None
+        if not money:
+            if band and c in GRAY_COLS:
+                fill_t = GRAY_F
+            if kind == "leaf":
+                if c == 8:
+                    fmt = ACCT_NUM
+                elif c in (11, 12):
+                    fmt = PCT_FMT
+                elif 13 <= c <= 17:
+                    fmt = ACCT_CUR
+            elif band_fmt and kind in ("section", "spacerB"):
+                if c == 8:
+                    fmt = ACCT_NUM
+                elif 13 <= c <= 17:
+                    fmt = ACCT_CUR
+            if kind in ("section", "spacerB") and c == 3:
+                bold = True
+        elif is_grand:
+            fill_t = GRAND_F
+            if c == 17:
+                fmt = ACCT_CUR
+        elif c == 17:
+            fmt = ACCT_CUR
+        _paint(ws, r, c, bold=bold, color=color, fill_theme=fill_t, z=fmt,
+               left=T, right=T, bottom=M if kind == "bottom" else None,
+               hal="right" if money and c == 3 else None,
+               underline=money and c == 17)
+    if not skip_uaa:
+        for c in (21, 22, 23, 25, 26, 27):
+            fmt = ACCT_CUR if money else (ACCT_NUM if kind == "leaf" else None)
+            col = (money_colors or {}).get(c) if money else None
+            _paint(ws, r, c, sz=10 if money else 11, bold=money, color=col,
+                   fill_theme=GRAND_F if is_grand else None, z=fmt,
+                   top=T if band else None, bottom=T if band else None,
+                   left=T, right=T, underline=money)
+        if x_money:
+            _paint(ws, r, 24, sz=10 if money else 11, bold=money,
+                   fill_theme=GRAND_F if is_grand else None,
+                   z=ACCT_CUR if money else None,
+                   top=T if band else None, bottom=T if band else None,
+                   left=T, right=T, underline=money)
+
+
+def _paint_gray_cells(ws, r):
+    """The six red-on-green 'input' cells (F,G,I,J,K,L) of a row with no
+    borders or formats - the mark-up band."""
+    for c in GRAY_COLS:
+        _paint(ws, r, c, color=RED, fill_theme=GRAY_F)
+
+
+def _paint_gray_row(ws, r):
+    """A whole grid row with no borders (the profit-block filler rows): B..R
+    plain Arial 10 with B left-aligned, plus the six red-on-green inputs."""
+    _paint(ws, r, 2, hal="left")
+    for c in (3, 4, 5, 8, 13, 14, 15, 16, 17, 18):
+        _paint(ws, r, c)
+    _paint_gray_cells(ws, r)
+
+
+
+def _write_bill_header(ws, name, sum_row, l_width, item_count=0, location=""):
     """Rows 1-9 of a detail sheet: title, project block, the two-row grouped
     column header with its merges, and the mark-up source cells. Exactly the
     layout of the reference workbook, shared by the data sheet and the blank
     template copies."""
-    from openpyxl.styles import Font
 
-    bold = Font(bold=True)
+    def cell(r, c, v=None, **kw):
+        cobj = ws.cell(row=r, column=c, value=v)
+        _paint(ws, r, c, **kw)
+        return cobj
 
-    def cell(r, c, v=None):
-        return ws.cell(row=r, column=c, value=v)
-
-    cell(1, 2, "BILL OF QUANTITY").font = bold
+    cell(1, 2, "BILL OF QUANTITY", sz=12, bold=True, hal="center")
     ws.merge_cells("B1:R1")
     cell(2, 2, "Project :")
     cell(2, 3, name)
     cell(3, 2, "Item :")
+    cell(3, 3, item_count)
     cell(4, 2, "Location :")
+    cell(4, 3, location)
     cell(5, 2, "Date :")
     cell(5, 3, datetime.now().strftime("%d/%m/%Y"))
     cell(6, 2, "Work Scope :")
 
-    g7 = cell(7, 7, "=10%")
+    # mark-up band: the six input cells are red-on-green, G7 holds the 10%
+    _paint_gray_cells(ws, 7)
+    g7 = cell(7, 7, "=10%", color=RED, fill_theme=GRAY_F)
     g7.number_format = PCT_FMT
-    cell(7, 17, "=SUM!B{}".format(sum_row))  # which Bill No. this sheet is
+    # the reference also numbers J7 and L7 as percents (styled empty)
+    ws["J7"].number_format = PCT_FMT
+    ws["L7"].number_format = PCT_FMT
+    cell(7, 17, "=SUM!B{}".format(sum_row), bold=True)  # which Bill No. this sheet is
 
-    header8 = [(2, "No."), (3, "Description"), (4, "Brand"), (5, "Unit"),
-               (6, "Quantity"), (8, "Quantity"), (9, "Original Rate "),
-               (11, "Material Mark up (%)"), (12, "Labour Mark up (%)"),
-               (13, "Rate "), (15, "Total "), (17, "Amount"), (18, "Remark"),
-               (21, "Budget"), (23, "Total"), (25, "Profit"), (27, "Total")]
-    for col, text in header8:
+    # Row 8 main header band: yellow on the generic columns, red-on-grey on
+    # the input columns F/G/I/J/K/L, plain white on the budget block.  Every
+    # border exactly as stored in the reference file.
+    header8 = [
+        (2, "No.", YELLOW, {"left": M, "right": T}),
+        (3, "Description", YELLOW, {}),
+        (4, "Brand", YELLOW, {}),
+        (5, "Unit", YELLOW, {}),
+        (6, "Quantity", GRAY_F, {}),
+        (8, "Quantity", YELLOW, {}),
+        (9, "Original Rate ", GRAY_F, {}),
+        (11, "Material Mark up (%)", GRAY_F, {}),
+        (12, "Labour Mark up (%)", GRAY_F, {}),
+        (13, "Rate ", YELLOW, {}),
+        (15, "Total ", YELLOW, {}),
+        (17, "Amount", YELLOW, {}),
+        (18, "Remark", YELLOW, {"right": M}),
+        (21, "Budget", None, {}),
+        (23, "Total", None, {}),
+        (25, "Profit", None, {}),
+        (27, "Total", None, {}),
+    ]
+    for col, text, fill, extra in header8:
         cell(8, col, text)
-    row9 = {6: "Drawing", 7: "Mark up 10%", 9: "Material", 10: "Labour",
-            11: 0.3, 12: 0.3, 13: "Material", 14: "Labour",
-            15: "Material", 16: "Labour", 21: "Material", 22: "Labour",
-            25: "Material", 26: "Labour"}
-    for col, v in row9.items():
-        c = cell(9, col, v)
-        if col in (7, 11, 12):
-            c.number_format = PCT_FMT
+        gray = fill == GRAY_F
+        yellow = fill == YELLOW
+        bd = {"top": T if (not yellow and not gray) or col in (11, 12) else M,
+              "bottom": T, "left": T, "right": T}
+        bd.update(extra)
+        _paint(ws, 8, col, bold=True,
+               color=RED if gray else None,
+               fill_theme=GRAY_F if gray else None,
+               fill=YELLOW if yellow else None,
+               hal="center", val="center", wrap=col == 17, **bd)
+    # Continuation cells inside the horizontal header merges keep the band's
+    # top/bottom edges (the reference stores these as Calibri 11).
+    for col, top_style in ((7, M), (10, M), (14, M), (16, M), (22, T), (26, T)):
+        _paint(ws, 8, col, calibri=True, top=top_style, bottom=T, right=T)
+
+    # Row 9 sub-headers (unit / mark-up / rate split).
+    def subhead(col, text, band=None, z=None, hal="center"):
+        cobj = cell(9, col, text,
+                    bold=True,
+                    color=RED if band == GRAY_F else None,
+                    fill_theme=GRAY_F if band == GRAY_F else None,
+                    fill=YELLOW if band == YELLOW else None,
+                    z=z,
+                    top=T, bottom=T, left=T, right=T,
+                    hal=hal, val="center")
+        return cobj
+
+    subhead(6, "Drawing", GRAY_F)
+    subhead(7, "Mark up 10%", GRAY_F, PCT_FMT, None)
+    subhead(9, "Material", GRAY_F)
+    subhead(10, "Labour", GRAY_F)
+    subhead(11, 0.3, GRAY_F, PCT_FMT)
+    subhead(12, 0.3, GRAY_F, PCT_FMT)
+    for col, text in ((13, "Material"), (14, "Labour"),
+                      (15, "Material"), (16, "Labour")):
+        subhead(col, text, YELLOW)
+    for col, text in ((21, "Material"), (22, "Labour"),
+                      (25, "Material"), (26, "Labour")):
+        subhead(col, text)
+
+    # Continuation cells below the vertical header merges close the band.
+    _paint(ws, 9, 2, calibri=True, bottom=T, left=M, right=T)   # B9
+    for col in (3, 4, 5, 8, 17):  # C9..E9,H9,Q9
+        _paint(ws, 9, col, calibri=True, bottom=T, left=T, right=T)
+    _paint(ws, 9, 18, calibri=True, bottom=T, left=T, right=M)  # R9
+    _paint(ws, 9, 23, calibri=True, bottom=T, left=T, right=T)  # W9
+    _paint(ws, 9, 27, calibri=True, bottom=T, left=T, right=T)  # AA9
+
     for rng in ["B8:B9", "C8:C9", "D8:D9", "E8:E9", "H8:H9", "Q8:Q9",
                 "R8:R9", "W8:W9", "AA8:AA9", "F8:G8", "I8:J8", "M8:N8",
                 "O8:P8", "U8:V8", "Y8:Z8"]:
         ws.merge_cells(rng)
-    for col, w in {"B": 5.7, "C": 50.7, "D": 9.1, "E": 8.5, "F": 9.1,
-                   "G": 11.7, "H": 9.1, "I": 9.1, "J": 9.1, "K": 19.7,
-                   "L": 21.4, "M": 9.1, "N": 9.1, "O": 9.1, "P": 9.1,
-                   "Q": 10.7, "R": 9.1, "U": 9.1, "V": 9.1, "W": 9.1,
-                   "Y": 9.1, "Z": 9.1, "AA": 9.1}.items():
+    # Exact column widths from the reference (F and G start hidden, S and T are
+    # the narrow spacer columns between the table and the budget block).
+    for col, w in {"A": 0.86, "B": 5.71, "C": 50.71, "D": 9.14, "E": 9.14,
+                   "F": 9.14, "G": 11.71, "H": 9.14, "I": 9.14, "J": 9.14,
+                   "K": 19.71, "L": l_width, "M": 9.14, "N": 9.14, "O": 9.14,
+                   "P": 9.14, "Q": 10.71, "R": 9.14, "S": 0.57, "T": 3.43,
+                   "U": 9.14, "V": 9.14, "W": 9.14, "X": 9.14, "Y": 9.14,
+                   "Z": 9.14, "AA": 9.14}.items():
         ws.column_dimensions[col].width = w
+    ws.column_dimensions["F"].hidden = True
+    ws.column_dimensions["G"].hidden = True
+    # Header row heights straight from the reference template.
+    for r, h in ((1, 15.75), (2, 15), (3, 15), (4, 15), (5, 15), (6, 15),
+                 (7, 13.5), (8, 15), (9, 12.75)):
+        ws.row_dimensions[r].height = h
+    ws.sheet_format.defaultRowHeight = 14.25
 
 
-def _build_bill_sheet(ws, name, sum_row, groups, state):
-    """Sheet 1.1 holds the whole BOQ like the reference template: loose
-    top-level rows become a 'WORK ITEMS' section, then one numbered section per
-    top-level heading, each closed by a SUB-TOTAL row, a GRAND TOTAL row and the
-    estimated profit block. Returns the GRAND TOTAL row number."""
+
+def _build_bill_sheet(ws, name, sum_row, groups, state, item_count=0, location=""):
+    """Sheet 1.1 holds the whole BOQ like the reference template: a stray blank
+    band at row 10, then one numbered section per top-level group (each closed
+    by an echo divider, its leaves, a plain divider and a SUB-TOTAL row), a
+    GRAND TOTAL row, the closing band and the estimated profit block. Returns
+    the GRAND TOTAL row number."""
     from openpyxl.styles import Font
 
     bold = Font(bold=True)
@@ -977,10 +1198,12 @@ def _build_bill_sheet(ws, name, sum_row, groups, state):
     def cell(r, c, v=None):
         return ws.cell(row=r, column=c, value=v)
 
-    _write_bill_header(ws, name, sum_row)
+    _write_bill_header(ws, name, sum_row, 21.43, item_count, location)
 
-    r = 10  # first data row is 11, exactly like the reference sheet
+    r = 10  # the stray blank band, exactly like the reference sheet
     sec_no = 0
+    first_top = 0
+    sec_start = 0
     pending = []
 
     def new_row():
@@ -991,12 +1214,14 @@ def _build_bill_sheet(ws, name, sum_row, groups, state):
     def flush_subtotal():
         if not pending or sec_no == 0:
             return
-        first, last = pending[0], pending[-1]
+        first, last = sec_start, pending[-1]
         row = new_row()
         cell(row, 3, "SUB-TOTAL {}".format(sec_no))
         for col, letter in money16:
             c = cell(row, col, "=SUBTOTAL(9,{0}{1}:{0}{2})".format(letter, first, last))
             c.number_format = ACCT_CUR
+        _paint_body_row(ws, row, "subtotal", x_money=sec_no == 3)
+        _set_h(ws, row, 16.5)
         pending[:] = []
 
     def write_leaf(node):
@@ -1006,10 +1231,9 @@ def _build_bill_sheet(ws, name, sum_row, groups, state):
         cell(row, 5, node.get("unit") or "")
         quantity = float(node.get("quantity") or 0)
         cell(row, 6, quantity)
-        g = cell(row, 7, round(quantity * (1 + qty_markup_pct(node) / 100), 2))
-        g.number_format = QTY_FMT
+        cell(row, 7, round(quantity * (1 + qty_markup_pct(node) / 100), 2))  # General
         h = cell(row, 8, "=ROUNDUP(G{0},2)".format(row))
-        h.number_format = QTY_FMT
+        h.number_format = ACCT_NUM
         cell(row, 9, round(original_rate(state, node, "material"), 2))
         cell(row, 10, round(original_rate(state, node, "labor"), 2))
         km = cell(row, 11, _markup_decimal(node, "material"))
@@ -1029,43 +1253,73 @@ def _build_bill_sheet(ws, name, sum_row, groups, state):
                     (27, "=Z{0}+Y{0}".format(row))]
         for col, formula in formulas:
             c = cell(row, col, formula)
-            # Data rows match the reference: sell-price columns (M..Q) carry the
-            # accounting "$" format while the budget/profit analysis columns (U..AA)
-            # use the plain accounting format without a currency symbol.
-            c.number_format = ACCT_CUR if col <= 17 else ACCT_NUM
+            if col in (13, 14, 15, 16, 17):
+                c.number_format = ACCT_CUR
+            else:
+                c.number_format = ACCT_NUM
         if node.get("remark"):
             cell(row, 18, node.get("remark"))
+        _paint_body_row(ws, row, "leaf")
         pending.append(row)
 
     def emit_node(node):
         if is_heading(node):
             row = new_row()
-            cell(row, 3, node.get("name") or "").font = bold  # nested heading row
+            cell(row, 3, node.get("name") or "")
+            _paint_body_row(ws, row, "section")
             for child in node.get("children") or []:
                 emit_node(child)
         else:
             write_leaf(node)
 
+    # stray first band (the reference's blank row 10 - no U..AA cells)
+    _paint_body_row(ws, 10, "section", skip_uaa=True, band_fmt=True)
+
     for group in groups:
         flush_subtotal()
         sec_no += 1
-        row = new_row()
-        cell(row, 2, sec_no)
-        cell(row, 3, group["title"]).font = bold
+        s_row = new_row()
+        if sec_no == 1:
+            first_top = s_row
+        cell(s_row, 2, sec_no)
+        cell(s_row, 3, group["title"])
+        _paint_body_row(ws, s_row, "section", band_fmt=sec_no == 1)
+        sec_start = s_row
+        pending[:] = []
+        # bold echo divider right after the section band
+        echo = new_row()
+        _paint_body_row(ws, echo, "spacerB", band_fmt=sec_no == 1)
+        _set_h(ws, echo, 5.25)
         nodes = group["nodes"]
         if len(nodes) == 1 and is_heading(nodes[0]):
             nodes = nodes[0].get("children") or []
         for node in nodes:
             emit_node(node)
+        # plain divider closes the leaf block before the sub-total
+        div = new_row()
+        _paint_body_row(ws, div, "spacer")
+        _set_h(ws, div, 5.25)
     flush_subtotal()
+    if not first_top:
+        first_top = 11
 
+    # plain divider before GRAND TOTAL (reference row 36)
+    pre_g = new_row()
+    _paint_body_row(ws, pre_g, "spacer")
+    _set_h(ws, pre_g, 6.0)
     gt = new_row()
-    cell(gt, 3, "GRAND TOTAL").font = bold
-    last = gt - 1
+    cell(gt, 3, "GRAND TOTAL")
     for col, letter in money16:
-        c = cell(gt, col, "=SUBTOTAL(9,{0}11:{0}{1})".format(letter, last))
+        c = cell(gt, col, "=SUBTOTAL(9,{0}{1}:{0}{2})".format(letter, first_top, gt - 1))
         c.number_format = ACCT_CUR
+    _paint_body_row(ws, gt, "grand")
+    _set_h(ws, gt, 16.5)
+    _paint_body_row(ws, gt + 1, "bottom")   # empty row that closes the table
+    _set_h(ws, gt + 1, 15)
 
+    for rr in (gt + 2, gt + 5):
+        _paint_gray_row(ws, rr)
+        _set_h(ws, rr, 14.25)
     p_label = gt + 3
     p_amt = gt + 4
     p_pct = gt + 6
@@ -1076,39 +1330,98 @@ def _build_bill_sheet(ws, name, sum_row, groups, state):
     cell(p_pct + 1, 24, "Project")
     cell(p_pct + 2, 23, "=W{0}/W{1}".format(p_amt, gt))  # General, like the reference
     cell(p_pct + 2, 24, "Budget")
+    _paint(ws, p_label, 21, sz=11, bold=True)
+    _paint(ws, p_amt, 23, sz=11, bold=True, color=RED)
+    _paint(ws, p_pct, 21, sz=11, bold=True)
+    _paint(ws, p_pct + 1, 23, sz=11, bold=True, color=RED)
+    _paint(ws, p_pct + 1, 24, sz=11)
+    _paint(ws, p_pct + 2, 23, sz=11, bold=True, color=RED)
+    _paint(ws, p_pct + 2, 24, sz=11)
+    for rr in (p_label, p_amt, p_pct, p_pct + 1, p_pct + 2):
+        _paint_gray_row(ws, rr)
+        _set_h(ws, rr, 15)
     return gt
 
 
-def _build_empty_bill_sheet(ws, name, sum_row):
+
+def _build_empty_bill_sheet(ws, name, sum_row, l_width, item_count=0, location="",
+                            grand_colored=False):
     """Blank template copy for sheets 1.2-1.4, keeping the workbook's sheet set
-    identical to the reference template. The empty GRAND TOTAL row sits at row
-    37, exactly where the reference's SUM formulas point ('1.2'!Q37 etc.), and
-    the profit block follows at 40-45."""
-    from openpyxl.styles import Font
-
-    bold = Font(bold=True)
-    money16 = [(17, "Q"), (21, "U"), (22, "V"), (23, "W"), (25, "Y"), (26, "Z"), (27, "AA")]
-
+    identical to the reference template: a stray blank band, four named
+    placeholder sections and the GRAND TOTAL at row 37, styled exactly like a
+    real sheet but with no live math (like the reference file itself)."""
     def cell(r, c, v=None):
         return ws.cell(row=r, column=c, value=v)
 
-    _write_bill_header(ws, name, sum_row)
+    _write_bill_header(ws, name, sum_row, l_width, item_count, location)
+
+    skeleton = [(10, "section", None), (11, "section", ("1", "PRELIMINARY WORK")),
+                (12, "spacerB", None), (13, "leaf", None), (14, "leaf", None),
+                (15, "spacer", None), (16, "subtotal", "SUB-TOTAL 1"),
+                (17, "section", ("2", "FOUNDATION AND EARTH WORK")),
+                (18, "spacerB", None), (19, "leaf", None), (20, "leaf", None),
+                (21, "leaf", None), (22, "spacer", None), (23, "subtotal", "SUB-TOTAL 2"),
+                (24, "section", ("3", "STRUCTURAL WORK")),
+                (25, "spacerB", None), (26, "leaf", None), (27, "leaf", None),
+                (28, "spacer", None), (29, "subtotal", "SUB-TOTAL 3"),
+                (30, "section", ("4", "ARCHITECTURAL WORK")),
+                (31, "spacerB", None), (32, "leaf", None), (33, "leaf", None),
+                (34, "spacer", None), (35, "subtotal", "SUB-TOTAL 4"),
+                (36, "spacer", None)]
+    spacer_h = {12: 5.25, 15: 5.25, 18: 3.0, 22: 4.5, 25: 4.5, 28: 6.75,
+                31: 4.5, 34: 3.75, 36: 6.0}
+    sub_no = 0
+    for row, kind, txt in skeleton:
+        if kind == "subtotal":
+            sub_no += 1
+        _paint_body_row(ws, row, kind, band_fmt=row <= 12,
+                        x_money=kind == "subtotal" and sub_no == 3)
+        if kind in ("spacer", "spacerB"):
+            _set_h(ws, row, spacer_h[row])
+        elif kind == "subtotal":
+            _set_h(ws, row, 16.5)
+        if txt:
+            if kind == "section":
+                cell(row, 2, txt[0])
+                cell(row, 3, txt[1])
+            else:
+                cell(row, 3, txt)
 
     gt = 37
-    cell(gt, 3, "GRAND TOTAL").font = bold
-    for col, letter in money16:
-        c = cell(gt, col, "=SUBTOTAL(9,{0}11:{0}36)".format(letter))
-        c.number_format = ACCT_CUR
+    cell(gt, 3, "GRAND TOTAL")
+    _paint_body_row(ws, gt, "grand",
+                    money_colors={21: "FFFFC000", 22: "FFFFC000", 23: "FFFFC000",
+                                  25: "FFFF0000", 26: "FFFF0000", 27: "FFFF0000"}
+                    if grand_colored else None)
+    _set_h(ws, gt, 16.5)
+    _paint_body_row(ws, gt + 1, "bottom")
+    _set_h(ws, gt + 1, 15)
+
+    for rr in (gt + 2, gt + 5):
+        _paint_gray_row(ws, rr)
+        _set_h(ws, rr, 14.25)
     cell(gt + 3, 21, "ESTIMATED PROFIT :")
-    cell(gt + 4, 23, "=Q37-W37").number_format = ACCT_CUR
     cell(gt + 6, 21, "ESTIMATED PROFIT (%) :")
-    cell(gt + 7, 23, "=W41/Q37").number_format = PCT_FMT
+    _paint(ws, gt + 3, 21, sz=11, bold=True)
+    _paint_gray_row(ws, gt + 3)
+    _paint_gray_row(ws, gt + 4)
+    _paint(ws, gt + 4, 23, sz=11, bold=True, color=RED, z=ACCT_CUR)  # styled empty
+    _paint(ws, gt + 6, 21, sz=11, bold=True)
+    _paint_gray_row(ws, gt + 6)
+    _paint_gray_row(ws, gt + 7)
+    _paint(ws, gt + 7, 23, sz=11, bold=True, color=RED, z=PCT_FMT)   # styled empty
     cell(gt + 7, 24, "Project")
-    cell(gt + 8, 23, "=W41/W37")
+    _paint(ws, gt + 7, 24, sz=11)
+    _paint(ws, gt + 8, 23, sz=11, bold=True, color=RED)              # styled empty
+    _paint_gray_row(ws, gt + 8)
     cell(gt + 8, 24, "Budget")
+    _paint(ws, gt + 8, 24, sz=11)
+    for rr in (gt + 3, gt + 4, gt + 6, gt + 7, gt + 8):
+        _set_h(ws, rr, 15)
 
 
-def _build_sum_sheet(ws, name, bill_sheets):
+
+def _build_sum_sheet(ws, name, bill_sheets, item_count=0, location=""):
     """QUOTATION sheet, laid out on the exact rows of the reference template:
     four Bill rows at 17/19/21/23, SUB-TOTAL 28, DISCOUNT 29, VAT 30, GRAND
     TOTAL 31, notes at 34-39 and signatures at 46. Bill 1 links to sheet 1.1's
@@ -1118,17 +1431,26 @@ def _build_sum_sheet(ws, name, bill_sheets):
 
     bold = Font(bold=True)
 
-    def cell(r, c, v=None):
-        return ws.cell(row=r, column=c, value=v)
+    def cell(r, c, v=None, **kw):
+        cobj = ws.cell(row=r, column=c, value=v)
+        _paint(ws, r, c, **kw)
+        return cobj
 
-    cell(2, 2, "QUOTATION").font = bold
+    cell(2, 2, "QUOTATION", sz=12, bold=True, hal="center",
+         top=M, bottom=M, left=M, right=T)
     ws.merge_cells("B2:H2")
+    # the merged title cells keep their band edges so the block draws as one
+    for c in range(3, 9):
+        _paint(ws, 2, c, calibri=True, top=M, bottom=M, right=T if c == 8 else None)
+    _paint(ws, 2, 9, sz=12)  # I2 styled empty (Arial 12)
     cell(3, 2, "Project :")
-    cell(3, 3, name)
+    cell(3, 3, name, bold=True)
     cell(4, 2, "Items :")
+    cell(4, 3, item_count, bold=True)
     cell(5, 2, "Location :")
+    cell(5, 3, location, bold=True)
     cell(6, 2, "Date :")
-    cell(6, 3, datetime.now().strftime("%d/%m/%Y"))
+    cell(6, 3, datetime.now().strftime("%d/%m/%Y"), bold=True)
     cell(8, 2, "From :")
     cell(9, 2, "H/P :")
     cell(11, 2, "Attend to :")
@@ -1137,64 +1459,207 @@ def _build_sum_sheet(ws, name, bill_sheets):
     for col, text in [(2, "Items"), (3, "Description"), (4, "Unit"),
                       (5, "Quantity"), (6, "Unit Price"), (7, "Amount"),
                       (8, "Remark")]:
-        cell(15, col, text)
+        cell(15, col, text,
+             bold=True, fill=YELLOW,
+             top=M, bottom=T,
+             left=M if col == 2 else T,
+             right=M if col == 8 else T,
+             hal="center")
+
+    # r16 painted band under the header (no F16, exactly like the reference)
+    _paint(ws, 16, 2, left=M, right=T)
+    for c in (3, 4, 5):
+        _paint(ws, 16, c, left=T, right=T)
+    _paint(ws, 16, 7, left=T, right=T)
+    _paint(ws, 16, 8, left=T, right=M)
+    _set_h(ws, 16, 15)
 
     for index, bill in enumerate(bill_sheets, start=1):
         row = 17 + 2 * (index - 1)  # Bill No. 1 on SUM row 17, like the reference
-        cell(row, 2, "Bill No. {}".format(index))
-        cell(row, 3, bill["title"])
-        cell(row, 4, "LOT")
-        cell(row, 5, 1)
-        cell(row, 6, "='{0}'!Q{1}".format(bill["sheet"], bill["gt"])).number_format = ACCT_CUR
-        cell(row, 7, "=F{0}*E{0}".format(row)).number_format = ACCT_CUR
+        cell(row, 2, "Bill No. {}".format(index), bold=True, left=M, right=T)
+        cell(row, 3, bill["title"], bold=True, left=T, right=T)
+        cell(row, 4, "LOT", left=T, right=T, hal="center")
+        cell(row, 5, 1, left=T, right=T, hal="center")
+        fcell = cell(row, 6, "='{0}'!Q{1}".format(bill["sheet"], bill["gt"]),
+                     left=T, right=T,
+                     hal=None if index == 1 else "center")
+        fcell.number_format = ACCT_CUR
+        gcell = cell(row, 7, "=F{0}*E{0}".format(row),
+                     left=T, right=T, hal="center")
+        gcell.number_format = ACCT_CUR
+        _paint(ws, row, 8, left=T, right=M, hal="center")
+        _set_h(ws, row, 15)
 
-    cell(28, 6, "SUB-TOTAL (EXCLUDE VAT)")
-    cell(28, 7, "=SUM(G16:G27)").number_format = ACCT_CUR
-    cell(29, 6, "DISCOUNT")
-    cell(30, 6, "VAT")
-    cell(30, 7, "=G28*0.1").number_format = ACCT_CUR
-    grand = 31
-    cell(grand, 6, "GRAND TOTAL").font = bold
-    cell(grand, 7, "=G30+G28").number_format = ACCT_CUR
+    # quiet grid rows around the bill rows keep the frame continuous
+    for r in (18, 20, 22):
+        _paint(ws, r, 2, bold=True, left=M, right=T)
+        _paint(ws, r, 3, bold=True, left=T, right=T)
+        for c in (4, 5, 6):
+            _paint(ws, r, c, left=T, right=T, hal="center")
+        _paint(ws, r, 7, left=T, right=T, hal="center", z=ACCT_CUR)
+        _paint(ws, r, 8, left=T, right=M, hal="center")
+        _set_h(ws, r, 15)
+    # r24 full-bold closing band (no alignment, G without a format)
+    _paint(ws, 24, 2, bold=True, left=M, right=T)
+    for c in range(3, 9):
+        _paint(ws, 24, c, bold=True, left=T, right=M if c == 8 else T)
+    _set_h(ws, 24, 15)
+    # r25-27 plain spacer rows
+    for r in (25, 26, 27):
+        _paint(ws, r, 2, left=M, right=T)
+        for c in range(3, 9):
+            _paint(ws, r, c, left=T, right=M if c == 8 else T)
+        _set_h(ws, r, 15)
 
-    cell(34, 2, "Note :")
+    cell(28, 6, "SUB-TOTAL (EXCLUDE VAT)", bold=True, top=T, hal="right")
+    cell(28, 7, "=SUM(G16:G27)", bold=True, top=T, left=T, right=T,
+         z=ACCT_CUR)
+    _paint(ws, 28, 2, top=T, left=M)
+    for c in (3, 4, 5):
+        _paint(ws, 28, c, top=T)
+    _paint(ws, 28, 8, top=T, right=M)
+
+    cell(29, 6, "DISCOUNT", bold=True, hal="right")
+    _paint(ws, 29, 7, bold=True, left=T, right=T, z=ACCT_CUR)  # styled empty
+    _paint(ws, 29, 2, left=M)
+    _paint(ws, 29, 8, right=M)
+    cell(30, 6, "VAT", bold=True, hal="right")
+    cell(30, 7, "=G28*0.1", bold=True, left=T, right=T, z=ACCT_CUR)
+    _paint(ws, 30, 2, left=M)
+    _paint(ws, 30, 8, right=M)
+    cell(31, 6, "GRAND TOTAL", bold=True, hal="right")
+    cell(31, 7, "=G30+G28", bold=True, left=T, right=T, z=ACCT_CUR)
+    _paint(ws, 31, 2, left=M)
+    _paint(ws, 31, 8, right=M)
+    # closing row 32
+    _paint(ws, 32, 2, bottom=M, left=M)
+    for c in (3, 4, 5, 6):
+        _paint(ws, 32, c, bottom=M)
+    _paint(ws, 32, 7, bottom=M, left=T, right=T)
+    _paint(ws, 32, 8, bottom=M, right=M)
+    _set_h(ws, 32, 13.5)
+
+    cell(34, 2, "Note :", bold=True, underline=True)
     for i in range(1, 6):
-        cell(34 + i, 2, i)
-    cell(46, 2, "Prepared by :")
-    cell(46, 4, "Checked by :")
-    cell(46, 8, "Accepted by :")
+        cell(34 + i, 2, i, hal="left")
+    for c in range(2, 8):
+        _paint(ws, 45, c, bold=True)  # styled empty
+    cell(46, 2, "Prepared by :", bold=True)
+    _paint(ws, 46, 3, bold=True)      # styled empty
+    cell(46, 4, "Checked by :", bold=True)
+    _paint(ws, 46, 5, bold=True)      # styled empty
+    _paint(ws, 46, 6, bold=True)      # styled empty
+    _paint(ws, 46, 7, bold=True, hal="left")   # styled empty
+    cell(46, 8, "Accepted by :", bold=True, hal="left")
+    for r in (47, 48, 49, 50, 51):
+        _paint(ws, r, 7, hal="left")
+        _paint(ws, r, 8, hal="left")
+    spaces = " " * 34
+    cell(52, 2, spaces, underline=True)
+    cell(52, 4, spaces, underline=True)
+    _paint(ws, 52, 7, hal="left", underline=True)     # styled empty
+    cell(52, 8, spaces, hal="left", underline=True)
 
-    for col, w in {"B": 10.1, "C": 30.7, "D": 4.6, "E": 8.6, "F": 10.0,
-                   "G": 12.0, "H": 21.0}.items():
+    for col, w in {"A": 1.71, "B": 10.14, "C": 30.71, "D": 4.57, "E": 8.57,
+                   "F": 10.0, "G": 10.0, "H": 21.0, "I": 9.14}.items():
         ws.column_dimensions[col].width = w
-    return grand
+    # the reference stores r1 = 13.5, but the client writer cannot emit an empty
+    # row 1, so it is kept at the sheet default for parity between the two.
+    for r, h in ((2, 16.5), (7, 7.5), (10, 6.75), (13, 6.0), (14, 13.5),
+                 (16, 15.0), (17, 15.0), (18, 15.0), (19, 15.0), (20, 15.0),
+                 (21, 15.0), (22, 15.0), (23, 15.0), (24, 15.0), (25, 15.0),
+                 (26, 15.0), (27, 15.0), (32, 13.5)):
+        ws.row_dimensions[r].height = h
+    ws.sheet_format.defaultRowHeight = 12.75
+    return 31
 
 
-def _build_cover_sheet(ws, name, grand_row):
-    from openpyxl.styles import Font
 
-    bold = Font(bold=True)
+def _build_cover_sheet(ws, name, grand_row, grand_value=0, item_count=0, location=""):
+    def cell(r, c, v=None, **kw):
+        cobj = ws.cell(row=r, column=c, value=v)
+        _paint(ws, r, c, **kw)
+        return cobj
 
-    def cell(r, c, v=None):
-        return ws.cell(row=r, column=c, value=v)
+    # thin/medium black frame around the whole page, exactly like the reference
+    for r in range(1, 48):
+        _paint(ws, r, 1,
+               top=M if r == 1 else None,
+               bottom=M if r == 47 else None,
+               left=M)
+        _paint(ws, r, 10,
+               top=M if r == 1 else None,
+               bottom=M if r == 47 else None,
+               right=M)
+    for c in range(2, 10):
+        _paint(ws, 1, c, top=M)
+        _paint(ws, 47, c, bottom=M)
 
-    cell(2, 9, "Quote Ref:")
-    cell(3, 9, "Date :")
-    cell(7, 1, "Lot 93, St.598, Phum Toul Kork, Sangkat Toul Sangke")
-    cell(8, 1, "Khan Russey Keo, PNP, Kingdom of Cambodia")
-    cell(9, 1, "Phone/Fax: +855 23 210 894")
-    cell(11, 1, "QUOTATION").font = bold
+    cell(2, 9, "Quote Ref:", bold=True, hal="right")
+    cell(3, 9, "Date :", bold=True, hal="right")
+    # r6 blank Arial-14 bold band
+    for c in range(1, 11):
+        _paint(ws, 6, c, sz=14, bold=True,
+               left=M if c == 1 else None, right=M if c == 10 else None)
+    # the black address band: Times New Roman 12 on a theme-0 black fill, with
+    # default (black) text - exactly the reference's black-on-black band
+    addr = ["Lot 93, St.598, Phum Toul Kork, Sangkat Toul Sangke",
+            "Khan Russey Keo, PNP, Kingdom of Cambodia",
+            "Phone/Fax: +855 23 210 894"]
+    for r, text in zip(range(7, 10), addr):
+        cell(r, 1, text, font=TNR, sz=12, fill_theme=BLACK_F, left=M,
+             hal="left" if r == 9 else None)
+        _paint(ws, r, 2, font=TNR, sz=14)  # styled empty B column
+    _paint(ws, 8, 3, sz=14)   # C8/C9/C10 styled empty (Arial 14)
+    _paint(ws, 9, 3, sz=14)
+    _paint(ws, 10, 3, sz=14)
+    cell(11, 1, "QUOTATION", sz=18, bold=True, underline=True, color=RED,
+         hal="center", left=M, right=M)
     ws.merge_cells("A11:J11")
-    cell(15, 3, "Project :")
-    cell(16, 3, name)
-    cell(17, 3, "Items :")
-    cell(19, 3, "Location :")
-    cell(27, 1, "GRAND TOTAL").font = bold
+    # the reference merges A11:J11 and leaves B..I unstyled (Calibri default)
+    _paint(ws, 11, 10, calibri=True, right=M)
+    # r13 blank Arial-18 bold band
+    for c in range(1, 11):
+        _paint(ws, 13, c, sz=18, bold=True,
+               left=M if c == 1 else None, right=M if c == 10 else None)
+    # r15-24 the 14pt bold right block
+    for r in range(15, 25):
+        _paint(ws, r, 2, sz=14, bold=True, hal="right")
+        _paint(ws, r, 3, sz=14, bold=True, hal="right")
+    cell(15, 3, "Project :", sz=14, bold=True, hal="right")
+    cell(16, 2, name, sz=14, bold=True, hal="right")
+    cell(17, 3, "Items :", sz=14, bold=True, hal="right")
+    cell(18, 2, item_count, sz=14, bold=True, hal="right")
+    cell(19, 3, "Location :", sz=14, bold=True, hal="right")
+    cell(20, 2, location, sz=14, bold=True, hal="right")
+    # r26 plain 14pt (non-bold) row
+    _paint(ws, 26, 2, sz=14)
+    _paint(ws, 26, 3, sz=14)
+    cell(27, 1, "GRAND TOTAL", sz=18, bold=True, underline=True, color=RED,
+         hal="center", left=M, right=M)
     ws.merge_cells("A27:J27")
+    _paint(ws, 27, 10, calibri=True, right=M)
+    # r28 carries the computed total (the reference leaves it blank); every
+    # A28..J28 cell carries the money format
+    cell(28, 1, grand_value, sz=18, bold=True, left=M, z=COVER_CUR)
+    for c in range(2, 10):
+        _paint(ws, 28, c, sz=18, bold=True, z=COVER_CUR)
+    _paint(ws, 28, 10, sz=18, bold=True, right=M, z=COVER_CUR)
+    cell(30, 1, "=SUM!G{}".format(grand_row), sz=18, bold=True, color=RED,
+         hal="center", left=M, right=M, z=COVER_CUR)
     ws.merge_cells("A30:J30")
-    cell(30, 1, "=SUM!G{}".format(grand_row)).number_format = COVER_CUR
-    for col, w in {"A": 15.0, "I": 12.9, "J": 12.9}.items():
+    _paint(ws, 30, 10, calibri=True, right=M)
+    for col, w in {"A": 9.14, "J": 12.86, "K": 1.855469, "L": 9.14}.items():
         ws.column_dimensions[col].width = w
+    for r, h in ((6, 18.0), (7, 18.75), (8, 20.1), (9, 20.1), (10, 20.1),
+                 (11, 23.25), (13, 23.25), (15, 20.1), (16, 20.1), (17, 20.1),
+                 (18, 20.1), (19, 20.1), (20, 22.5), (21, 22.5), (22, 22.5),
+                 (23, 20.1), (24, 20.1), (26, 20.1), (27, 20.1), (28, 20.1),
+                 (29, 20.1), (30, 20.1), (31, 20.1), (32, 20.1), (33, 20.1),
+                 (47, 13.5)):
+        ws.row_dimensions[r].height = h
+    ws.sheet_format.defaultRowHeight = 12.75
+
 
 
 def build_excel(state, project):
@@ -1206,28 +1671,57 @@ def build_excel(state, project):
     wb = Workbook()
     wb.remove(wb.active)
     name = (project.get("name") if project else "") or ""
-    groups = _collect_bills((project.get("boq") if project else []) or [])
+    boq = (project.get("boq") if project else []) or []
+    groups = _collect_bills(boq)
+
+    def count_items(nodes):
+        n = 0
+        for row in nodes:
+            if is_heading(row):
+                n += count_items(row.get("children") or [])
+            else:
+                n += 1
+        return n
+
+    item_count = count_items(boq)
+    location = (project.get("location") if project else None) or ""
 
     cover = wb.create_sheet("COVER")
     summary = wb.create_sheet("SUM")
 
     main = wb.create_sheet("1.1")
-    main_gt = _build_bill_sheet(main, name, 17, groups, state)
+    main_gt = _build_bill_sheet(main, name, 17, groups, state, item_count, location)
 
     bill_sheets = [
         {"sheet": "1.1", "gt": main_gt,
          "title": groups[0]["title"] if groups else ""},
     ]
+    l_width = {2: 19.29, 3: 18.71, 4: 18.71}  # reference L width varies per blank sheet
     for index in range(2, 5):
         ws = wb.create_sheet("1.{}".format(index))
-        _build_empty_bill_sheet(ws, name, 17 + 2 * (index - 1))
+        _build_empty_bill_sheet(ws, name, 17 + 2 * (index - 1), l_width[index],
+                                item_count, location, grand_colored=index == 4)
         bill_sheets.append({
             "sheet": "1.{}".format(index), "gt": 37,
             "title": groups[index - 1]["title"] if index - 1 < len(groups) else "",
         })
 
-    grand = _build_sum_sheet(summary, name, bill_sheets)
-    _build_cover_sheet(cover, name, grand)
+    grand = _build_sum_sheet(summary, name, bill_sheets, item_count, location)
+
+    # cover value = the 1.1 GRAND TOTAL x 1.1 (VAT): the same figure the SUM
+    # formula chain computes once Excel evaluates the formulas.
+    def leaves(nodes):
+        out = []
+        for row in nodes:
+            if is_heading(row):
+                out.extend(leaves(row.get("children") or []))
+            else:
+                out.append(row)
+        return out
+
+    main_total = sum(own_amount(state, leaf) for leaf in leaves(boq))
+    _build_cover_sheet(cover, name, grand, grand_value=round(main_total * 1.1, 2),
+                       item_count=item_count, location=location)
 
     output = io.BytesIO()
     wb.save(output)
