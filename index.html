@@ -151,8 +151,9 @@
   .cell-input:hover { border-color: var(--line); }
   .cell-input:focus { border-color: var(--steel); outline: none; background: var(--surface); }
   input.cell-input.num-in { font-family: var(--font-mono); text-align: right; }
-  td.num.money-in { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
-  td.num.money-in .cell-input { width: auto; flex: 0 1 auto; min-width: 44px; text-align: right; }
+  td.num.money-in { display: flex; align-items: center; justify-content: center; gap: 3px; }
+  td.num.money-in .cell-input { width: auto; flex: 0 1 auto; min-width: 44px; text-align: center; }
+  thead th.num-cen { text-align: center; }
   .money-pre { color: var(--ink-muted); }
   textarea.cell-input.note-in { resize: vertical; min-height: 42px; line-height: 1.35; }
   select.cell-input { font-family: var(--font-sans); cursor: pointer; }
@@ -391,7 +392,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26e ($ unit prices)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26f ($ unit prices · centered)</span>
   </div>
   </aside>
   <main>
@@ -433,7 +434,7 @@
         <th>Material</th>
         <th>Unit</th>
         <th class="num">Q'ty</th>
-        <th class="num">Unit price ($)</th>
+        <th class="num num-cen">Unit price ($)</th>
         <th class="num">Amount</th>
         <th>Photos</th>
         <th>Note</th>
@@ -489,7 +490,7 @@
         <th>Ref</th>
         <th>Labor item</th>
         <th>Unit</th>
-        <th class="num">Unit price ($)</th>
+        <th class="num num-cen">Unit price ($)</th>
       </tr>
       </thead>
       <tbody id="laborBody"></tbody>
@@ -664,7 +665,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26e ($ unit prices)");
+  console.log("Site Ledger — build 2026-09-26f ($ unit prices · centered)");
   let state = null;
   let me = null;
   let stateSaved = null;
