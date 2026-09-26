@@ -23,7 +23,30 @@
   * { box-sizing: border-box; }
   body { margin: 0; font-family: var(--font-sans); font-size: 14px; color: var(--ink); background: var(--surface-alt); }
   .shell { display: flex; min-height: 100vh; }
-  .rail { width: 220px; flex: 0 0 220px; background: var(--navy); color: #D8E2EC; display: flex; flex-direction: column; padding: 18px 14px; }
+  .rail { width: 220px; flex: 0 0 auto; background: var(--navy); color: #D8E2EC; display: flex; flex-direction: column; padding: 18px 14px; overflow: hidden; transition: width 0.25s ease, padding 0.25s ease; }
+  body.rail-hidden .rail { width: 0; padding-left: 0; padding-right: 0; }
+  body.rail-peek .rail { width: 220px; padding-left: 14px; padding-right: 14px; }
+  .rail-controls { display: flex; gap: 8px; margin-bottom: 14px; flex: 0 0 auto; }
+  .rail-btn {
+  width: 44px; height: 44px; min-width: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+  color: #D8E2EC; border-radius: 10px; cursor: pointer; padding: 0;
+  }
+  .rail-btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
+  .rail-btn.active { background: var(--amber); border-color: var(--amber); color: #1F2E3D; }
+  .rail-btn .ic { width: 24px; height: 24px; }
+  .rail-show-fab {
+  position: fixed; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+  background: var(--navy); color: #fff; border: 1px solid var(--line-strong);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.4); cursor: pointer; z-index: 60; padding: 0;
+  }
+  .rail-show-fab:hover { background: var(--navy-deep); color: #fff; }
+  body.rail-hidden .rail-show-fab { display: flex; }
+  body.rail-peek .rail-show-fab { display: none; }
+  .rail-show-fab .ic { width: 24px; height: 24px; }
   .rail-brand .mark { font-family: var(--font-mono); font-size: 11px; color: var(--amber); letter-spacing: 0.08em; }
   .rail-brand h1 { margin: 4px 0 18px 0; font-size: 19px; font-weight: 600; color: #fff; }
   /* Site Ledger tree — the navigation in the left rail */
@@ -266,6 +289,9 @@
   @media (max-width: 780px) {
   .shell { flex-direction: column; }
   .rail { width: 100%; flex: none; flex-direction: row; align-items: center; gap: 12px; padding: 10px 14px; }
+  body.rail-hidden .rail, body.rail-peek .rail { width: 100%; padding: 10px 14px; }
+  .rail-controls { display: none; }
+  .rail-show-fab { display: none; }
   .rail-brand h1 { margin: 0; font-size: 16px; }
   .ledger { flex-direction: row; flex-wrap: wrap; column-gap: 2px; max-height: 220px; overflow-y: auto; align-items: flex-start; }
   .ledger-node, .ledger-cat { width: auto; padding: 7px 10px; font-size: 12.5px; }
@@ -377,6 +403,15 @@
 <div class="shell">
   <nav class="mobile-tabs" id="mobileTabs"></nav>
   <aside class="rail">
+  <!-- Icons styled on the Flaticon sets: eye / eye-off (the "Password" icons by th studio, https://www.flaticon.com/free-icons/password) and the "Automatic" icons by Magnific (https://www.flaticon.com/free-icons/automatic). -->
+  <div class="rail-controls">
+    <button type="button" class="rail-btn" id="btnRailHide" title="Hide left panel" aria-label="Hide left panel">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+    </button>
+    <button type="button" class="rail-btn" id="btnRailAuto" title="Auto-hide: off" aria-label="Toggle auto-hide panel">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </button>
+  </div>
   <div class="rail-brand">
   <span class="mark">📐 SITE LEDGER</span>
   <h1>Site Ledger</h1>
@@ -396,9 +431,12 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26h (aligned unit price)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26i (rail show/hide/auto)</span>
   </div>
   </aside>
+  <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+  </button>
   <main>
   <!-- MATERIALS -->
   <section class="panel" id="panel-materials">
@@ -677,7 +715,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26h (aligned unit price)");
+  console.log("Site Ledger — build 2026-09-26i (rail show/hide/auto)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -3695,7 +3733,57 @@
   renderBoq();
   }
 
+  /* ================= LEFT PANEL: hide / show / auto-hide ================= */
+  let railPinned = true, railAuto = false, railPeek = false;
+  const RAIL_KEY = "siteledger.rail";
+
+  function saveRail() {
+  try { localStorage.setItem(RAIL_KEY, JSON.stringify({ pinned: railPinned, auto: railAuto })); } catch (e) {}
+  }
+  function loadRail() {
+  try {
+    const s = JSON.parse(localStorage.getItem(RAIL_KEY) || "{}");
+    railPinned = s.pinned !== false;
+    railAuto = !!s.auto;
+  } catch (e) { railPinned = true; railAuto = false; }
+  }
+  function applyRail() {
+  const visible = railPinned || (railAuto && railPeek);
+  document.body.classList.toggle("rail-hidden", !visible);
+  document.body.classList.toggle("rail-peek", railAuto && railPeek);
+  const b = document.getElementById("btnRailAuto");
+  if (b) {
+    b.classList.toggle("active", railAuto);
+    b.title = railAuto ? "Auto-hide on — move the mouse to the left edge to show" : "Auto-hide: off";
+  }
+  }
+  function initRail() {
+  loadRail();
+  document.getElementById("btnRailHide").addEventListener("click", function () {
+    railPinned = false; railPeek = false; applyRail(); saveRail();
+  });
+  document.getElementById("btnRailShow").addEventListener("click", function () {
+    railPinned = true; railPeek = false; applyRail(); saveRail();
+  });
+  document.getElementById("btnRailAuto").addEventListener("click", function () {
+    railAuto = !railAuto;
+    if (railAuto) { railPinned = false; railPeek = false; }
+    else if (railPeek) { railPinned = true; railPeek = false; }
+    applyRail(); saveRail();
+  });
+  document.addEventListener("mousemove", function (e) {
+    if (!railAuto || railPinned) return;
+    if (!railPeek && e.clientX <= 14) { railPeek = true; applyRail(); }
+    else if (railPeek && e.clientX > 240) { railPeek = false; applyRail(); }
+  });
+  document.documentElement.addEventListener("mouseleave", function () {
+    if (railPeek) { railPeek = false; applyRail(); }
+  });
+  applyRail();
+  }
+
   function init() {
+  initRail();
   bindAuthForms();
   bindAdminPanel();
   bootAuth();
