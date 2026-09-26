@@ -151,6 +151,9 @@
   .cell-input:hover { border-color: var(--line); }
   .cell-input:focus { border-color: var(--steel); outline: none; background: var(--surface); }
   input.cell-input.num-in { font-family: var(--font-mono); text-align: right; }
+  td.num.money-in { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+  td.num.money-in .cell-input { width: auto; flex: 0 1 auto; min-width: 44px; text-align: right; }
+  .money-pre { color: var(--ink-muted); }
   textarea.cell-input.note-in { resize: vertical; min-height: 42px; line-height: 1.35; }
   select.cell-input { font-family: var(--font-sans); cursor: pointer; }
   .photo-cell { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
@@ -388,7 +391,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26d (Excel export)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26e ($ unit prices)</span>
   </div>
   </aside>
   <main>
@@ -430,7 +433,7 @@
         <th>Material</th>
         <th>Unit</th>
         <th class="num">Q'ty</th>
-        <th class="num">Unit price</th>
+        <th class="num">Unit price ($)</th>
         <th class="num">Amount</th>
         <th>Photos</th>
         <th>Note</th>
@@ -486,7 +489,7 @@
         <th>Ref</th>
         <th>Labor item</th>
         <th>Unit</th>
-        <th class="num">Unit price</th>
+        <th class="num">Unit price ($)</th>
       </tr>
       </thead>
       <tbody id="laborBody"></tbody>
@@ -661,7 +664,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26d (Excel export)");
+  console.log("Site Ledger — build 2026-09-26e ($ unit prices)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1117,6 +1120,13 @@
   persist(); renderAll();
   });
   return input;
+  }
+
+  function moneyPrefix() {
+  const s = document.createElement("span");
+  s.className = "money-pre";
+  s.textContent = "$";
+  return s;
   }
 
   function textInput(owner, key) {
@@ -1700,7 +1710,8 @@
     tdUnit.appendChild(textInput(n, "unit", "unit"));
     tdQty.className = "num";
     tdQty.appendChild(numberInput(n, "quantity"));
-    tdPrice.className = "num";
+    tdPrice.className = "num money-in";
+    tdPrice.appendChild(moneyPrefix());
     tdPrice.appendChild(numberInput(n, "price"));
     tdAmount.className = "num";
     tdAmount.textContent = fmt(toNum(n.quantity) * toNum(n.price));
@@ -1760,7 +1771,7 @@
 
   const tdUnit = document.createElement("td");
   const tdPrice = document.createElement("td");
-  tdPrice.className = "num";
+  tdPrice.className = "num money-in";
 
   if (heading) {
     tdPrice.textContent = "\u2014";
@@ -1774,6 +1785,7 @@
     }
   } else {
     tdUnit.appendChild(textInput(n, "unit", "unit"));
+    tdPrice.appendChild(moneyPrefix());
     tdPrice.appendChild(numberInput(n, "price"));
   }
 
