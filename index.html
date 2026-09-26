@@ -155,10 +155,10 @@
   .cell-input:hover { border-color: var(--line); }
   .cell-input:focus { border-color: var(--steel); outline: none; background: var(--surface); }
   input.cell-input.num-in { font-family: var(--font-mono); text-align: right; }
-  td.num.money-in { display: flex; align-items: center; justify-content: center; gap: 3px; }
-  td.num.money-in .cell-input { width: auto; flex: 0 1 auto; min-width: 44px; text-align: center; }
+  td.num.money-in { text-align: center; position: relative; }
+  td.num.money-in .cell-input { width: 92px; text-align: center; }
   thead th.num-cen { text-align: center; }
-  .money-pre { color: var(--ink-muted); }
+  .money-pre { color: var(--ink-muted); margin-right: 2px; }
   textarea.cell-input.note-in { resize: vertical; min-height: 42px; line-height: 1.35; }
   select.cell-input { font-family: var(--font-sans); cursor: pointer; }
   .photo-cell { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
@@ -396,7 +396,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26g (rate list search)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26h (aligned unit price)</span>
   </div>
   </aside>
   <main>
@@ -677,7 +677,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26g (rate list search)");
+  console.log("Site Ledger — build 2026-09-26h (aligned unit price)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1706,7 +1706,7 @@
 
   if (heading) {
     tdQty.className = "num";
-    tdPrice.className = "num";
+    tdPrice.className = "num money-in";
     tdAmount.className = "num";
     tdQty.textContent = "\u2014";
     tdPrice.textContent = "\u2014";
