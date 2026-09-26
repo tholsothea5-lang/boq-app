@@ -627,6 +627,2179 @@
       "name": "SUNWAH \u00b7 Bill-9 (Edge)",
       "price": 0,
       "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "nasl_b2_1",
+          "name": "Disposal surplus materials",
+          "price": 3.1,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_2",
+          "name": "Soil backfilling to meet new design level",
+          "price": 3.1,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_3",
+          "name": "Compaction foundation and ground beam",
+          "price": 3.1,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_4",
+          "name": "Pile cutting head",
+          "price": 8,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_5",
+          "name": "Blinding concrete C12/15MPa, 50mm thk.",
+          "price": 15,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_6",
+          "name": "Compacted sand, 100mm thk.",
+          "price": 3.1,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_7",
+          "name": "Grading, cleaning of ground floor",
+          "price": 2.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_8",
+          "name": "Damp proof membranes 0.3mm thk. for ground slab",
+          "price": 0.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_9",
+          "name": "Anti termite spray on ground floor",
+          "price": 2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_10",
+          "name": "Concrete, C30 Mpa (Cylinder)",
+          "price": 17.5,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_11",
+          "name": "Formwork",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_12",
+          "name": "Reinforced Rebar",
+          "price": 200,
+          "unit": "ton"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_13",
+          "name": "Typical wall type Brick Wall 200mm thk., double layers of brickwall",
+          "price": 6,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_14",
+          "name": "Typical wall type Brick Wall 100mm thk: single layers of brickwall",
+          "price": 4.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_15",
+          "name": "External Wall Plaster 15mm thk",
+          "price": 3.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_16",
+          "name": "Internal Wall Plaster 15mm thk",
+          "price": 2.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_17",
+          "name": "Plastering column 15mm thk, mortar grade 75",
+          "price": 2.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_18",
+          "name": "Plastering beam, 15mm thk, mortar grade 75",
+          "price": 2.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_19",
+          "name": "Plastering edge door & window, 15mm thk, mortar grade 75",
+          "price": 2.5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_20",
+          "name": "Exterior emulsion paint (Color selection with 5 coat system as specified by Architect)",
+          "price": 3.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_21",
+          "name": "Interior emulsion paint (Color selection with 4 coat system as specified by Architect)",
+          "price": 2.4,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_22",
+          "name": "Emulsion paint column (color select by Architect)",
+          "price": 2.4,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_23",
+          "name": "Emulsion paint beam (color select by Architect)",
+          "price": 2.4,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_24",
+          "name": "Emulsion paint edge door & window (color select by Architect)",
+          "price": 2.4,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_25",
+          "name": "Type W02: Bathroom Wall Tile 300x600mm",
+          "price": 6.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_26",
+          "name": "Type W03: bedroom and passage Skirting Tile 150x600mm",
+          "price": 2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_27",
+          "name": "Floor Type A: Bedroom Floor Porcelain or Ceramic Tile 600mmx600mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_28",
+          "name": "Floor Type B: Bathroom Porcelain or Ceramic Tile 300mmx300mm (Non-slip)",
+          "price": 5.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_29",
+          "name": "Floor Type C: Corridor Porcelain or Ceramic Tile 600mmx600mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_30",
+          "name": "Floor Type D: Balcony and Veranda Porcelain or Ceramic Tile 600mmx600mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_31",
+          "name": "Under Bedroom Door Floor: Granite Threshold Strip 13mm thick",
+          "price": 10,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_32",
+          "name": "Under Toilet Door Floor: Granite Threshold Strip 30mm thick",
+          "price": 10,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_33",
+          "name": "Staircase Floor, Marble",
+          "price": 10,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_34",
+          "name": "Gypsum board flat ceiling with emulsion paint finish white color and all necessary accessories",
+          "price": 3,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_35",
+          "name": "Gypsum board water resistant ceiling with emulsion paint finish white color and all necessary accessories",
+          "price": 4,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_36",
+          "name": "Concrete slab soffit painted with emulsions (color select by Architect)",
+          "price": 3.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_37",
+          "name": "Supply and Install handrail for staircase height 900mm comprising of top railing dia. 50mm, vertical post dia. 20mm, vertical and horizontal railing dia. 8mm including other necessary fixing to finish",
+          "price": 16,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_38",
+          "name": "Supply and apply cementitious waterproofing including screeding slope to fall min.20mm thk. to all toilets and terraces",
+          "price": 7,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_39",
+          "name": "External Ventilation Brick including other associated necessary fixing",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_40",
+          "name": "Supply and install lintel on the top door (include where accessory)",
+          "price": 3.6,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_41",
+          "name": "Evacuator Floor (spec. by MEP)",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_42",
+          "name": "D01 - Solid wood sash bedroom door single swing, dimension W980x H2100 comprising wooden frame single sash door including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_43",
+          "name": "D02 - uPVC Toilet door single swing, dimension W820 x H2100 comprising of uPCV frame and uPVC panel and uPVC louvers, including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_44",
+          "name": "D03 - Aluminium door single swing, dimension W1100 x H2100 comprising of Aluminium frame and panel with 10mm glazing, including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_45",
+          "name": "D04 - Partition door single swing, dimension W1000 x H2100 comprising of Aluminium SUS frame and uPVC door panel, including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_46",
+          "name": "D05 - Glassed double sash door, dimension W1700 x H2100 comprising of aluminium frame double sash door with fixed glass panels, including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_47",
+          "name": "D06 - Glassed frameless partition door, dimension W1000 x H2100 including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_48",
+          "name": "D07 - Double glassed door, dimension W1500 x H2100 comprising of aluminium frame double sash door with fixed glass panels, including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_49",
+          "name": "D08 - Solid wood sash door single swing, dimension W1100x H2100 comprising wooden frame single sash door including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_50",
+          "name": "D09 - uPVC door single swing, dimension W1020 x H2100 comprising of uPCV frame and uPVC panel and uPVC louvers, including all complete set of standard door hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_51",
+          "name": "D-10 Fire rated (60min) sash door dimension W1400 X 2100 comprising of frame and single swing with glazing, including all complete set of standard hardware/ironmongery",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_52",
+          "name": "W01 - Double sash glass window, dimension W2100x H1100 & W2100x H400 comprising UPVC frame double sash door with fixed glass panels, including all complete set of standard hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_53",
+          "name": "W02 - Single sash fixed glass with ventilator window, dimension W800x H1100 & W800x H400 comprising of UPVC frame double sash door with fixed glass panels, including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_54",
+          "name": "W03 - Double sash fixed glass window, dimension W1600 x H1100 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_55",
+          "name": "W04- Fixed glazing window/partion, total length 12650x H3000 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware, door measured seperatly",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_56",
+          "name": "W05- Double sliding windows for main staircase, dimension W1500 x H550 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_57",
+          "name": "Supply and Install handrail for balcony height 1000mm comprising of top railing dia. 50mm, vertical post dia. 20mm, vertical and horizontal railing dia. 8mm including other necessary fixing to finish",
+          "price": 16,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_58",
+          "name": "Supply and install lintel on the top door (include accessory)",
+          "price": 3.6,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_59",
+          "name": "Type W03: Main Floor Skirting Tile 150x600mm",
+          "price": 2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_60",
+          "name": "Staircase Floor Marble",
+          "price": 10,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_61",
+          "name": "W05- Double sliding windows for main staircase, dimension W3320 x H1100 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_62",
+          "name": "Supply and apply cementitious waterproofing including screeding slope to fall min.20mm thk. to all toilets and terraces, roof gutter",
+          "price": 7,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_63",
+          "name": "pvc 100MM",
+          "price": 3.2,
+          "unit": "M"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_64",
+          "name": "Hangers and supporters other accessories to completed",
+          "price": 230,
+          "unit": "ls"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_65",
+          "name": "Septic tank 5 m3",
+          "price": 200,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_66",
+          "name": "U-PVC pipe 100mm (sewer)",
+          "price": 3.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_67",
+          "name": "U-PVC pipe 80mm (waste water)",
+          "price": 2.8,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_68",
+          "name": "U-PVC pipe 50mm (waste water)",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_69",
+          "name": "Lavatory (c02237) with Vanity counter",
+          "price": 20,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_70",
+          "name": "Lavatory square type with Vanity counter",
+          "price": 35,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_71",
+          "name": "Single lever Faucet (cT II3)",
+          "price": 8,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_72",
+          "name": "Plug Waster (cT665)",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_73",
+          "name": "Basin trap (cT80IT)",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_74",
+          "name": "Floor drain",
+          "price": 3,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_75",
+          "name": "Urinal with Faucet",
+          "price": 7,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_76",
+          "name": "Water Closet (cl3331)",
+          "price": 12,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_77",
+          "name": "Rinsing Spray cT993K#CR(HM)",
+          "price": 3,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_78",
+          "name": "Shower head with mixer",
+          "price": 12,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_79",
+          "name": "Hangers and supporters",
+          "price": 850,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_80",
+          "name": "PP-R pipe OD 20mm PN 12.5 (4m/pcs)",
+          "price": 1,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_81",
+          "name": "PP-R pipe OD 25mm PN 12.5 (4m/pcs)",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_82",
+          "name": "PP-R pipe OD 32mm PN 12.5 (4m/pcs)",
+          "price": 1.5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_83",
+          "name": "PP-R pipe OD 40mm PN 12.5 (4m/pcs)",
+          "price": 1.8,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_84",
+          "name": "PP-R pipe OD 50mm PN 12.5 (4m/pcs)",
+          "price": 2.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_85",
+          "name": "Gate Valves 20mm",
+          "price": 3,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_86",
+          "name": "Gate Valves 25mm",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_87",
+          "name": "Gate Valves 32mm",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_88",
+          "name": "Fittings for cold water pipe work",
+          "price": 250,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_89",
+          "name": "Flexible connection 32mm",
+          "price": 50,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_90",
+          "name": "Pressure gauge 15mm",
+          "price": 25,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_91",
+          "name": "Water tank 3 m3",
+          "price": 30,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_92",
+          "name": "Pressure pump 3.5l/s . H=15m brand : DAB ( 1 set have 2 electric pump 1 duty and 1 stand by)",
+          "price": 120,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_93",
+          "name": "And other Accessoreis to completed",
+          "price": 50,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_94",
+          "name": "G.I DN 65mm",
+          "price": 5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_95",
+          "name": "G.I DN 40mm",
+          "price": 4.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_96",
+          "name": "G.I DN 32mm",
+          "price": 4,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_97",
+          "name": "Pipework - fittings",
+          "price": 1200,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_98",
+          "name": "Internal Fire hose reels cabinet 7400mmWx1540mmHx320mmD (c/w ball valve hose and nozzle dn25)",
+          "price": 135,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_99",
+          "name": "Enternal Fire hose reels cabinet 740mmWx740mmHx320mmD (c/w ball valve hose and nozzle dn25)",
+          "price": 135,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_100",
+          "name": "Double outlet pillar hydrant",
+          "price": 110,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_101",
+          "name": "Auto Air Vale",
+          "price": 50,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_102",
+          "name": "Painting",
+          "price": 320,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_103",
+          "name": "Signage",
+          "price": 150,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_104",
+          "name": "and other accessories to completed",
+          "price": 100,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_105",
+          "name": "Portable fire extinguisher - ABC 3kg",
+          "price": 3.5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_106",
+          "name": "Portable fire extinguisher - CO2 5kg",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_107",
+          "name": "Single Socket Outlet, Unswitched 13A,Gpo, Metal Clad",
+          "price": 3,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_108",
+          "name": "Double Socket Outlet, Unswitched 13A,Gpo",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_109",
+          "name": "10A Light switch - 1 gang 1 way",
+          "price": 3,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_110",
+          "name": "10A Light switch \u2013 2 gang 1 way",
+          "price": 3.5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_111",
+          "name": "10A Light switch - 1 gang 2 way",
+          "price": 3.5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_112",
+          "name": "10A Light switch - 3 gang 1 way",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_113",
+          "name": "SUPPLY AND INSTALL MDB 250A 3P",
+          "price": 100,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_114",
+          "name": "supply and install (SDB-GF-01,02,03,..,30) and (SDB-1F-01,02,03,\u2026.,33)",
+          "price": 40,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_115",
+          "name": "100mm width x 50mm Height Power cable tray",
+          "price": 3,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_116",
+          "name": "200mm width x 100mm Height Power cable tray",
+          "price": 5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_117",
+          "name": "300mm width x 100mm Height Power cable tray",
+          "price": 6.5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_118",
+          "name": "Cable tray fitting and accessories",
+          "price": 520,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_119",
+          "name": "1.5 SQmm 1-CORE CU PVC",
+          "price": 12,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_120",
+          "name": "2.5 SQmm 1-CORE CU PVC",
+          "price": 15,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_121",
+          "name": "4 SQmm 1-CORE CU PVC",
+          "price": 20,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_122",
+          "name": "6 SQmm 1-CORE CU PVC",
+          "price": 25,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_123",
+          "name": "10 SQmm 1-CORE CU PVC for ground",
+          "price": 35,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_124",
+          "name": "25 SQmm 1-CORE CU PVC for lift",
+          "price": 1.5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_125",
+          "name": "35 SQmm 1-CORE CU PVC for AC",
+          "price": 2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_126",
+          "name": "Mounted Ceiling Light",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_127",
+          "name": "Emergency exit",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_128",
+          "name": "Emergency exit sign",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_129",
+          "name": "Smart Connect Multiloop 6 Expansion Port Panel",
+          "price": 120,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_130",
+          "name": "Smart Connect Multi Loop Card Module (MKII)",
+          "price": 35,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_131",
+          "name": "24VDC External Power Supply",
+          "price": 15,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_132",
+          "name": "Addressable Break glass",
+          "price": 8,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_133",
+          "name": "Photoelectric addressable smoke detector c/w base",
+          "price": 6,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_134",
+          "name": "Photoelectric addressable heater detector",
+          "price": 6,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_135",
+          "name": "Photoelectric add. smoke detector c/w sounder and base",
+          "price": 8,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_136",
+          "name": "Addressable Input/Output Module",
+          "price": 10,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_137",
+          "name": "Addressable control Module/ Sounder Circuit Controller",
+          "price": 15,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_138",
+          "name": "Addressable Relay Module",
+          "price": 20,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_139",
+          "name": "Fire Alarm bell/ Sounder Beacon",
+          "price": 7,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_140",
+          "name": "Addressable Isulation Module / MKII Isolator Base",
+          "price": 20,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_141",
+          "name": "16AWG Cu/Fire Rated Wire",
+          "price": 0.8,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_142",
+          "name": "Dia 20 PVC Conduit",
+          "price": 0.45,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_143",
+          "name": "Conduit fitting and accessories",
+          "price": 150,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_144",
+          "name": "Main Data Rack 24U",
+          "price": 80,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_145",
+          "name": "ODF/ SC Simplex Adaptor with Plate, Flush Mount, 6\u2010fiber,",
+          "price": 110,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_146",
+          "name": "Gigabit Ethernet SX Mini\u2010GBIC SFP Transceiver, MM",
+          "price": 100,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_147",
+          "name": "Unifie router",
+          "price": 15,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_148",
+          "name": "Cate 6 cable",
+          "price": 80,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_149",
+          "name": "Accessories",
+          "price": 150,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_150",
+          "name": "Testing & Commissioning",
+          "price": 150,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_151",
+          "name": "NS300 Main unit",
+          "price": 30,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_152",
+          "name": "19inch Rack Adaptor for NS300",
+          "price": 50,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_153",
+          "name": "DSP\u2010S",
+          "price": 30,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_154",
+          "name": "desk phone",
+          "price": 8,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_155",
+          "name": "Single RJ45 Socket outlet",
+          "price": 5,
+          "unit": "no"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_156",
+          "name": "CAT45 CABLE ( 1 roll=200m)",
+          "price": 65,
+          "unit": "no"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_157",
+          "name": "EARLY STREAMER EMISSION Rmin=50m, LEVER III, HEIGHT 5m",
+          "price": 40,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_158",
+          "name": "70mm2 bare cooper",
+          "price": 2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_159",
+          "name": "25mm2 Cu/PVC",
+          "price": 0.95,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_160",
+          "name": "120mm2 Cu/PVC",
+          "price": 3,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_161",
+          "name": "PVC conduit, 32 mm dia",
+          "price": 0.65,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_162",
+          "name": "Earth Pit",
+          "price": 10,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_163",
+          "name": "Copper Grounding Rods Dia 16mm Length 2400mm",
+          "price": 5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_164",
+          "name": "Earth Test Box",
+          "price": 5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_165",
+          "name": "Earth bar",
+          "price": 3,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_166",
+          "name": "Soil Impedance & Resistance Enhancement Material",
+          "price": 65,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_167",
+          "name": "Data Rack 19\"",
+          "price": 65,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_168",
+          "name": "DVR 32CH",
+          "price": 35,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_169",
+          "name": "HDD 4TB",
+          "price": 12,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_170",
+          "name": "Dome Camera",
+          "price": 7,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_171",
+          "name": "Body Camera",
+          "price": 7,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_172",
+          "name": "FO SWITCH 4PORT",
+          "price": 15,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_173",
+          "name": "Camera RG-6 cable (1 roll=305m)",
+          "price": 65,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_174",
+          "name": "4 CORE F.O CABLE MULTI MODE",
+          "price": 1,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_175",
+          "name": "Condensing Unit Inverter Type VRF System with Refrigerant R-410a",
+          "price": 650,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_176",
+          "name": "Supply and Install grounp of Condensing Unit Inverter Type Capacity 88.5hp as per drawing",
+          "price": 3500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_177",
+          "name": "Hanger & Support",
+          "price": 320,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_178",
+          "name": "Truck lift for Outdoor Units (Hang Up)",
+          "price": 200,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_179",
+          "name": "supply and Install Indoor unit cassette type 2.5Hp as per drawing and specification",
+          "price": 65,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_180",
+          "name": "Supply and Install Indoor unit wall mount type 1.5Hp as per drawing and technical specification",
+          "price": 35,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_181",
+          "name": "Controller & Accessoies (Room thermostat)",
+          "price": 950,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_182",
+          "name": "Refrigerant Copper Pipe",
+          "price": 3500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_183",
+          "name": "Additional Refrigerant Charge",
+          "price": 500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_184",
+          "name": "Refrigerant Pipe Fitting, Accessories",
+          "price": 650,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_185",
+          "name": "Insulation Fitting, Accessories",
+          "price": 1200,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_186",
+          "name": "PVC Drain Pipe Fitting & Accessories",
+          "price": 1500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_187",
+          "name": "10 -12 passenger elevator ( FLOOR STOP 02)",
+          "price": 3500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_188",
+          "name": "Rockwool 25mm + fire-resistant fabric + hole tole",
+          "price": 3.55,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b2_189",
+          "name": "Rockwool 50mm + fire-resistant fabric + hole tole",
+          "price": 4,
+          "unit": "m2"
+        }
+      ],
+      "id": "nasl_b2",
+      "name": "NASLA \u00b7 Bill 2-Dormitory",
+      "price": 0,
+      "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "nasl_b3_1",
+          "name": "Typical wall type Brick Wall 200mm thk., double layers of brick wall",
+          "price": 6,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_2",
+          "name": "Typical wall type Brick Wall 100mm thk: single layers of brick wall",
+          "price": 4.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_3",
+          "name": "Typical wall type Brick Wall 200mm thk., double layers of Retaining Wall Surrounding",
+          "price": 6,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_4",
+          "name": "Floor Type A: Main Floor Porcelain or Ceramic Tile 600mmx600mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_5",
+          "name": "Floor of Semi gloss (Timber Textured) Porcelain or Ceramic Tile 300mmx300mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_6",
+          "name": "Floor Type B: Semi gloss Porcelain or Ceramic Tile 600mmx600mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_7",
+          "name": "Bathroom Floor of Non skid Porcelain or Ceramic Tile 300mmx600mm",
+          "price": 5.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_8",
+          "name": "Floor Type C: Semi gloss Porcelain 600mmx600mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_9",
+          "name": "Floor of External grade porcelain tile 300mmx300mm",
+          "price": 5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_10",
+          "name": "Under Door Floor: Granite Threshold Strip 18mm thick",
+          "price": 5.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_11",
+          "name": "Special design ceiling with emulsion paint finish white color and all necessary accessories",
+          "price": 24,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_12",
+          "name": "Suspended acoustic and sound insulated ceiling with emulsion paint finish white color and all necessary accessories",
+          "price": 18,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_13",
+          "name": "Granite Floor Skirting Tile 150x600mm",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_14",
+          "name": "Timber Floor Skirting Tile 150x600mm",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_15",
+          "name": "Floor of Granite Tile 600mmx600mm",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_16",
+          "name": "Floor of Natural color treated timber flooring",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_17",
+          "name": "MED1 - Main Entrance door tempered glass double sash door, dimension W2800x H3000 comprising of aluminium frame double sash door with tempered glass panels and stainless steel door handle, including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_18",
+          "name": "SED1 - Side entrance double door, dimension W5800x H3600 comprising of aluminium frame double sash door with fixed glass panels, including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_19",
+          "name": "Roller gate of door SED1",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_20",
+          "name": "D01 - External door double swing, dimension W1800 x H2100 comprising of aluminium frame double sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_21",
+          "name": "D02 - Class room door double swing, dimension W1800 x H2100 comprising of aluminium frame double sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_22",
+          "name": "D03 - Class room emergency door single swing, dimension W1200 x H2100 comprising of aluminium frame single sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_23",
+          "name": "D04 - Room door single swing, dimension W1200 x H2100 comprising of aluminium frame single sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_24",
+          "name": "D05 - Wash room door single swing, dimension W1200 x H2100 comprising of aluminium frame single sash double sided door with ACP panels, including all complete set of standard door hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_25",
+          "name": "W01 - Double sash glass window, dimension W3000x H900 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_26",
+          "name": "W02 - Double sash glass window, dimension W3700x H900 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_27",
+          "name": "W03 - External sliding window, dimension W1800x H1400 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_28",
+          "name": "W04- Class room sliding window, dimension W1800x H1400 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_29",
+          "name": "W05- Room sliding window, dimension W1800x H2400 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_30",
+          "name": "W06-Aluminium frame glass panelled sliding window, dimension W5600 x H3000 comprising of aluminium frame glass panel including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_31",
+          "name": "W06-B- Fixed glass door window, dimension W5600 x H3000 comprising of aluminium frame glass panel including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_32",
+          "name": "FG1- Fixed glass, dimension W1800 x H900 comprising of aluminium frame fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_33",
+          "name": "FG2- Fixed glass, dimension W1200 x H900 comprising of aluminium frame fixed glass panels including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_34",
+          "name": "FG3- Fixed glass panels,, dimension W5700 x H3000 comprising of aluminium frame with glass panel including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_35",
+          "name": "F1- Aluminium louvers, dimension W1800 x H1200 comprising of aluminium frame fixed glass panel window including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_36",
+          "name": "F2- Fan Light W900XH600 including all necessary hardware",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_37",
+          "name": "Supply and install the structural metal for Roof structure (Roof covering measured separately), to comply with the Khmer roof tile Roofing system, including anti rust-prevention primer base coating/ painting, as following :",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_38",
+          "name": "Supply and installation of khmer roof cover tile Shera Mini Curve-Slate, Size 300x800x60 cm, 2.5kg/pcs and 12.50pcs/m2 or equal, including Ridge tile, Metal zn/al valance/ gutter and down pipes",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_39",
+          "name": "Supply and installation of insulated Viva board",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_40",
+          "name": "Supply and Installation of Fascia roof with Paint finishes or equal",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_41",
+          "name": "pvc 100mm ( for downspout)",
+          "price": 3.2,
+          "unit": "M"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_42",
+          "name": "Hangers and supporters other accessories",
+          "price": 350,
+          "unit": "ls"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_43",
+          "name": "Lavatory (c02237)",
+          "price": 15,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_44",
+          "name": "OD65mm",
+          "price": 5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_45",
+          "name": "OD40mm",
+          "price": 4.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_46",
+          "name": "OD32mm",
+          "price": 4,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_47",
+          "name": "OD25mm",
+          "price": 3,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_48",
+          "name": "Fire hose reels cabinet 740mm(W) x1540mm(H) x320mm(D) (c/w ball valve hose and nozzle dn25)",
+          "price": 135,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_49",
+          "name": "automatic controll panel c/w component",
+          "price": 120,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_50",
+          "name": "Single Socket Outlet, Unswitched 13A,Gpo, weatherproof",
+          "price": 4,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_51",
+          "name": "10A Light switch - 2 gang 2 way",
+          "price": 4.2,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_52",
+          "name": "10A Light switch - 3 gang 2 way",
+          "price": 4.5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_53",
+          "name": "SUPPLY AND INSTALL MDB-01 320A 3P",
+          "price": 200,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_54",
+          "name": "SUPPLY AND INSTALL DB-GF (DB GF,1F, 2F Panel)",
+          "price": 90,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_55",
+          "name": "supply and install (SDB-EXIT-01,02,03)",
+          "price": 65,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_56",
+          "name": "supply and install (SDB-GF-01,02,03,..,08),(SDB-1F-01,02,03,..,11) and (SDB-2F-01,02,03,04)",
+          "price": 35,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_57",
+          "name": "Main Data Rack 42U",
+          "price": 80,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_58",
+          "name": "Digital main phone",
+          "price": 30,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_59",
+          "name": "Analoge desk phone",
+          "price": 5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_60",
+          "name": "UPS 5KVA",
+          "price": 50,
+          "unit": "1"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_61",
+          "name": "Router wifi PoE",
+          "price": 15,
+          "unit": "no"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_62",
+          "name": "CAT6 CABLE",
+          "price": 0.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_63",
+          "name": "EARLY STREAMER EMISSION Rmin=40m, LEVER II, HEIGHT 4m at top of roof level",
+          "price": 120,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_64",
+          "name": "LIGHTNING EVENT COUNTERS with outdoor box",
+          "price": 25,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_65",
+          "name": "Elevetion Pole dia 49 mm H=4m c/w fitting",
+          "price": 60,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_66",
+          "name": "Standard Copper cable 1Cx70Sq.mm Cu. Cable C/w PVC conduit dia 25ND",
+          "price": 2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_67",
+          "name": "PVC conduit, DN25 mm",
+          "price": 0.25,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_68",
+          "name": "Rod to Tape Clamp Type A",
+          "price": 2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_69",
+          "name": "Threaded Copper bonded Earth Rods dia 14.3 mm H=3m",
+          "price": 5,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_70",
+          "name": "Lobour for installtion",
+          "price": 150,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_71",
+          "name": "And other accessoies to complete",
+          "price": 50,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_72",
+          "name": "Camera RG-6 cable",
+          "price": 65,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_73",
+          "name": "Supply and Install grounp of Condensing Unit Inverter Type Capacity 152.5 Hp (20hp+20hp+20hp+20hp+20hp+20hp)",
+          "price": 3650,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_74",
+          "name": "Supply and Install grounp of Condensing Unit Inverter Type Capacity 131.5Hp (20hp+20hp+20hp+20hp+20hp+20hp+20hp)",
+          "price": 3250,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_75",
+          "name": "supply and Install Indoor unit cassette type 5Hp as per drawing and specification",
+          "price": 80,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_76",
+          "name": "supply and Install Indoor unit cassette type 4Hp as per drawing and specification",
+          "price": 75,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_77",
+          "name": "supply and Install Indoor unit cassette type 3Hp as per drawing and specification",
+          "price": 70,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_78",
+          "name": "supply and Install Indoor unit cassette type 2Hp as per drawing and specification",
+          "price": 55,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_79",
+          "name": "Supply and Install Indoor unit wall mount type 2Hp as per drawing and technical specification",
+          "price": 45,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_80",
+          "name": "Supply and Install Indoor unit wall mount type 1Hp as per drawing and technical specification",
+          "price": 35,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b3_81",
+          "name": "10 -12 passenger elevator (floor stop 03 )",
+          "price": 4850,
+          "unit": "lot"
+        }
+      ],
+      "id": "nasl_b3",
+      "name": "NASLA \u00b7 Bill 3-Academic",
+      "price": 0,
+      "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "nasl_b4_1",
+          "name": "Mixed Stone (CBR>=30%), thk=100mm",
+          "price": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_2",
+          "name": "Sand (CBR>=15%), thk=50mm",
+          "price": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_3",
+          "name": "Interlocking Block",
+          "price": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_4",
+          "name": "Natural Grass",
+          "price": 1.5,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_5",
+          "name": "Main hole 1m x 1m",
+          "price": 90,
+          "unit": "PCS"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_6",
+          "name": "Concrete pipe dia 0.8m",
+          "price": 15,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_7",
+          "name": "U-drain pipe",
+          "price": 7,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_8",
+          "name": "Other accessories",
+          "price": 2500,
+          "unit": "ls"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_9",
+          "name": "Water supply connection free",
+          "price": 100,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_10",
+          "name": "Gate Valves 40mm",
+          "price": 7,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_11",
+          "name": "Gate Valves 65mm",
+          "price": 8,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_12",
+          "name": "Check Valves 32mm",
+          "price": 6,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_13",
+          "name": "Check Valves 40mm",
+          "price": 7,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_14",
+          "name": "Strainer 40mm",
+          "price": 6,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_15",
+          "name": "Strainer 65mm",
+          "price": 7,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_16",
+          "name": "Flexible connection 40mm",
+          "price": 10,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_17",
+          "name": "Flexible connection 65mm",
+          "price": 12,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_18",
+          "name": "Foot Valves 40mm",
+          "price": 12,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_19",
+          "name": "Foot Valves 65mm",
+          "price": 15,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_20",
+          "name": "Transfer Pump 17m3/hr, H 45m Code : 02 nos x VSD pump 3kw, 400v, 50hz 01 no x power panel 01 no x manifold discharge with valve & acc 01 no x pressure tranducer 01 no x pressure tank 24L",
+          "price": 350,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_21",
+          "name": "Control panel Panel, breaker, contactor, overload, selector, and support accessorie Brand : Schneider",
+          "price": 100,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_22",
+          "name": "ELECTRICAL FIRE PUMP SET \"Each pump is controlled by pressure switch\" 1 set complete with: 1.) Horizontal Centrifugal Pump Model: Capacity: 10 L/s @ 70m Electrical Data: 11kW/380V/50Hz,3Phase (Alternative & Parallel) 2.Accessories: -ElectricalControlPanel - Pressure Tank x 2units - Discharge & Suction Manifold - Gate Valve, Check Valve for Discharge Manifold - Float level switch for dry protection - Pressure Switch, Pressure Gauge - Base and Panel Support",
+          "price": 750,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_23",
+          "name": "G.I-DN 90mm",
+          "price": 5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_24",
+          "name": "Fire department connection for fire police",
+          "price": 230,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_25",
+          "name": "Gate-valves 65mm",
+          "price": 10,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_26",
+          "name": "Auto air valve",
+          "price": 15,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_27",
+          "name": "Labour for welding and installtion",
+          "price": 700,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_28",
+          "name": "ATS 500A 4P Metal Enclosure 3 door (H1800x2400WxD800) Indoor type",
+          "price": 650,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_29",
+          "name": "SUPPLY AND INSTALL DB-PUBLICE",
+          "price": 120,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_30",
+          "name": "HDPE conduit, 100 mm dia",
+          "price": 3.85,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_31",
+          "name": "HDPE conduit, 50 mm dia",
+          "price": 1.5,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_32",
+          "name": "PVC conduit fitting and accessories",
+          "price": 350,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_33",
+          "name": "240 SQmm 4-CORE Cu/XLPE/PVC/DSTA/PVC -( academy building)",
+          "price": 19,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_34",
+          "name": "185 SQmm 1-CORE Cu/XLPE/PVC (dormitory building)",
+          "price": 6,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_35",
+          "name": "EARLY STREAMER EMISSION Rmin=40m, LEVER III, HEIGHT 15m from ground level",
+          "price": 120,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_36",
+          "name": "Elevetion Pole dia 49 mm H=15m c/w fitting and fundation work",
+          "price": 60,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasl_b4_37",
+          "name": "And other accessoies to completed",
+          "price": 50,
+          "unit": "lot"
+        }
+      ],
+      "id": "nasl_b4",
+      "name": "NASLA \u00b7 Bill 4-Infrastructure",
+      "price": 0,
+      "unit": ""
     }
   ],
   "materials": [
@@ -7792,6 +9965,3229 @@
       ],
       "id": "sunm_b9e",
       "name": "SUNWAH \u00b7 Bill-9 (Edge)",
+      "note": "",
+      "photos": [],
+      "price": 0,
+      "quantity": 0,
+      "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "nasm_b2_1",
+          "name": "Soil excavation",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_2",
+          "name": "Disposal surplus materials",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_3",
+          "name": "Soil backfilling to meet new design level",
+          "note": "",
+          "photos": [],
+          "price": 9.75,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_4",
+          "name": "Compaction foundation and ground beam",
+          "note": "",
+          "photos": [],
+          "price": 55,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_5",
+          "name": "Driving Pile (0.4x0.4x7m)",
+          "note": "",
+          "photos": [],
+          "price": 39,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_6",
+          "name": "Pile cutting head",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_7",
+          "name": "Blinding concrete C12/15MPa, 50mm thk.",
+          "note": "",
+          "photos": [],
+          "price": 60,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_8",
+          "name": "Compacted sand, 100mm thk.",
+          "note": "",
+          "photos": [],
+          "price": 9.75,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_9",
+          "name": "Damp proof membranes 0.3mm thk. for ground slab",
+          "note": "",
+          "photos": [],
+          "price": 1,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_10",
+          "name": "Anti termite spray on ground floor",
+          "note": "",
+          "photos": [],
+          "price": 4,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_11",
+          "name": "Concrete, C30 Mpa (Cylinder)",
+          "note": "",
+          "photos": [],
+          "price": 75,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_12",
+          "name": "Formwork",
+          "note": "",
+          "photos": [],
+          "price": 9,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_13",
+          "name": "Reinforced Rebar",
+          "note": "",
+          "photos": [],
+          "price": 810,
+          "quantity": 0,
+          "unit": "ton"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_14",
+          "name": "Typical wall type Brick Wall 200mm thk., double layers of brickwall",
+          "note": "",
+          "photos": [],
+          "price": 11,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_15",
+          "name": "Typical wall type Brick Wall 100mm thk: single layers of brickwall",
+          "note": "",
+          "photos": [],
+          "price": 9,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_16",
+          "name": "External Wall Plaster 15mm thk",
+          "note": "",
+          "photos": [],
+          "price": 3,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_17",
+          "name": "Internal Wall Plaster 15mm thk",
+          "note": "",
+          "photos": [],
+          "price": 2.5,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_18",
+          "name": "Plastering column 15mm thk, mortar grade 75",
+          "note": "",
+          "photos": [],
+          "price": 3,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_19",
+          "name": "Plastering beam, 15mm thk, mortar grade 75",
+          "note": "",
+          "photos": [],
+          "price": 3,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_20",
+          "name": "Plastering edge door & window, 15mm thk, mortar grade 75",
+          "note": "",
+          "photos": [],
+          "price": 3,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_21",
+          "name": "Exterior emulsion paint (Color selection with 5 coat system as specified by Architect)",
+          "note": "",
+          "photos": [],
+          "price": 4.2,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_22",
+          "name": "Interior emulsion paint (Color selection with 4 coat system as specified by Architect)",
+          "note": "",
+          "photos": [],
+          "price": 3.6,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_23",
+          "name": "Emulsion paint column (color select by Architect)",
+          "note": "",
+          "photos": [],
+          "price": 3.6,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_24",
+          "name": "Emulsion paint beam (color select by Architect)",
+          "note": "",
+          "photos": [],
+          "price": 3.6,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_25",
+          "name": "Emulsion paint edge door & window (color select by Architect)",
+          "note": "",
+          "photos": [],
+          "price": 3.6,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_26",
+          "name": "Type W02: Bathroom Wall Tile 300x600mm",
+          "note": "",
+          "photos": [],
+          "price": 13.93,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_27",
+          "name": "Type W03: bedroom and passage Skirting Tile 150x600mm",
+          "note": "",
+          "photos": [],
+          "price": 3,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_28",
+          "name": "Floor Type A: Bedroom Floor Porcelain or Ceramic Tile 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 16.81,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_29",
+          "name": "Floor Type B: Bathroom Porcelain or Ceramic Tile 300mmx300mm (Non-slip)",
+          "note": "",
+          "photos": [],
+          "price": 16.81,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_30",
+          "name": "Floor Type C: Corridor Porcelain or Ceramic Tile 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 16.81,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_31",
+          "name": "Floor Type D: Balcony and Veranda Porcelain or Ceramic Tile 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 16.81,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_32",
+          "name": "Under Bedroom Door Floor: Granite Threshold Strip 13mm thick",
+          "note": "",
+          "photos": [],
+          "price": 28,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_33",
+          "name": "Under Toilet Door Floor: Granite Threshold Strip 30mm thick",
+          "note": "",
+          "photos": [],
+          "price": 28,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_34",
+          "name": "Staircase Floor, Marble",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_35",
+          "name": "Gypsum board flat ceiling with emulsion paint finish white color and all necessary accessories",
+          "note": "",
+          "photos": [],
+          "price": 6,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_36",
+          "name": "Gypsum board water resistant ceiling with emulsion paint finish white color and all necessary accessories",
+          "note": "",
+          "photos": [],
+          "price": 8.5,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_37",
+          "name": "Concrete slab soffit painted with emulsions (color select by Architect)",
+          "note": "",
+          "photos": [],
+          "price": 3.6,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_38",
+          "name": "D01 - Solid wood sash bedroom door single swing, dimension W980x H2100 comprising wooden frame single sash door including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 370,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_39",
+          "name": "D03 - Aluminium door single swing, dimension W1100 x H2100 comprising of Aluminium frame and panel with 10mm glazing, including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 200,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_40",
+          "name": "D05 - Glassed double sash door, dimension W1700 x H2100 comprising of aluminium frame double sash door with fixed glass panels, including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 400,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_41",
+          "name": "D06 - Glassed frameless partition door, dimension W1000 x H2100 including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 700,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_42",
+          "name": "D07 - Double glassed door, dimension W1500 x H2100 comprising of aluminium frame double sash door with fixed glass panels, including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 400,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_43",
+          "name": "D08 - Solid wood sash door single swing, dimension W1100x H2100 comprising wooden frame single sash door including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 380,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_44",
+          "name": "W01 - Double sash glass window, dimension W2100x H1100 & W2100x H400 comprising UPVC frame double sash door with fixed glass panels, including all complete set of standard hardware",
+          "note": "",
+          "photos": [],
+          "price": 190,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_45",
+          "name": "W02 - Single sash fixed glass with ventilator window, dimension W800x H1100 & W800x H400 comprising of UPVC frame double sash door with fixed glass panels, including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 70,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_46",
+          "name": "W03 - Double sash fixed glass window, dimension W1600 x H1100 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_47",
+          "name": "W04- Fixed glazing window/partion, total length 12650x H3000 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware, door measured seperatly",
+          "note": "",
+          "photos": [],
+          "price": 1725,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_48",
+          "name": "W05- Double sliding windows for main staircase, dimension W1500 x H550 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_49",
+          "name": "Supply and Install handrail for staircase height 900mm comprising of top railing dia. 50mm, vertical post dia. 20mm, vertical and horizontal railing dia. 8mm including other necessary fixing to finish",
+          "note": "",
+          "photos": [],
+          "price": 24,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_50",
+          "name": "Supply and apply cementitious waterproofing including screeding slope to fall min.20mm thk. to all toilets and terraces",
+          "note": "",
+          "photos": [],
+          "price": 11,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_51",
+          "name": "External Ventilation Brick including other associated necessary fixing",
+          "note": "",
+          "photos": [],
+          "price": 21.875,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_52",
+          "name": "Supply and install tempered glass wall partition (include accessory)",
+          "note": "",
+          "photos": [],
+          "price": 50,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_53",
+          "name": "Supply and install lintel on the top door (include where accessory)",
+          "note": "",
+          "photos": [],
+          "price": 5.4,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_54",
+          "name": "Evacuator Floor (spec. by MEP)",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_55",
+          "name": "D02 - uPVC Toilet door single swing, dimension W820 x H2100 comprising of uPCV frame and uPVC panel and uPVC louvers, including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_56",
+          "name": "D04 - Partition door single swing, dimension W1000 x H2100 comprising of Aluminium SUS frame and uPVC door panel, including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_57",
+          "name": "D09 - uPVC door single swing, dimension W1020 x H2100 comprising of uPCV frame and uPVC panel and uPVC louvers, including all complete set of standard door hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_58",
+          "name": "D-10 Fire rated (60min) sash door dimension W1400 X 2100 comprising of frame and single swing with glazing, including all complete set of standard hardware/ironmongery",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_59",
+          "name": "Supply and Install handrail for balcony height 1000mm comprising of top railing dia. 50mm, vertical post dia. 20mm, vertical and horizontal railing dia. 8mm including other necessary fixing to finish",
+          "note": "",
+          "photos": [],
+          "price": 24,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_60",
+          "name": "Supply and install lintel on the top door (include accessory)",
+          "note": "",
+          "photos": [],
+          "price": 5.4,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_61",
+          "name": "Type W03: Main Floor Skirting Tile 150x600mm",
+          "note": "",
+          "photos": [],
+          "price": 3,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_62",
+          "name": "Staircase Floor Marble",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_63",
+          "name": "W05- Double sliding windows for main staircase, dimension W3320 x H1100 comprising of UPVC frame in dark grey finish with 10mm thk. laminated glass panel including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_64",
+          "name": "Supply and apply cementitious waterproofing including screeding slope to fall min.20mm thk. to all toilets and terraces, roof gutter",
+          "note": "",
+          "photos": [],
+          "price": 11,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_65",
+          "name": "Supply and installation of khmer roof cover tile Shera Mini Curve-Slate, Size 300x800x60 cm, 2.5kg/pcs and 12.50pcs/m2 or equal, including Ridge tile, Metal zn/al valance/ gutter and down pipes",
+          "note": "",
+          "photos": [],
+          "price": 16,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_66",
+          "name": "Supply and installation of insulated Viva board",
+          "note": "",
+          "photos": [],
+          "price": 12.5,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_67",
+          "name": "pvc 100MM",
+          "note": "",
+          "photos": [],
+          "price": 6.88,
+          "quantity": 0,
+          "unit": "M"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_68",
+          "name": "Hangers and supporters other accessories to completed",
+          "note": "",
+          "photos": [],
+          "price": 650,
+          "quantity": 0,
+          "unit": "ls"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_69",
+          "name": "Septic tank 5 m3",
+          "note": "",
+          "photos": [],
+          "price": 1550,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_70",
+          "name": "U-PVC pipe 100mm (sewer)",
+          "note": "",
+          "photos": [],
+          "price": 6.88,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_71",
+          "name": "U-PVC pipe 80mm (waste water)",
+          "note": "",
+          "photos": [],
+          "price": 4.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_72",
+          "name": "U-PVC pipe 50mm (waste water)",
+          "note": "",
+          "photos": [],
+          "price": 1.95,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_73",
+          "name": "Lavatory (c02237) with Vanity counter",
+          "note": "",
+          "photos": [],
+          "price": 335,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_74",
+          "name": "Lavatory square type with Vanity counter",
+          "note": "",
+          "photos": [],
+          "price": 560,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_75",
+          "name": "Single lever Faucet (cT II3)",
+          "note": "",
+          "photos": [],
+          "price": 85,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_76",
+          "name": "Plug Waster (cT665)",
+          "note": "",
+          "photos": [],
+          "price": 38,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_77",
+          "name": "Basin trap (cT80IT)",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_78",
+          "name": "Floor drain",
+          "note": "",
+          "photos": [],
+          "price": 12.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_79",
+          "name": "Urinal with Faucet",
+          "note": "",
+          "photos": [],
+          "price": 155,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_80",
+          "name": "Water Closet (cl3331)",
+          "note": "",
+          "photos": [],
+          "price": 295,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_81",
+          "name": "Rinsing Spray cT993K#CR(HM)",
+          "note": "",
+          "photos": [],
+          "price": 28,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_82",
+          "name": "Shower head with mixer",
+          "note": "",
+          "photos": [],
+          "price": 215,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_83",
+          "name": "Hangers and supporters",
+          "note": "",
+          "photos": [],
+          "price": 1850,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_84",
+          "name": "PP-R pipe OD 20mm PN 12.5 (4m/pcs)",
+          "note": "",
+          "photos": [],
+          "price": 1.8,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_85",
+          "name": "PP-R pipe OD 25mm PN 12.5 (4m/pcs)",
+          "note": "",
+          "photos": [],
+          "price": 2.35,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_86",
+          "name": "PP-R pipe OD 32mm PN 12.5 (4m/pcs)",
+          "note": "",
+          "photos": [],
+          "price": 2.9,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_87",
+          "name": "PP-R pipe OD 40mm PN 12.5 (4m/pcs)",
+          "note": "",
+          "photos": [],
+          "price": 3.88,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_88",
+          "name": "PP-R pipe OD 50mm PN 12.5 (4m/pcs)",
+          "note": "",
+          "photos": [],
+          "price": 5.95,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_89",
+          "name": "Gate Valves 20mm",
+          "note": "",
+          "photos": [],
+          "price": 15,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_90",
+          "name": "Gate Valves 25mm",
+          "note": "",
+          "photos": [],
+          "price": 19,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_91",
+          "name": "Gate Valves 32mm",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_92",
+          "name": "Fittings for cold water pipe work",
+          "note": "",
+          "photos": [],
+          "price": 1150,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_93",
+          "name": "Flexible connection 32mm",
+          "note": "",
+          "photos": [],
+          "price": 110,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_94",
+          "name": "Pressure gauge 15mm",
+          "note": "",
+          "photos": [],
+          "price": 95,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_95",
+          "name": "Water tank 3 m3",
+          "note": "",
+          "photos": [],
+          "price": 365,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_96",
+          "name": "Pressure pump 3.5l/s . H=15m brand : DAB ( 1 set have 2 electric pump 1 duty and 1 stand by)",
+          "note": "",
+          "photos": [],
+          "price": 2350,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_97",
+          "name": "And other Accessoreis to completed",
+          "note": "",
+          "photos": [],
+          "price": 125,
+          "quantity": 0,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_98",
+          "name": "G.I DN 65mm",
+          "note": "",
+          "photos": [],
+          "price": 23.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_99",
+          "name": "G.I DN 40mm",
+          "note": "",
+          "photos": [],
+          "price": 18.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_100",
+          "name": "G.I DN 32mm",
+          "note": "",
+          "photos": [],
+          "price": 16.85,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_101",
+          "name": "Pipework - fittings",
+          "note": "",
+          "photos": [],
+          "price": 1500,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_102",
+          "name": "Internal Fire hose reels cabinet 7400mmWx1540mmHx320mmD (c/w ball valve hose and nozzle dn25)",
+          "note": "",
+          "photos": [],
+          "price": 560,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_103",
+          "name": "Enternal Fire hose reels cabinet 740mmWx740mmHx320mmD (c/w ball valve hose and nozzle dn25)",
+          "note": "",
+          "photos": [],
+          "price": 560,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_104",
+          "name": "Double outlet pillar hydrant",
+          "note": "",
+          "photos": [],
+          "price": 485,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_105",
+          "name": "Auto Air Vale",
+          "note": "",
+          "photos": [],
+          "price": 230,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_106",
+          "name": "Painting",
+          "note": "",
+          "photos": [],
+          "price": 150,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_107",
+          "name": "Signage",
+          "note": "",
+          "photos": [],
+          "price": 110,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_108",
+          "name": "and other accessories to completed",
+          "note": "",
+          "photos": [],
+          "price": 120,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_109",
+          "name": "Portable fire extinguisher - ABC 3kg",
+          "note": "",
+          "photos": [],
+          "price": 45,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_110",
+          "name": "Portable fire extinguisher - CO2 5kg",
+          "note": "",
+          "photos": [],
+          "price": 68,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_111",
+          "name": "Single Socket Outlet, Unswitched 13A,Gpo, Metal Clad",
+          "note": "",
+          "photos": [],
+          "price": 11.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_112",
+          "name": "Double Socket Outlet, Unswitched 13A,Gpo",
+          "note": "",
+          "photos": [],
+          "price": 14.2,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_113",
+          "name": "10A Light switch - 1 gang 1 way",
+          "note": "",
+          "photos": [],
+          "price": 5.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_114",
+          "name": "10A Light switch \u2013 2 gang 1 way",
+          "note": "",
+          "photos": [],
+          "price": 6.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_115",
+          "name": "10A Light switch - 1 gang 2 way",
+          "note": "",
+          "photos": [],
+          "price": 6.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_116",
+          "name": "10A Light switch - 3 gang 1 way",
+          "note": "",
+          "photos": [],
+          "price": 7.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_117",
+          "name": "SUPPLY AND INSTALL MDB 250A 3P",
+          "note": "",
+          "photos": [],
+          "price": 3200,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_118",
+          "name": "supply and install (SDB-GF-01,02,03,..,30) and (SDB-1F-01,02,03,\u2026.,33)",
+          "note": "",
+          "photos": [],
+          "price": 235,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_119",
+          "name": "100mm width x 50mm Height Power cable tray",
+          "note": "",
+          "photos": [],
+          "price": 6.55,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_120",
+          "name": "200mm width x 100mm Height Power cable tray",
+          "note": "",
+          "photos": [],
+          "price": 14.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_121",
+          "name": "300mm width x 100mm Height Power cable tray",
+          "note": "",
+          "photos": [],
+          "price": 21.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_122",
+          "name": "Cable tray fitting and accessories",
+          "note": "",
+          "photos": [],
+          "price": 750,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_123",
+          "name": "1.5 SQmm 1-CORE CU PVC",
+          "note": "",
+          "photos": [],
+          "price": 23.55,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_124",
+          "name": "2.5 SQmm 1-CORE CU PVC",
+          "note": "",
+          "photos": [],
+          "price": 38.5,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_125",
+          "name": "4 SQmm 1-CORE CU PVC",
+          "note": "",
+          "photos": [],
+          "price": 58.9,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_126",
+          "name": "6 SQmm 1-CORE CU PVC",
+          "note": "",
+          "photos": [],
+          "price": 85,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_127",
+          "name": "10 SQmm 1-CORE CU PVC for ground",
+          "note": "",
+          "photos": [],
+          "price": 145,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_128",
+          "name": "25 SQmm 1-CORE CU PVC for lift",
+          "note": "",
+          "photos": [],
+          "price": 3.95,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_129",
+          "name": "35 SQmm 1-CORE CU PVC for AC",
+          "note": "",
+          "photos": [],
+          "price": 4.88,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_130",
+          "name": "Mounted Ceiling Light",
+          "note": "",
+          "photos": [],
+          "price": 25.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_131",
+          "name": "Emergency exit",
+          "note": "",
+          "photos": [],
+          "price": 28,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_132",
+          "name": "Emergency exit sign",
+          "note": "",
+          "photos": [],
+          "price": 29,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_133",
+          "name": "Smart Connect Multiloop 6 Expansion Port Panel",
+          "note": "",
+          "photos": [],
+          "price": 3350,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_134",
+          "name": "Smart Connect Multi Loop Card Module (MKII)",
+          "note": "",
+          "photos": [],
+          "price": 855,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_135",
+          "name": "24VDC External Power Supply",
+          "note": "",
+          "photos": [],
+          "price": 120,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_136",
+          "name": "Addressable Break glass",
+          "note": "",
+          "photos": [],
+          "price": 78,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_137",
+          "name": "Photoelectric addressable smoke detector c/w base",
+          "note": "",
+          "photos": [],
+          "price": 55.8,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_138",
+          "name": "Photoelectric addressable heater detector",
+          "note": "",
+          "photos": [],
+          "price": 61,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_139",
+          "name": "Photoelectric add. smoke detector c/w sounder and base",
+          "note": "",
+          "photos": [],
+          "price": 115,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_140",
+          "name": "Addressable Input/Output Module",
+          "note": "",
+          "photos": [],
+          "price": 155,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_141",
+          "name": "Addressable control Module/ Sounder Circuit Controller",
+          "note": "",
+          "photos": [],
+          "price": 185,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_142",
+          "name": "Addressable Relay Module",
+          "note": "",
+          "photos": [],
+          "price": 190,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_143",
+          "name": "Fire Alarm bell/ Sounder Beacon",
+          "note": "",
+          "photos": [],
+          "price": 95,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_144",
+          "name": "Addressable Isulation Module / MKII Isolator Base",
+          "note": "",
+          "photos": [],
+          "price": 235,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_145",
+          "name": "16AWG Cu/Fire Rated Wire",
+          "note": "",
+          "photos": [],
+          "price": 2.35,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_146",
+          "name": "Dia 20 PVC Conduit",
+          "note": "",
+          "photos": [],
+          "price": 2,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_147",
+          "name": "Conduit fitting and accessories",
+          "note": "",
+          "photos": [],
+          "price": 210,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_148",
+          "name": "Main Data Rack 24U",
+          "note": "",
+          "photos": [],
+          "price": 560,
+          "quantity": 0,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_149",
+          "name": "ODF/ SC Simplex Adaptor with Plate, Flush Mount, 6\u2010fiber,",
+          "note": "",
+          "photos": [],
+          "price": 1850,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_150",
+          "name": "Gigabit Ethernet SX Mini\u2010GBIC SFP Transceiver, MM",
+          "note": "",
+          "photos": [],
+          "price": 1650,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_151",
+          "name": "Unifie router",
+          "note": "",
+          "photos": [],
+          "price": 215,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_152",
+          "name": "Cate 6 cable",
+          "note": "",
+          "photos": [],
+          "price": 175,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_153",
+          "name": "Accessories",
+          "note": "",
+          "photos": [],
+          "price": 250,
+          "quantity": 0,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_154",
+          "name": "Testing & Commissioning",
+          "note": "",
+          "photos": [],
+          "price": 100,
+          "quantity": 0,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_155",
+          "name": "NS300 Main unit",
+          "note": "",
+          "photos": [],
+          "price": 420,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_156",
+          "name": "19inch Rack Adaptor for NS300",
+          "note": "",
+          "photos": [],
+          "price": 380,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_157",
+          "name": "DSP\u2010S",
+          "note": "",
+          "photos": [],
+          "price": 290,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_158",
+          "name": "desk phone",
+          "note": "",
+          "photos": [],
+          "price": 78,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_159",
+          "name": "Single RJ45 Socket outlet",
+          "note": "",
+          "photos": [],
+          "price": 15,
+          "quantity": 0,
+          "unit": "no"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_160",
+          "name": "CAT45 CABLE ( 1 roll=200m)",
+          "note": "",
+          "photos": [],
+          "price": 145,
+          "quantity": 0,
+          "unit": "no"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_161",
+          "name": "EARLY STREAMER EMISSION Rmin=50m, LEVER III, HEIGHT 5m",
+          "note": "",
+          "photos": [],
+          "price": 1250,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_162",
+          "name": "70mm2 bare cooper",
+          "note": "",
+          "photos": [],
+          "price": 9.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_163",
+          "name": "25mm2 Cu/PVC",
+          "note": "",
+          "photos": [],
+          "price": 3.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_164",
+          "name": "120mm2 Cu/PVC",
+          "note": "",
+          "photos": [],
+          "price": 17.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_165",
+          "name": "PVC conduit, 32 mm dia",
+          "note": "",
+          "photos": [],
+          "price": 0.95,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_166",
+          "name": "Earth Pit",
+          "note": "",
+          "photos": [],
+          "price": 95,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_167",
+          "name": "Copper Grounding Rods Dia 16mm Length 2400mm",
+          "note": "",
+          "photos": [],
+          "price": 32,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_168",
+          "name": "Earth Test Box",
+          "note": "",
+          "photos": [],
+          "price": 115,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_169",
+          "name": "Earth bar",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_170",
+          "name": "Soil Impedance & Resistance Enhancement Material",
+          "note": "",
+          "photos": [],
+          "price": 120,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_171",
+          "name": "Data Rack 19\"",
+          "note": "",
+          "photos": [],
+          "price": 385,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_172",
+          "name": "DVR 32CH",
+          "note": "",
+          "photos": [],
+          "price": 370,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_173",
+          "name": "HDD 4TB",
+          "note": "",
+          "photos": [],
+          "price": 85,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_174",
+          "name": "Dome Camera",
+          "note": "",
+          "photos": [],
+          "price": 55,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_175",
+          "name": "Body Camera",
+          "note": "",
+          "photos": [],
+          "price": 52,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_176",
+          "name": "FO SWITCH 4PORT",
+          "note": "",
+          "photos": [],
+          "price": 95,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_177",
+          "name": "Camera RG-6 cable (1 roll=305m)",
+          "note": "",
+          "photos": [],
+          "price": 165,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_178",
+          "name": "4 CORE F.O CABLE MULTI MODE",
+          "note": "",
+          "photos": [],
+          "price": 2.95,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_179",
+          "name": "Condensing Unit Inverter Type VRF System with Refrigerant R-410a",
+          "note": "",
+          "photos": [],
+          "price": 1850,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_180",
+          "name": "Supply and Install grounp of Condensing Unit Inverter Type Capacity 88.5hp as per drawing",
+          "note": "",
+          "photos": [],
+          "price": 31550,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_181",
+          "name": "Hanger & Support",
+          "note": "",
+          "photos": [],
+          "price": 1050,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_182",
+          "name": "Truck lift for Outdoor Units (Hang Up)",
+          "note": "",
+          "photos": [],
+          "price": 650,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_183",
+          "name": "supply and Install Indoor unit cassette type 2.5Hp as per drawing and specification",
+          "note": "",
+          "photos": [],
+          "price": 550,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_184",
+          "name": "Supply and Install Indoor unit wall mount type 1.5Hp as per drawing and technical specification",
+          "note": "",
+          "photos": [],
+          "price": 320,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_185",
+          "name": "Controller & Accessoies (Room thermostat)",
+          "note": "",
+          "photos": [],
+          "price": 4520,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_186",
+          "name": "Refrigerant Copper Pipe",
+          "note": "",
+          "photos": [],
+          "price": 13550,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_187",
+          "name": "Additional Refrigerant Charge",
+          "note": "",
+          "photos": [],
+          "price": 1100,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_188",
+          "name": "Refrigerant Pipe Fitting, Accessories",
+          "note": "",
+          "photos": [],
+          "price": 4500,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_189",
+          "name": "Insulation Fitting, Accessories",
+          "note": "",
+          "photos": [],
+          "price": 2850,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_190",
+          "name": "PVC Drain Pipe Fitting & Accessories",
+          "note": "",
+          "photos": [],
+          "price": 2350,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_191",
+          "name": "10 -12 passenger elevator ( FLOOR STOP 02)",
+          "note": "",
+          "photos": [],
+          "price": 23500,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_192",
+          "name": "Rockwool 25mm + fire-resistant fabric + hole tole",
+          "note": "",
+          "photos": [],
+          "price": 7.55,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b2_193",
+          "name": "Rockwool 50mm + fire-resistant fabric + hole tole",
+          "note": "",
+          "photos": [],
+          "price": 11.5,
+          "quantity": 0,
+          "unit": "m2"
+        }
+      ],
+      "id": "nasm_b2",
+      "name": "NASLA \u00b7 Bill 2-Dormitory",
+      "note": "",
+      "photos": [],
+      "price": 0,
+      "quantity": 0,
+      "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "nasm_b3_1",
+          "name": "Bored pile Dia. 800mm",
+          "note": "",
+          "photos": [],
+          "price": 101,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_2",
+          "name": "Bored pile Dia. 500mm",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_3",
+          "name": "Ultrasonic quality pile testing",
+          "note": "",
+          "photos": [],
+          "price": 230.8,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_4",
+          "name": "PIT Test",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_5",
+          "name": "PDA Test",
+          "note": "",
+          "photos": [],
+          "price": 850,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_6",
+          "name": "Grading, cleaning of ground floor",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_7",
+          "name": "Typical wall type Brick Wall 200mm thk., double layers of brick wall",
+          "note": "",
+          "photos": [],
+          "price": 11,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_8",
+          "name": "Typical wall type Brick Wall 100mm thk: single layers of brick wall",
+          "note": "",
+          "photos": [],
+          "price": 9,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_9",
+          "name": "Typical wall type Brick Wall 200mm thk., double layers of Retaining Wall Surrounding",
+          "note": "",
+          "photos": [],
+          "price": 11,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_10",
+          "name": "Timber Floor Skirting Tile 150x600mm",
+          "note": "",
+          "photos": [],
+          "price": 12,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_11",
+          "name": "Floor Type A: Main Floor Porcelain or Ceramic Tile 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 16.81,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_12",
+          "name": "Floor of Granite Tile 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 17.382911,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_13",
+          "name": "Floor of Semi gloss (Timber Textured) Porcelain or Ceramic Tile 300mmx300mm",
+          "note": "",
+          "photos": [],
+          "price": 12,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_14",
+          "name": "Floor Type B: Semi gloss Porcelain or Ceramic Tile 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 12,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_15",
+          "name": "Bathroom Floor of Non skid Porcelain or Ceramic Tile 300mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 7.5,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_16",
+          "name": "Floor Type C: Semi gloss Porcelain 600mmx600mm",
+          "note": "",
+          "photos": [],
+          "price": 12,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_17",
+          "name": "Floor of External grade porcelain tile 300mmx300mm",
+          "note": "",
+          "photos": [],
+          "price": 12,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_18",
+          "name": "Under Door Floor: Granite Threshold Strip 18mm thick",
+          "note": "",
+          "photos": [],
+          "price": 17.38,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_19",
+          "name": "Special design ceiling with emulsion paint finish white color and all necessary accessories",
+          "note": "",
+          "photos": [],
+          "price": 36,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_20",
+          "name": "Suspended acoustic and sound insulated ceiling with emulsion paint finish white color and all necessary accessories",
+          "note": "",
+          "photos": [],
+          "price": 27,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_21",
+          "name": "MED1 - Main Entrance door tempered glass double sash door, dimension W2800x H3000 comprising of aluminium frame double sash door with tempered glass panels and stainless steel door handle, including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 850,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_22",
+          "name": "SED1 - Side entrance double door, dimension W5800x H3600 comprising of aluminium frame double sash door with fixed glass panels, including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 850,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_23",
+          "name": "D01 - External door double swing, dimension W1800 x H2100 comprising of aluminium frame double sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 850,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_24",
+          "name": "D02 - Class room door double swing, dimension W1800 x H2100 comprising of aluminium frame double sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 800,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_25",
+          "name": "D03 - Class room emergency door single swing, dimension W1200 x H2100 comprising of aluminium frame single sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 490,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_26",
+          "name": "D04 - Room door single swing, dimension W1200 x H2100 comprising of aluminium frame single sash door with fixed glass panel 10mm thk., including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 490,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_27",
+          "name": "D05 - Wash room door single swing, dimension W1200 x H2100 comprising of aluminium frame single sash double sided door with ACP panels, including all complete set of standard door hardware",
+          "note": "",
+          "photos": [],
+          "price": 750,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_28",
+          "name": "W01 - Double sash glass window, dimension W3000x H900 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 229.5,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_29",
+          "name": "W02 - Double sash glass window, dimension W3700x H900 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 283.05,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_30",
+          "name": "W03 - External sliding window, dimension W1800x H1400 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 214.2,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_31",
+          "name": "W04- Class room sliding window, dimension W1800x H1400 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 214.2,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_32",
+          "name": "W05- Room sliding window, dimension W1800x H2400 comprising of aluminium frame sliding window with fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 367.2,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_33",
+          "name": "W06-Aluminium frame glass panelled sliding window, dimension W5600 x H3000 comprising of aluminium frame glass panel including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 1260,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_34",
+          "name": "W06-B- Fixed glass door window, dimension W5600 x H3000 comprising of aluminium frame glass panel including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 855.0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_35",
+          "name": "FG1- Fixed glass, dimension W1800 x H900 comprising of aluminium frame fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 121.5,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_36",
+          "name": "FG2- Fixed glass, dimension W1200 x H900 comprising of aluminium frame fixed glass panels including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 81,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_37",
+          "name": "FG3- Fixed glass panels,, dimension W5700 x H3000 comprising of aluminium frame with glass panel including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 769.5,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_38",
+          "name": "F1- Aluminium louvers, dimension W1800 x H1200 comprising of aluminium frame fixed glass panel window including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 183.6,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_39",
+          "name": "F2- Fan Light W900XH600 including all necessary hardware",
+          "note": "",
+          "photos": [],
+          "price": 45.9,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_40",
+          "name": "Granite Floor Skirting Tile 150x600mm",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_41",
+          "name": "Floor of Natural color treated timber flooring",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_42",
+          "name": "Roller gate of door SED1",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_43",
+          "name": "Supply and install the structural metal for Roof structure (Roof covering measured separately), to comply with the Khmer roof tile Roofing system, including anti rust-prevention primer base coating/ painting, as following :",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_44",
+          "name": "Supply and Installation of Fascia roof with Paint finishes or equal",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_45",
+          "name": "pvc 100mm ( for downspout)",
+          "note": "",
+          "photos": [],
+          "price": 6.8,
+          "quantity": 0,
+          "unit": "M"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_46",
+          "name": "Hangers and supporters other accessories",
+          "note": "",
+          "photos": [],
+          "price": 750,
+          "quantity": 0,
+          "unit": "ls"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_47",
+          "name": "Lavatory (c02237)",
+          "note": "",
+          "photos": [],
+          "price": 285,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_48",
+          "name": "OD65mm",
+          "note": "",
+          "photos": [],
+          "price": 23.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_49",
+          "name": "OD40mm",
+          "note": "",
+          "photos": [],
+          "price": 18.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_50",
+          "name": "OD32mm",
+          "note": "",
+          "photos": [],
+          "price": 16.85,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_51",
+          "name": "OD25mm",
+          "note": "",
+          "photos": [],
+          "price": 14.85,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_52",
+          "name": "Fire hose reels cabinet 740mm(W) x1540mm(H) x320mm(D) (c/w ball valve hose and nozzle dn25)",
+          "note": "",
+          "photos": [],
+          "price": 560,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_53",
+          "name": "automatic controll panel c/w component",
+          "note": "",
+          "photos": [],
+          "price": 1850,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_54",
+          "name": "Single Socket Outlet, Unswitched 13A,Gpo, weatherproof",
+          "note": "",
+          "photos": [],
+          "price": 14.2,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_55",
+          "name": "10A Light switch - 2 gang 2 way",
+          "note": "",
+          "photos": [],
+          "price": 8,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_56",
+          "name": "10A Light switch - 3 gang 2 way",
+          "note": "",
+          "photos": [],
+          "price": 8.2,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_57",
+          "name": "SUPPLY AND INSTALL MDB-01 320A 3P",
+          "note": "",
+          "photos": [],
+          "price": 3680,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_58",
+          "name": "SUPPLY AND INSTALL DB-GF (DB GF,1F, 2F Panel)",
+          "note": "",
+          "photos": [],
+          "price": 1450,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_59",
+          "name": "supply and install (SDB-EXIT-01,02,03)",
+          "note": "",
+          "photos": [],
+          "price": 785,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_60",
+          "name": "supply and install (SDB-GF-01,02,03,..,08),(SDB-1F-01,02,03,..,11) and (SDB-2F-01,02,03,04)",
+          "note": "",
+          "photos": [],
+          "price": 280,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_61",
+          "name": "Main Data Rack 42U",
+          "note": "",
+          "photos": [],
+          "price": 560,
+          "quantity": 0,
+          "unit": ""
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_62",
+          "name": "Digital main phone",
+          "note": "",
+          "photos": [],
+          "price": 175,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_63",
+          "name": "Analoge desk phone",
+          "note": "",
+          "photos": [],
+          "price": 35,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_64",
+          "name": "UPS 5KVA",
+          "note": "",
+          "photos": [],
+          "price": 1150,
+          "quantity": 0,
+          "unit": "1"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_65",
+          "name": "Router wifi PoE",
+          "note": "",
+          "photos": [],
+          "price": 215,
+          "quantity": 0,
+          "unit": "no"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_66",
+          "name": "CAT6 CABLE",
+          "note": "",
+          "photos": [],
+          "price": 0.65,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_67",
+          "name": "EARLY STREAMER EMISSION Rmin=40m, LEVER II, HEIGHT 4m at top of roof level",
+          "note": "",
+          "photos": [],
+          "price": 1250,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_68",
+          "name": "LIGHTNING EVENT COUNTERS with outdoor box",
+          "note": "",
+          "photos": [],
+          "price": 230,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_69",
+          "name": "Elevetion Pole dia 49 mm H=4m c/w fitting",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_70",
+          "name": "Standard Copper cable 1Cx70Sq.mm Cu. Cable C/w PVC conduit dia 25ND",
+          "note": "",
+          "photos": [],
+          "price": 9.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_71",
+          "name": "PVC conduit, DN25 mm",
+          "note": "",
+          "photos": [],
+          "price": 0.65,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_72",
+          "name": "Rod to Tape Clamp Type A",
+          "note": "",
+          "photos": [],
+          "price": 7.5,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_73",
+          "name": "Threaded Copper bonded Earth Rods dia 14.3 mm H=3m",
+          "note": "",
+          "photos": [],
+          "price": 33.5,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_74",
+          "name": "And other accessoies to complete",
+          "note": "",
+          "photos": [],
+          "price": 90,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_75",
+          "name": "Camera RG-6 cable",
+          "note": "",
+          "photos": [],
+          "price": 165,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_76",
+          "name": "Supply and Install grounp of Condensing Unit Inverter Type Capacity 152.5 Hp (20hp+20hp+20hp+20hp+20hp+20hp)",
+          "note": "",
+          "photos": [],
+          "price": 55850,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_77",
+          "name": "Supply and Install grounp of Condensing Unit Inverter Type Capacity 131.5Hp (20hp+20hp+20hp+20hp+20hp+20hp+20hp)",
+          "note": "",
+          "photos": [],
+          "price": 46710,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_78",
+          "name": "supply and Install Indoor unit cassette type 5Hp as per drawing and specification",
+          "note": "",
+          "photos": [],
+          "price": 670,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_79",
+          "name": "supply and Install Indoor unit cassette type 4Hp as per drawing and specification",
+          "note": "",
+          "photos": [],
+          "price": 630,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_80",
+          "name": "supply and Install Indoor unit cassette type 3Hp as per drawing and specification",
+          "note": "",
+          "photos": [],
+          "price": 588,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_81",
+          "name": "supply and Install Indoor unit cassette type 2Hp as per drawing and specification",
+          "note": "",
+          "photos": [],
+          "price": 480,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_82",
+          "name": "Supply and Install Indoor unit wall mount type 2Hp as per drawing and technical specification",
+          "note": "",
+          "photos": [],
+          "price": 388,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_83",
+          "name": "Supply and Install Indoor unit wall mount type 1Hp as per drawing and technical specification",
+          "note": "",
+          "photos": [],
+          "price": 260,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b3_84",
+          "name": "10 -12 passenger elevator (floor stop 03 )",
+          "note": "",
+          "photos": [],
+          "price": 24450,
+          "quantity": 0,
+          "unit": "lot"
+        }
+      ],
+      "id": "nasm_b3",
+      "name": "NASLA \u00b7 Bill 3-Academic",
+      "note": "",
+      "photos": [],
+      "price": 0,
+      "quantity": 0,
+      "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "nasm_b4_1",
+          "name": "Mixed Stone (CBR>=30%), thk=100mm",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_2",
+          "name": "Sand (CBR>=15%), thk=50mm",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_3",
+          "name": "Interlocking Block",
+          "note": "",
+          "photos": [],
+          "price": 0,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_4",
+          "name": "Natural Grass",
+          "note": "",
+          "photos": [],
+          "price": 2,
+          "quantity": 0,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_5",
+          "name": "Peacock Flower Tree, \u00f8200mm diameter",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_6",
+          "name": "Crepe Myrtle tree, \u00f8200mm diameter",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_7",
+          "name": "Full Set of Football Pitch (Natural Grass,17.96x35.92m) and Shaded Viewing include accessory",
+          "note": "",
+          "photos": [],
+          "price": 9100,
+          "quantity": 0,
+          "unit": "LS"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_8",
+          "name": "Full Set of Basketball Field (25.14x13.47m) and Shaded Viewing include accessory",
+          "note": "",
+          "photos": [],
+          "price": 9100,
+          "quantity": 0,
+          "unit": "LS"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_9",
+          "name": "Full Set of Badminton CRT (11.67x5.39m) include accessory",
+          "note": "",
+          "photos": [],
+          "price": 3150,
+          "quantity": 0,
+          "unit": "LS"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_10",
+          "name": "Main hole 1m x 1m",
+          "note": "",
+          "photos": [],
+          "price": 285,
+          "quantity": 0,
+          "unit": "PCS"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_11",
+          "name": "Concrete pipe dia 0.8m",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_12",
+          "name": "U-drain pipe",
+          "note": "",
+          "photos": [],
+          "price": 25,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_13",
+          "name": "Other accessories",
+          "note": "",
+          "photos": [],
+          "price": 3500,
+          "quantity": 0,
+          "unit": "ls"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_14",
+          "name": "Water supply connection free",
+          "note": "",
+          "photos": [],
+          "price": 4500,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_15",
+          "name": "Gate Valves 40mm",
+          "note": "",
+          "photos": [],
+          "price": 45,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_16",
+          "name": "Gate Valves 65mm",
+          "note": "",
+          "photos": [],
+          "price": 75,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_17",
+          "name": "Check Valves 32mm",
+          "note": "",
+          "photos": [],
+          "price": 48,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_18",
+          "name": "Check Valves 40mm",
+          "note": "",
+          "photos": [],
+          "price": 85,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_19",
+          "name": "Strainer 40mm",
+          "note": "",
+          "photos": [],
+          "price": 33,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_20",
+          "name": "Strainer 65mm",
+          "note": "",
+          "photos": [],
+          "price": 60,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_21",
+          "name": "Flexible connection 40mm",
+          "note": "",
+          "photos": [],
+          "price": 45,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_22",
+          "name": "Flexible connection 65mm",
+          "note": "",
+          "photos": [],
+          "price": 62,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_23",
+          "name": "Foot Valves 40mm",
+          "note": "",
+          "photos": [],
+          "price": 95,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_24",
+          "name": "Foot Valves 65mm",
+          "note": "",
+          "photos": [],
+          "price": 135,
+          "quantity": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_25",
+          "name": "Transfer Pump 17m3/hr, H 45m Code : 02 nos x VSD pump 3kw, 400v, 50hz 01 no x power panel 01 no x manifold discharge with valve & acc 01 no x pressure tranducer 01 no x pressure tank 24L",
+          "note": "",
+          "photos": [],
+          "price": 4850,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_26",
+          "name": "Control panel Panel, breaker, contactor, overload, selector, and support accessorie Brand : Schneider",
+          "note": "",
+          "photos": [],
+          "price": 850,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_27",
+          "name": "ELECTRICAL FIRE PUMP SET \"Each pump is controlled by pressure switch\" 1 set complete with: 1.) Horizontal Centrifugal Pump Model: Capacity: 10 L/s @ 70m Electrical Data: 11kW/380V/50Hz,3Phase (Alternative & Parallel) 2.Accessories: -ElectricalControlPanel - Pressure Tank x 2units - Discharge & Suction Manifold - Gate Valve, Check Valve for Discharge Manifold - Float level switch for dry protection - Pressure Switch, Pressure Gauge - Base and Panel Support",
+          "note": "",
+          "photos": [],
+          "price": 16500,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_28",
+          "name": "G.I-DN 90mm",
+          "note": "",
+          "photos": [],
+          "price": 33.85,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_29",
+          "name": "Fire department connection for fire police",
+          "note": "",
+          "photos": [],
+          "price": 885,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_30",
+          "name": "Gate-valves 65mm",
+          "note": "",
+          "photos": [],
+          "price": 88,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_31",
+          "name": "Auto air valve",
+          "note": "",
+          "photos": [],
+          "price": 115,
+          "quantity": 0,
+          "unit": "nos"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_32",
+          "name": "Labour for welding and installtion",
+          "note": "",
+          "photos": [],
+          "price": 210,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_33",
+          "name": "ATS 500A 4P Metal Enclosure 3 door (H1800x2400WxD800) Indoor type",
+          "note": "",
+          "photos": [],
+          "price": 22950,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_34",
+          "name": "SUPPLY AND INSTALL DB-PUBLICE",
+          "note": "",
+          "photos": [],
+          "price": 2350,
+          "quantity": 0,
+          "unit": "Set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_35",
+          "name": "HDPE conduit, 100 mm dia",
+          "note": "",
+          "photos": [],
+          "price": 9.8,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_36",
+          "name": "HDPE conduit, 50 mm dia",
+          "note": "",
+          "photos": [],
+          "price": 3.25,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_37",
+          "name": "PVC conduit fitting and accessories",
+          "note": "",
+          "photos": [],
+          "price": 1200,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_38",
+          "name": "240 SQmm 4-CORE Cu/XLPE/PVC/DSTA/PVC -( academy building)",
+          "note": "",
+          "photos": [],
+          "price": 172.8,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_39",
+          "name": "185 SQmm 1-CORE Cu/XLPE/PVC (dormitory building)",
+          "note": "",
+          "photos": [],
+          "price": 33.3,
+          "quantity": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_40",
+          "name": "EARLY STREAMER EMISSION Rmin=40m, LEVER III, HEIGHT 15m from ground level",
+          "note": "",
+          "photos": [],
+          "price": 1250,
+          "quantity": 0,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_41",
+          "name": "Elevetion Pole dia 49 mm H=15m c/w fitting and fundation work",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "nasm_b4_42",
+          "name": "And other accessoies to completed",
+          "note": "",
+          "photos": [],
+          "price": 65,
+          "quantity": 0,
+          "unit": "lot"
+        }
+      ],
+      "id": "nasm_b4",
+      "name": "NASLA \u00b7 Bill 4-Infrastructure",
       "note": "",
       "photos": [],
       "price": 0,
