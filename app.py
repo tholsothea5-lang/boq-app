@@ -481,8 +481,13 @@ def row_rate(state, row, which):
 
 
 def round_up2(v):
-    """Excel ROUNDUP(x, 2): always round up to 2 decimals."""
-    return math.ceil(float(v or 0) * 100) / 100
+    """Excel ROUNDUP(x, 2): always round up to 2 decimals. The -1e-9 slack
+    removes binary floating-point artefacts (e.g. 2.2 * 100 = 220.0000...03),
+    keeping results identical to Excel's decimal ROUNDUP."""
+    x = float(v or 0)
+    if x <= 0:
+        return 0.0
+    return math.ceil(x * 100 - 1e-9) / 100
 
 
 def qty_markup_pct(row):
@@ -876,6 +881,7 @@ def export_csv():
 # display as percentages).
 ACCT_CUR = '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)'
 ACCT_NUM = '_(* #,##0_);_(* \\(#,##0\\);_(* "-"_);_(@_)'
+COVER_CUR = '"$"#,##0.00_);\\("$"#,##0.00\\)'
 PCT_FMT = "0%"
 QTY_FMT = "0.00"
 
@@ -905,11 +911,11 @@ def _collect_bills(boq):
     return groups
 
 
-def _build_bill_sheet(ws, name, sum_row, nodes, state):
-    """One detail sheet (e.g. '1.1') laid out and calculated exactly like the
-    reference workbook: title, project block, two-row grouped column header,
-    section headings with SUB-TOTAL rows, a GRAND TOTAL row and the estimated
-    profit block. Returns the GRAND TOTAL row number."""
+def _write_bill_header(ws, name, sum_row):
+    """Rows 1-9 of a detail sheet: title, project block, the two-row grouped
+    column header with its merges, and the mark-up source cells. Exactly the
+    layout of the reference workbook, shared by the data sheet and the blank
+    template copies."""
     from openpyxl.styles import Font
 
     bold = Font(bold=True)
@@ -932,9 +938,9 @@ def _build_bill_sheet(ws, name, sum_row, nodes, state):
     cell(7, 17, "=SUM!B{}".format(sum_row))  # which Bill No. this sheet is
 
     header8 = [(2, "No."), (3, "Description"), (4, "Brand"), (5, "Unit"),
-               (6, "Quantity"), (8, "Quantity"), (9, "Original Rate"),
+               (6, "Quantity"), (8, "Quantity"), (9, "Original Rate "),
                (11, "Material Mark up (%)"), (12, "Labour Mark up (%)"),
-               (13, "Rate"), (15, "Total"), (17, "Amount"), (18, "Remark"),
+               (13, "Rate "), (15, "Total "), (17, "Amount"), (18, "Remark"),
                (21, "Budget"), (23, "Total"), (25, "Profit"), (27, "Total")]
     for col, text in header8:
         cell(8, col, text)
@@ -944,16 +950,37 @@ def _build_bill_sheet(ws, name, sum_row, nodes, state):
             25: "Material", 26: "Labour"}
     for col, v in row9.items():
         c = cell(9, col, v)
-        if col in (11, 12):
+        if col in (7, 11, 12):
             c.number_format = PCT_FMT
     for rng in ["B8:B9", "C8:C9", "D8:D9", "E8:E9", "H8:H9", "Q8:Q9",
                 "R8:R9", "W8:W9", "AA8:AA9", "F8:G8", "I8:J8", "M8:N8",
                 "O8:P8", "U8:V8", "Y8:Z8"]:
         ws.merge_cells(rng)
+    for col, w in {"B": 5.7, "C": 50.7, "D": 9.1, "E": 8.5, "F": 9.1,
+                   "G": 11.7, "H": 9.1, "I": 9.1, "J": 9.1, "K": 19.7,
+                   "L": 21.4, "M": 9.1, "N": 9.1, "O": 9.1, "P": 9.1,
+                   "Q": 10.7, "R": 9.1, "U": 9.1, "V": 9.1, "W": 9.1,
+                   "Y": 9.1, "Z": 9.1, "AA": 9.1}.items():
+        ws.column_dimensions[col].width = w
+
+
+def _build_bill_sheet(ws, name, sum_row, groups, state):
+    """Sheet 1.1 holds the whole BOQ like the reference template: loose
+    top-level rows become a 'WORK ITEMS' section, then one numbered section per
+    top-level heading, each closed by a SUB-TOTAL row, a GRAND TOTAL row and the
+    estimated profit block. Returns the GRAND TOTAL row number."""
+    from openpyxl.styles import Font
+
+    bold = Font(bold=True)
+    money16 = [(17, "Q"), (21, "U"), (22, "V"), (23, "W"), (25, "Y"), (26, "Z"), (27, "AA")]
+
+    def cell(r, c, v=None):
+        return ws.cell(row=r, column=c, value=v)
+
+    _write_bill_header(ws, name, sum_row)
 
     r = 10  # first data row is 11, exactly like the reference sheet
     sec_no = 0
-    leaf_no = 0
     pending = []
 
     def new_row():
@@ -962,24 +989,18 @@ def _build_bill_sheet(ws, name, sum_row, nodes, state):
         return r
 
     def flush_subtotal():
-        # A bill made only of loose rows (no section heading) has no SUB-TOTAL;
-        # its rows are still inside the GRAND TOTAL range below.
         if not pending or sec_no == 0:
             return
         first, last = pending[0], pending[-1]
         row = new_row()
         cell(row, 3, "SUB-TOTAL {}".format(sec_no))
-        for col, letter in [(17, "Q"), (21, "U"), (22, "V"), (23, "W"),
-                            (25, "Y"), (26, "Z"), (27, "AA")]:
+        for col, letter in money16:
             c = cell(row, col, "=SUBTOTAL(9,{0}{1}:{0}{2})".format(letter, first, last))
-            c.number_format = ACCT_CUR if col == 17 else ACCT_NUM
+            c.number_format = ACCT_CUR
         pending[:] = []
 
     def write_leaf(node):
-        nonlocal leaf_no
         row = new_row()
-        leaf_no += 1
-        cell(row, 2, leaf_no)
         cell(row, 3, node.get("name") or "")
         cell(row, 4, node.get("brand") or "")
         cell(row, 5, node.get("unit") or "")
@@ -1008,35 +1029,42 @@ def _build_bill_sheet(ws, name, sum_row, nodes, state):
                     (27, "=Z{0}+Y{0}".format(row))]
         for col, formula in formulas:
             c = cell(row, col, formula)
-            c.number_format = ACCT_CUR if col in (13, 14, 15, 16, 17) else ACCT_NUM
+            # Data rows match the reference: sell-price columns (M..Q) carry the
+            # accounting "$" format while the budget/profit analysis columns (U..AA)
+            # use the plain accounting format without a currency symbol.
+            c.number_format = ACCT_CUR if col <= 17 else ACCT_NUM
         if node.get("remark"):
             cell(row, 18, node.get("remark"))
         pending.append(row)
 
-    def emit(node):
-        nonlocal sec_no
+    def emit_node(node):
         if is_heading(node):
-            flush_subtotal()
-            sec_no += 1
             row = new_row()
-            cell(row, 2, sec_no)
-            cell(row, 3, node.get("name") or "").font = bold
+            cell(row, 3, node.get("name") or "").font = bold  # nested heading row
             for child in node.get("children") or []:
-                emit(child)
+                emit_node(child)
         else:
             write_leaf(node)
 
-    for node in nodes:
-        emit(node)
+    for group in groups:
+        flush_subtotal()
+        sec_no += 1
+        row = new_row()
+        cell(row, 2, sec_no)
+        cell(row, 3, group["title"]).font = bold
+        nodes = group["nodes"]
+        if len(nodes) == 1 and is_heading(nodes[0]):
+            nodes = nodes[0].get("children") or []
+        for node in nodes:
+            emit_node(node)
     flush_subtotal()
 
     gt = new_row()
     cell(gt, 3, "GRAND TOTAL").font = bold
     last = gt - 1
-    for col, letter in [(17, "Q"), (21, "U"), (22, "V"), (23, "W"),
-                        (25, "Y"), (26, "Z"), (27, "AA")]:
+    for col, letter in money16:
         c = cell(gt, col, "=SUBTOTAL(9,{0}11:{0}{1})".format(letter, last))
-        c.number_format = ACCT_CUR if col == 17 else ACCT_NUM
+        c.number_format = ACCT_CUR
 
     p_label = gt + 3
     p_amt = gt + 4
@@ -1044,24 +1072,48 @@ def _build_bill_sheet(ws, name, sum_row, nodes, state):
     cell(p_label, 21, "ESTIMATED PROFIT :")
     cell(p_amt, 23, "=Q{0}-W{0}".format(gt)).number_format = ACCT_CUR
     cell(p_pct, 21, "ESTIMATED PROFIT (%) :")
-    cell(p_pct + 1, 23, "=W{0}/Q{1}".format(p_amt, gt)).number_format = "0.00%"
+    cell(p_pct + 1, 23, "=W{0}/Q{1}".format(p_amt, gt)).number_format = PCT_FMT
     cell(p_pct + 1, 24, "Project")
-    cell(p_pct + 2, 23, "=W{0}/W{1}".format(p_amt, gt)).number_format = "0.00%"
+    cell(p_pct + 2, 23, "=W{0}/W{1}".format(p_amt, gt))  # General, like the reference
     cell(p_pct + 2, 24, "Budget")
-
-    for col, w in {"B": 5.7, "C": 50.7, "D": 9.1, "E": 8.5, "F": 9.1,
-                   "G": 11.7, "H": 9.1, "I": 9.1, "J": 9.1, "K": 19.7,
-                   "L": 21.4, "M": 9.1, "N": 9.1, "O": 9.1, "P": 9.1,
-                   "Q": 10.7, "R": 9.1, "U": 9.1, "V": 9.1, "W": 9.1,
-                   "Y": 9.1, "Z": 9.1, "AA": 9.1}.items():
-        ws.column_dimensions[col].width = w
     return gt
 
 
+def _build_empty_bill_sheet(ws, name, sum_row):
+    """Blank template copy for sheets 1.2-1.4, keeping the workbook's sheet set
+    identical to the reference template. The empty GRAND TOTAL row sits at row
+    37, exactly where the reference's SUM formulas point ('1.2'!Q37 etc.), and
+    the profit block follows at 40-45."""
+    from openpyxl.styles import Font
+
+    bold = Font(bold=True)
+    money16 = [(17, "Q"), (21, "U"), (22, "V"), (23, "W"), (25, "Y"), (26, "Z"), (27, "AA")]
+
+    def cell(r, c, v=None):
+        return ws.cell(row=r, column=c, value=v)
+
+    _write_bill_header(ws, name, sum_row)
+
+    gt = 37
+    cell(gt, 3, "GRAND TOTAL").font = bold
+    for col, letter in money16:
+        c = cell(gt, col, "=SUBTOTAL(9,{0}11:{0}36)".format(letter))
+        c.number_format = ACCT_CUR
+    cell(gt + 3, 21, "ESTIMATED PROFIT :")
+    cell(gt + 4, 23, "=Q37-W37").number_format = ACCT_CUR
+    cell(gt + 6, 21, "ESTIMATED PROFIT (%) :")
+    cell(gt + 7, 23, "=W41/Q37").number_format = PCT_FMT
+    cell(gt + 7, 24, "Project")
+    cell(gt + 8, 23, "=W41/W37")
+    cell(gt + 8, 24, "Budget")
+
+
 def _build_sum_sheet(ws, name, bill_sheets):
-    """QUOTATION sheet: one row per bill linking to that sheet's GRAND TOTAL,
-    then SUB-TOTAL (exclude VAT), DISCOUNT, VAT 10% and GRAND TOTAL, plus the
-    note and signature blocks. Returns the SUM GRAND TOTAL row for the cover."""
+    """QUOTATION sheet, laid out on the exact rows of the reference template:
+    four Bill rows at 17/19/21/23, SUB-TOTAL 28, DISCOUNT 29, VAT 30, GRAND
+    TOTAL 31, notes at 34-39 and signatures at 46. Bill 1 links to sheet 1.1's
+    GRAND TOTAL; bills 2-4 link to the blank templates' row 37 (zero). Returns
+    the SUM GRAND TOTAL row (31) for the cover."""
     from openpyxl.styles import Font
 
     bold = Font(bold=True)
@@ -1087,36 +1139,30 @@ def _build_sum_sheet(ws, name, bill_sheets):
                       (8, "Remark")]:
         cell(15, col, text)
 
-    row = 17  # Bill No. 1 starts on SUM row 17, exactly like the reference
     for index, bill in enumerate(bill_sheets, start=1):
+        row = 17 + 2 * (index - 1)  # Bill No. 1 on SUM row 17, like the reference
         cell(row, 2, "Bill No. {}".format(index))
         cell(row, 3, bill["title"])
         cell(row, 4, "LOT")
         cell(row, 5, 1)
-        cell(row, 6, "='{0}'!Q{1}".format(bill["sheet"], bill["gt"]))
-        cell(row, 7, "=F{0}*E{0}".format(row))
-        row += 2
+        cell(row, 6, "='{0}'!Q{1}".format(bill["sheet"], bill["gt"])).number_format = ACCT_CUR
+        cell(row, 7, "=F{0}*E{0}".format(row)).number_format = ACCT_CUR
 
-    sub = row
-    cell(sub, 6, "SUB-TOTAL (EXCLUDE VAT)")
-    cell(sub, 7, "=SUM(G16:G{})".format(row - 2))
-    dis = sub + 1
-    cell(dis, 6, "DISCOUNT")
-    vat = sub + 2
-    cell(vat, 6, "VAT")
-    cell(vat, 7, "=G{0}*0.1".format(sub))
-    grand = sub + 3
+    cell(28, 6, "SUB-TOTAL (EXCLUDE VAT)")
+    cell(28, 7, "=SUM(G16:G27)").number_format = ACCT_CUR
+    cell(29, 6, "DISCOUNT")
+    cell(30, 6, "VAT")
+    cell(30, 7, "=G28*0.1").number_format = ACCT_CUR
+    grand = 31
     cell(grand, 6, "GRAND TOTAL").font = bold
-    cell(grand, 7, "=G{0}+G{1}".format(vat, sub))
+    cell(grand, 7, "=G30+G28").number_format = ACCT_CUR
 
-    note = grand + 3
-    cell(note, 2, "Note :")
+    cell(34, 2, "Note :")
     for i in range(1, 6):
-        cell(note + i, 2, str(i))
-    sig = grand + 9
-    cell(sig, 2, "Prepared by :")
-    cell(sig, 4, "Checked by :")
-    cell(sig, 8, "Accepted by :")
+        cell(34 + i, 2, i)
+    cell(46, 2, "Prepared by :")
+    cell(46, 4, "Checked by :")
+    cell(46, 8, "Accepted by :")
 
     for col, w in {"B": 10.1, "C": 30.7, "D": 4.6, "E": 8.6, "F": 10.0,
                    "G": 12.0, "H": 21.0}.items():
@@ -1132,7 +1178,7 @@ def _build_cover_sheet(ws, name, grand_row):
     def cell(r, c, v=None):
         return ws.cell(row=r, column=c, value=v)
 
-    cell(2, 9, "Quote Ref :")
+    cell(2, 9, "Quote Ref:")
     cell(3, 9, "Date :")
     cell(7, 1, "Lot 93, St.598, Phum Toul Kork, Sangkat Toul Sangke")
     cell(8, 1, "Khan Russey Keo, PNP, Kingdom of Cambodia")
@@ -1145,29 +1191,40 @@ def _build_cover_sheet(ws, name, grand_row):
     cell(19, 3, "Location :")
     cell(27, 1, "GRAND TOTAL").font = bold
     ws.merge_cells("A27:J27")
-    cell(30, 1, "=SUM!G{}".format(grand_row))
+    ws.merge_cells("A30:J30")
+    cell(30, 1, "=SUM!G{}".format(grand_row)).number_format = COVER_CUR
     for col, w in {"A": 15.0, "I": 12.9, "J": 12.9}.items():
         ws.column_dimensions[col].width = w
 
 
 def build_excel(state, project):
-    """Build the .xlsx download: COVER, SUM and one detail sheet per top-level
-    BOQ section, laid out and calculated exactly like the reference workbook."""
+    """Build the .xlsx download: COVER, SUM, sheet 1.1 holding the whole BOQ
+    (same quotation layout as the reference workbook) and blank template copies
+    1.2-1.4 so the sheet set matches the reference file exactly."""
     from openpyxl import Workbook
 
     wb = Workbook()
     wb.remove(wb.active)
     name = (project.get("name") if project else "") or ""
-    bills = _collect_bills((project.get("boq") if project else []) or [])
+    groups = _collect_bills((project.get("boq") if project else []) or [])
 
     cover = wb.create_sheet("COVER")
     summary = wb.create_sheet("SUM")
-    bill_sheets = []
-    for index, bill in enumerate(bills, start=1):
-        sheet = "1.{}".format(index)
-        ws = wb.create_sheet(sheet)
-        gt = _build_bill_sheet(ws, name, 17 + 2 * (index - 1), bill["nodes"], state)
-        bill_sheets.append({"sheet": sheet, "gt": gt, "title": bill["title"]})
+
+    main = wb.create_sheet("1.1")
+    main_gt = _build_bill_sheet(main, name, 17, groups, state)
+
+    bill_sheets = [
+        {"sheet": "1.1", "gt": main_gt,
+         "title": groups[0]["title"] if groups else ""},
+    ]
+    for index in range(2, 5):
+        ws = wb.create_sheet("1.{}".format(index))
+        _build_empty_bill_sheet(ws, name, 17 + 2 * (index - 1))
+        bill_sheets.append({
+            "sheet": "1.{}".format(index), "gt": 37,
+            "title": groups[index - 1]["title"] if index - 1 < len(groups) else "",
+        })
 
     grand = _build_sum_sheet(summary, name, bill_sheets)
     _build_cover_sheet(cover, name, grand)

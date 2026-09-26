@@ -388,7 +388,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>All changes are saved on the server and recorded per user. · build 2026-09-26b (Excel export)</span>
+  <span>All changes are saved on the server and recorded per user. · build 2026-09-26c (Excel export)</span>
   </div>
   </aside>
   <main>
@@ -1609,7 +1609,9 @@
   }
 
   function roundUp2(v) {
-  return Math.ceil(toNum(v) * 100) / 100;
+  const n = toNum(v);
+  if (n <= 0) return 0;
+  return Math.ceil(n * 100 - 1e-9) / 100;
   }
   function numFmt(v) {
   return (Math.round(toNum(v) * 100) / 100).toFixed(2);
