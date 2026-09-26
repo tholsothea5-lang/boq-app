@@ -1939,9 +1939,9 @@
   window.location.href = "/api/export.csv";
   });
   /* ---------------- Column layout ---------------- */
-  // The tables never scroll sideways. Each column owns a percentage of the
-  // table's width and the shares always add up to 100%, so the whole table —
-  // and every column in it — fits inside the window at any size.
+  // Each column owns a share of the table's width and the shares always add
+  // up to 100%. The BOQ table has a minimum width (21 columns) and scrolls
+  // sideways inside .table-wrap on narrow screens; the others fit the window.
   const COL_STORE = "boq.cols.";
   const COL_MIN_PX = 46;
   const COL_DEFAULTS = {
