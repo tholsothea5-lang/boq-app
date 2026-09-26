@@ -804,10 +804,10 @@ def export_csv():
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(["Ref", "Level", "Work description", "Brand", "Unit", "Quantity",
-                     "Qty markup %", "Charged qty", "Material price", "Labor price",
-                     "Original rate material", "Original rate labour",
-                     "Mark up % material", "Mark up % labour", "Rate material",
-                     "Rate labour", "Total material", "Total labour", "Amount",
+                     "Quantity Mark-up %", "Charged Quantity", "Material Price",
+                     "Labour Price", "Original Rate Material", "Original Rate Labour",
+                     "Mark-up % Material", "Mark-up % Labour", "Rate Material",
+                     "Rate Labour", "Total Material", "Total Labour", "Amount",
                      "Budget", "Profit", "Remark"])
 
     for ref, row in walk(boq):
