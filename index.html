@@ -132,8 +132,8 @@
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  #boqTable { min-width: 1320px; }
-  #boqTable thead th { white-space: nowrap; }
+  #boqTable { min-width: 1560px; }
+  #boqTable thead th { white-space: nowrap; font-size: 8.5px; letter-spacing: 0.02em; }
   thead th {
   position: relative; text-align: left; font-family: var(--font-mono);
   font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase;
@@ -518,9 +518,9 @@
   <div class="summary-strip">
     <div class="summary-cell"><span class="label">WORK ITEMS</span><span class="value" id="sumItems">0</span></div>
     <div class="summary-cell"><span class="label">MATERIAL COST</span><span class="value" id="sumMaterial">0.00</span></div>
-    <div class="summary-cell"><span class="label">LABOR COST</span><span class="value" id="sumLabor">0.00</span></div>
-    <div class="summary-cell"><span class="label">EST. BUDGET</span><span class="value" id="sumBudget">0.00</span></div>
-    <div class="summary-cell"><span class="label">EST. PROFIT</span><span class="value" id="sumProfit">0.00</span></div>
+    <div class="summary-cell"><span class="label">LABOUR COST</span><span class="value" id="sumLabor">0.00</span></div>
+    <div class="summary-cell"><span class="label">ESTIMATED BUDGET</span><span class="value" id="sumBudget">0.00</span></div>
+    <div class="summary-cell"><span class="label">ESTIMATED PROFIT</span><span class="value" id="sumProfit">0.00</span></div>
     <div class="summary-cell hero"><span class="label">GRAND TOTAL</span><span class="value" id="sumTotal">0.00</span></div>
   </div>
   <div class="toolbar">
@@ -558,22 +558,22 @@
         <th>Work description</th>
         <th>Brand</th>
         <th>Unit</th>
-        <th class="num">Qty</th>
-        <th class="num" title="Quantity mark-up % added to the drawing quantity (Excel: Mark up 10%)">Qty M/U %</th>
-        <th class="num" title="Charged quantity = Qty x (1 + Qty M/U %) rounded up">Qty chg</th>
-        <th class="num" title="Per-row custom final unit price (kept for existing bills)">Mat price</th>
-        <th class="num" title="Per-row custom final unit price (kept for existing bills)">Lab price</th>
-        <th class="num" title="Original base unit rate, Material">Orig M</th>
-        <th class="num" title="Original base unit rate, Labour">Orig L</th>
-        <th class="num" title="Material mark-up % (Excel default 0.3 = 30%)">M/U % M</th>
-        <th class="num" title="Labour mark-up % (Excel default 0.3 = 30%)">M/U % L</th>
-        <th class="num" title="Rate = ROUNDUP(Original x (1 + mark-up %))">Rate M</th>
-        <th class="num" title="Rate = ROUNDUP(Original x (1 + mark-up %))">Rate L</th>
-        <th class="num" title="Total = Rate x Charged qty">Total M</th>
-        <th class="num" title="Total = Rate x Charged qty">Total L</th>
-        <th class="num" title="Amount = Total M + Total L">Amount</th>
-        <th class="num" title="Budget = Original x Charged qty">Budget</th>
-        <th class="num" title="Profit = Amount - Budget">Profit</th>
+        <th class="num" title="The quantity measured from the drawing">Quantity (Drawing)</th>
+        <th class="num" title="Mark-up % added to the drawing quantity (the sheet uses 10%)">Quantity Mark-up %</th>
+        <th class="num" title="Quantity x (1 + mark-up %) rounded up">Charged Quantity</th>
+        <th class="num" title="Optional per-row fixed unit price, used when no Original Rate is entered">Material Price</th>
+        <th class="num" title="Optional per-row fixed unit price, used when no Original Rate is entered">Labour Price</th>
+        <th class="num">Original Rate — Material</th>
+        <th class="num">Original Rate — Labour</th>
+        <th class="num">Mark-up % — Material</th>
+        <th class="num">Mark-up % — Labour</th>
+        <th class="num" title="ROUNDUP(Original x (1 + mark-up %))">Rate — Material</th>
+        <th class="num" title="ROUNDUP(Original x (1 + mark-up %))">Rate — Labour</th>
+        <th class="num" title="Rate x Charged Quantity">Total — Material</th>
+        <th class="num" title="Rate x Charged Quantity">Total — Labour</th>
+        <th class="num" title="Total Material + Total Labour">Amount</th>
+        <th class="num" title="Original Rate x Charged Quantity">Budget</th>
+        <th class="num" title="Amount - Budget">Profit</th>
         <th>Remark</th>
       </tr>
       </thead>
@@ -2147,10 +2147,10 @@
   if (!p) { showToast("Nothing to export yet"); return; }
   const lines = [];
   lines.push(["Ref", "Level", "Work description", "Brand", "Unit", "Quantity",
-    "Qty markup %", "Charged qty", "Material price", "Labor price",
-    "Original rate material", "Original rate labour",
-    "Mark up % material", "Mark up % labour", "Rate material", "Rate labour",
-    "Total material", "Total labour", "Amount", "Budget", "Profit", "Remark"]
+    "Quantity Mark-up %", "Charged Quantity", "Material Price", "Labour Price",
+    "Original Rate Material", "Original Rate Labour",
+    "Mark-up % Material", "Mark-up % Labour", "Rate Material", "Rate Labour",
+    "Total Material", "Total Labour", "Amount", "Budget", "Profit", "Remark"]
     .map(csvCell).join(","));
   walkTree(p.boq, 0, function (n, meta) {
     const level = meta.depth + 1;
@@ -2200,7 +2200,7 @@
   const COL_DEFAULTS = {
   materialsTable: [6, 34, 8, 7, 9, 9, 14, 13],
   laborTable:     [7, 58, 15, 20],
-  boqTable:       [4, 15, 6, 4, 5, 5, 5, 6, 6, 6, 6, 5, 5, 6, 6, 6, 6, 8, 7, 7, 8]
+  boqTable:       [4, 16, 7, 5, 7, 8, 8, 8, 8, 10, 10, 8, 8, 8, 8, 8, 8, 8, 7, 7, 8]
   };
   const colWeights = {};
 

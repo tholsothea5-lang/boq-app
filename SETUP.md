@@ -105,15 +105,15 @@ That is exactly what an audit log depends on.
 
 The BOQ table mirrors your `Blank BOQ.xlsx` detail sheets (1.1–1.4). Per row:
 
-- **Brand**, **Qty**, **Qty M/U %** (quantity mark-up %, like the sheet's
-  "Mark up 10%"), **Qty chg** (charged qty, rounded up).
-- **Orig M / Orig L** (original base unit rates), **M/U % M / M/U % L**
-  (mark-up % — the sheets default to 30%), and computed **Rate M / Rate L**
-  (`ROUNDUP(Original × (1 + mark-up %))`).
-- Computed **Total M / Total L / Amount**, plus **Budget** (original × charged
-  qty) and **Profit** (Amount − Budget). Totals appear in the summary strip,
-  the table footer and the CSV export.
+- **Brand**, **Quantity (Drawing)**, **Quantity Mark-up %** (like the sheet's
+  "Mark up 10%"), **Charged Quantity** (rounded up).
+- **Original Rate — Material / Labour** (base unit rates), **Mark-up % —
+  Material / Labour** (the sheets default to 30%), and computed **Rate —
+  Material / Labour** (`ROUNDUP(Original × (1 + mark-up %))`).
+- Computed **Total — Material / Labour** and **Amount**, plus **Budget**
+  (original × charged qty) and **Profit** (Amount − Budget). Totals appear in
+  the summary strip, the table footer and the CSV export.
 
-The old **Mat price / Lab price** columns stay — a row that has no Orig M/L is
-priced exactly as before, so existing bills are unaffected. Rows with an Orig
-rate get the Excel mark-up treatment automatically.
+The old **Material Price / Labour Price** columns stay — a row that has no
+Original Rate is priced exactly as before, so existing bills are unaffected.
+Rows with an Original Rate get the Excel mark-up treatment automatically.
