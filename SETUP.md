@@ -112,7 +112,16 @@ The BOQ table mirrors your `Blank BOQ.xlsx` detail sheets (1.1–1.4). Per row:
   Material / Labour** (`ROUNDUP(Original × (1 + mark-up %))`).
 - Computed **Total — Material / Labour** and **Amount**, plus **Budget**
   (original × charged qty) and **Profit** (Amount − Budget). Totals appear in
-  the summary strip, the table footer and the CSV export.
+  the summary strip, the table footer, the CSV export and the Excel export.
+
+**Export Excel** (next to Export CSV) downloads a real workbook that mirrors
+`Blank BOQ.xlsx`: a **COVER** page, the **SUM** quotation (Bill No. 1–N rows
+linked to each sheet's grand total, SUB-TOTAL, DISCOUNT, VAT 10% and GRAND
+TOTAL) and one detail sheet per top-level BOQ section (`1.1`, `1.2`, …) with
+the same two-row grouped header, `ROUNDUP` mark-up formulas, SUB-TOTAL /
+GRAND TOTAL rows and the ESTIMATED PROFIT block. On the hosted site it is
+built in the browser (the SheetJS library is loaded from a CDN); in the local
+Flask app it is generated server-side (`/api/export.xlsx`).
 
 The old **Material Price / Labour Price** columns stay — a row that has no
 Original Rate is priced exactly as before, so existing bills are unaffected.

@@ -530,6 +530,7 @@
     <button class="btn btn-ghost btn-sm" id="btnBoqExpand">Expand all</button>
     <button class="btn btn-ghost btn-sm" id="btnBoqCollapse">Collapse all</button>
     <button class="btn btn-ghost" id="btnExportCsv" title="Download this project's bill as a spreadsheet">Export CSV</button>
+    <button class="btn btn-ghost" id="btnExportExcel" title="Download this project's bill as a workbook that looks like the reference Excel file">Export Excel</button>
     <button class="btn btn-ghost btn-sm" id="btnResetData" title="Discard changes saved in this browser and reload the bundled ledger">Reset saved copy</button>
     <button class="btn btn-danger-ghost" id="btnClearBoq">Clear all</button>
   </div>
@@ -656,10 +657,11 @@
   </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26a (BOQ mark-up & original rates)");
+  console.log("Site Ledger — build 2026-09-26b (Excel export)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -2189,7 +2191,250 @@
   setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   showToast("CSV exported");
   }
-  document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
+
+  /* ---------------- Excel export ---------------- */
+  // Builds a real .xlsx workbook (COVER + SUM + one sheet per top-level BOQ
+  // section) laid out and calculated exactly like the reference
+  // "Blank BOQ.xlsx": same sheets, two-row grouped header, ROUNDUP mark-up
+  // formulas, SUB-TOTAL / GRAND TOTAL rows and the ESTIMATED PROFIT block.
+  // Lives in this file so the static site needs no server to make the file;
+  // it uses the SheetJS library loaded from a CDN above.
+  function exportExcel() {
+    const p = activeProject();
+    if (!p) { showToast("Nothing to export yet"); return; }
+    if (typeof XLSX === "undefined") {
+      showToast("Excel export needs the spreadsheet library to load from the CDN — check your connection and try again");
+      return;
+    }
+    const wb = XLSX.utils.book_new();
+    const ACCT_CUR = '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)';
+    const ACCT_NUM = '_(* #,##0_);_(* \\(#,##0\\);_(* "-"_);_(@_)';
+    const PCT = "0%", QTY = "0.00";
+    const today = new Date();
+    const dateStr = ("0" + today.getDate()).slice(-2) + "/" +
+      ("0" + (today.getMonth() + 1)).slice(-2) + "/" + today.getFullYear();
+
+    function colNum(s) {
+      let n = 0;
+      for (let i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+      return n - 1;
+    }
+    function colL(n) {
+      let s = "";
+      while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = (n - m - 1) / 26; }
+      return s;
+    }
+    function a1rc(a1) {
+      const m = /^([A-Z]+)(\d+):([A-Z]+)(\d+)$/.exec(a1);
+      return { s: { r: parseInt(m[2], 10) - 1, c: colNum(m[1]) },
+               e: { r: parseInt(m[4], 10) - 1, c: colNum(m[3]) } };
+    }
+    function setCell(ws, r, c, v, z) {
+      const ref = colL(c) + r;
+      if (typeof v === "string" && v.charAt(0) === "=") {
+        ws[ref] = { t: "n", f: v.slice(1) };   // formula; Excel recalculates on open
+      } else {
+        ws[ref] = { t: typeof v === "number" ? "n" : "s", v: v };
+      }
+      if (z) ws[ref].z = z;
+      return ws[ref];
+    }
+    function markupDecimal(n, which) {
+      const orig = toNum(n[which === "material" ? "originalMaterial" : "originalLabor"]);
+      const mk = toNum(n[which === "material" ? "materialMarkup" : "laborMarkup"]);
+      return orig > 0 ? mk / 100 : 0;
+    }
+    function collectBills(boq) {
+      const leaves = [], heads = [], groups = [];
+      (boq || []).forEach(function (n) {
+        if (isHeading(n)) heads.push(n); else leaves.push(n);
+      });
+      if (leaves.length) groups.push({ title: "WORK ITEMS", nodes: leaves });
+      heads.forEach(function (h) { groups.push({ title: h.name || "ITEM", nodes: [h] }); });
+      return groups;
+    }
+
+    function makeBillSheet(nodes, sumRow) {
+      const ws = {};
+      const cell = function (r, c, v, z) { return setCell(ws, r, c, v, z); };
+      const money16 = [[17, "Q"], [21, "U"], [22, "V"], [23, "W"], [25, "Y"], [26, "Z"], [27, "AA"]];
+      cell(1, 2, "BILL OF QUANTITY");
+      ws["!merges"] = [{ s: { r: 0, c: 1 }, e: { r: 0, c: 17 } }];
+      cell(2, 2, "Project :"); cell(2, 3, p.name || "");
+      cell(3, 2, "Item :"); cell(4, 2, "Location :");
+      cell(5, 2, "Date :"); cell(5, 3, dateStr);
+      cell(6, 2, "Work Scope :");
+      cell(7, 7, "=10%", PCT);
+      cell(7, 17, "=SUM!B" + sumRow);
+      [[2, "No."], [3, "Description"], [4, "Brand"], [5, "Unit"], [6, "Quantity"],
+       [8, "Quantity"], [9, "Original Rate"], [11, "Material Mark up (%)"],
+       [12, "Labour Mark up (%)"], [13, "Rate"], [15, "Total"], [17, "Amount"],
+       [18, "Remark"], [21, "Budget"], [23, "Total"], [25, "Profit"], [27, "Total"]]
+        .forEach(function (h) { cell(8, h[0], h[1]); });
+      const row9map = { 6: "Drawing", 7: "Mark up 10%", 9: "Material", 10: "Labour",
+        11: 0.3, 12: 0.3, 13: "Material", 14: "Labour", 15: "Material", 16: "Labour",
+        21: "Material", 22: "Labour", 25: "Material", 26: "Labour" };
+      Object.keys(row9map).forEach(function (k) {
+        cell(9, parseInt(k, 10), row9map[k], (k === "11" || k === "12") ? PCT : undefined);
+      });
+      ["B8:B9", "C8:C9", "D8:D9", "E8:E9", "H8:H9", "Q8:Q9", "R8:R9", "W8:W9",
+       "AA8:AA9", "F8:G8", "I8:J8", "M8:N8", "O8:P8", "U8:V8", "Y8:Z8"]
+        .forEach(function (a1) { ws["!merges"].push(a1rc(a1)); });
+      const widths = { B: 5.7, C: 50.7, D: 9.1, E: 8.5, F: 9.1, G: 11.7, H: 9.1,
+        I: 9.1, J: 9.1, K: 19.7, L: 21.4, M: 9.1, N: 9.1, O: 9.1, P: 9.1,
+        Q: 10.7, R: 9.1, U: 9.1, V: 9.1, W: 9.1, Y: 9.1, Z: 9.1, AA: 9.1 };
+      ws["!cols"] = [];
+      for (let c = 1; c <= 27; c++) ws["!cols"].push({ wch: widths[colL(c)] || 8.5 });
+
+      let r = 10, secNo = 0, leafNo = 0, pending = [];
+      function newRow() { r += 1; return r; }
+      function flushSubtotal() {
+        if (!pending.length || secNo === 0) return;
+        const first = pending[0], last = pending[pending.length - 1];
+        const row = newRow();
+        cell(row, 3, "SUB-TOTAL " + secNo);
+        money16.forEach(function (p2) {
+          cell(row, p2[0], "=SUBTOTAL(9," + p2[1] + first + ":" + p2[1] + last + ")",
+            p2[0] === 17 ? ACCT_CUR : ACCT_NUM);
+        });
+        pending = [];
+      }
+      function writeLeaf(n) {
+        const row = newRow();
+        leafNo += 1;
+        cell(row, 2, leafNo);
+        cell(row, 3, n.name || "");
+        cell(row, 4, n.brand || "");
+        cell(row, 5, n.unit || "");
+        const quantity = toNum(n.quantity);
+        cell(row, 6, quantity);
+        cell(row, 7, Math.round(quantity * (1 + qtyMarkupPctFor(n) / 100) * 100) / 100, QTY);
+        cell(row, 8, "=ROUNDUP(G" + row + ",2)", QTY);
+        cell(row, 9, Math.round(originalMaterialFor(n) * 100) / 100);
+        cell(row, 10, Math.round(originalLaborFor(n) * 100) / 100);
+        cell(row, 11, markupDecimal(n, "material"), PCT);
+        cell(row, 12, markupDecimal(n, "labor"), PCT);
+        [[13, "=ROUNDUP(I" + row + "+I" + row + "*K" + row + ",2)", ACCT_CUR],
+         [14, "=ROUNDUP(J" + row + "+J" + row + "*L" + row + ",2)", ACCT_CUR],
+         [15, "=M" + row + "*H" + row, ACCT_CUR],
+         [16, "=N" + row + "*H" + row, ACCT_CUR],
+         [17, "=O" + row + "+P" + row, ACCT_CUR],
+         [21, "=I" + row + "*H" + row, ACCT_NUM],
+         [22, "=J" + row + "*H" + row, ACCT_NUM],
+         [23, "=V" + row + "+U" + row, ACCT_NUM],
+         [25, "=O" + row + "-U" + row, ACCT_NUM],
+         [26, "=P" + row + "-V" + row, ACCT_NUM],
+         [27, "=Z" + row + "+Y" + row, ACCT_NUM]]
+          .forEach(function (f) { cell(row, f[0], f[1], f[2]); });
+        if (n.remark) cell(row, 18, n.remark);
+        pending.push(row);
+      }
+      function emit(n) {
+        if (isHeading(n)) {
+          flushSubtotal();
+          secNo += 1;
+          const row = newRow();
+          cell(row, 2, secNo);
+          cell(row, 3, n.name || "");
+          (n.children || []).forEach(emit);
+        } else {
+          writeLeaf(n);
+        }
+      }
+      (nodes || []).forEach(emit);
+      flushSubtotal();
+      const gt = newRow();
+      cell(gt, 3, "GRAND TOTAL");
+      money16.forEach(function (p2) {
+        cell(gt, p2[0], "=SUBTOTAL(9," + p2[1] + "11:" + p2[1] + (gt - 1) + ")",
+          p2[0] === 17 ? ACCT_CUR : ACCT_NUM);
+      });
+      const pLabel = gt + 3, pAmt = gt + 4, pPct = gt + 6;
+      cell(pLabel, 21, "ESTIMATED PROFIT :");
+      cell(pAmt, 23, "=Q" + gt + "-W" + gt, ACCT_CUR);
+      cell(pPct, 21, "ESTIMATED PROFIT (%) :");
+      cell(pPct + 1, 23, "=W" + pAmt + "/Q" + gt, "0.00%");
+      cell(pPct + 1, 24, "Project");
+      cell(pPct + 2, 23, "=W" + pAmt + "/W" + gt, "0.00%");
+      cell(pPct + 2, 24, "Budget");
+      return { ws: ws, gt: gt };
+    }
+
+    function makeSumSheet(billInfos) {
+      const ws = {};
+      const cell = function (r, c, v, z) { return setCell(ws, r, c, v, z); };
+      cell(2, 2, "QUOTATION");
+      ws["!merges"] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 7 } }];
+      cell(3, 2, "Project :"); cell(3, 3, p.name || "");
+      cell(4, 2, "Items :"); cell(5, 2, "Location :");
+      cell(6, 2, "Date :"); cell(6, 3, dateStr);
+      cell(8, 2, "From :"); cell(9, 2, "H/P :");
+      cell(11, 2, "Attend to :"); cell(12, 2, "H/P :");
+      cell(14, 2, "Quote Ref :");
+      [[2, "Items"], [3, "Description"], [4, "Unit"], [5, "Quantity"],
+       [6, "Unit Price"], [7, "Amount"], [8, "Remark"]]
+        .forEach(function (h) { cell(15, h[0], h[1]); });
+      let row = 17;
+      billInfos.forEach(function (b, i) {
+        cell(row, 2, "Bill No. " + (i + 1));
+        cell(row, 3, b.title);
+        cell(row, 4, "LOT"); cell(row, 5, 1);
+        cell(row, 6, "='" + b.sheet + "'!Q" + b.gt);
+        cell(row, 7, "=F" + row + "*E" + row);
+        row += 2;
+      });
+      const sub = row, vat = sub + 2, grand = sub + 3;
+      cell(sub, 6, "SUB-TOTAL (EXCLUDE VAT)");
+      cell(sub, 7, "=SUM(G16:G" + (row - 2) + ")");
+      cell(sub + 1, 6, "DISCOUNT");
+      cell(vat, 6, "VAT");
+      cell(vat, 7, "=G" + sub + "*0.1");
+      cell(grand, 6, "GRAND TOTAL");
+      cell(grand, 7, "=G" + vat + "+G" + sub);
+      const note = grand + 3;
+      cell(note, 2, "Note :");
+      for (let i = 1; i <= 5; i++) cell(note + i, 2, String(i));
+      const sig = grand + 9;
+      cell(sig, 2, "Prepared by :"); cell(sig, 4, "Checked by :"); cell(sig, 8, "Accepted by :");
+      const widths = { B: 10.1, C: 30.7, D: 4.6, E: 8.6, F: 10.0, G: 12.0, H: 21.0 };
+      ws["!cols"] = [];
+      for (let c = 1; c <= 8; c++) ws["!cols"].push({ wch: widths[colL(c)] || 8.5 });
+      return { ws: ws, grand: grand };
+    }
+
+    function makeCover(grandRow) {
+      const ws = {};
+      const cell = function (r, c, v, z) { return setCell(ws, r, c, v, z); };
+      cell(2, 9, "Quote Ref :"); cell(3, 9, "Date :");
+      cell(7, 1, "Lot 93, St.598, Phum Toul Kork, Sangkat Toul Sangke");
+      cell(8, 1, "Khan Russey Keo, PNP, Kingdom of Cambodia");
+      cell(9, 1, "Phone/Fax: +855 23 210 894");
+      cell(11, 1, "QUOTATION");
+      ws["!merges"] = [{ s: { r: 10, c: 0 }, e: { r: 10, c: 9 } },
+                       { s: { r: 26, c: 0 }, e: { r: 26, c: 9 } }];
+      cell(15, 3, "Project :"); cell(16, 3, p.name || "");
+      cell(17, 3, "Items :"); cell(19, 3, "Location :");
+      cell(27, 1, "GRAND TOTAL");
+      cell(30, 1, "=SUM!G" + grandRow);
+      return ws;
+    }
+
+    const billInfos = [];
+    const bills = collectBills(p.boq);
+    bills.forEach(function (b, i) {
+      const sheet = "1." + (i + 1);
+      const made = makeBillSheet(b.nodes, 17 + 2 * i);
+      billInfos.push({ sheet: sheet, gt: made.gt, title: b.title, ws: made.ws });
+    });
+    const sumInfo = makeSumSheet(billInfos);
+    XLSX.utils.book_append_sheet(wb, makeCover(sumInfo.grand), "COVER");
+    XLSX.utils.book_append_sheet(wb, sumInfo.ws, "SUM");
+    billInfos.forEach(function (b) { XLSX.utils.book_append_sheet(wb, b.ws, b.sheet); });
+    const filename = ((p.name || "").replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/ /g, "-") || "bill-of-quantities");
+    XLSX.writeFile(wb, filename + ".xlsx");
+    showToast("Excel exported");
+  }
+  document.getElementById("btnExportExcel").addEventListener("click", exportExcel);
   document.getElementById("btnResetData").addEventListener("click", resetSharedLedger);
   /* ---------------- Column layout ---------------- */
   // Each column owns a share of the table's width and the shares always add
