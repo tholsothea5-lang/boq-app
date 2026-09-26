@@ -119,6 +119,10 @@
   padding: 7px 10px; font-family: var(--font-sans); font-size: 13px;
   background: var(--surface); color: var(--ink); min-width: 180px;
   }
+  .searchbar { position: relative; }
+  .searchbar .search-glyph { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.55; font-size: 13px; pointer-events: none; z-index: 1; }
+  .searchbar .search-input { flex: 1; width: 100%; min-width: 0; padding-left: 32px; }
+  .search-count { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); white-space: nowrap; }
   /* row toolbar: the seven row functions, standing at the top-right of the list */
   .row-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
   .row-toolbar .row-toolbar-hint {
@@ -392,7 +396,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26f ($ unit prices · centered)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26g (rate list search)</span>
   </div>
   </aside>
   <main>
@@ -405,13 +409,17 @@
     </div>
     <button class="btn btn-primary" id="btnAddMaterial">+ Add level 1 row</button>
   </div>
+  <div class="toolbar searchbar">
+    <span class="search-glyph">&#128269;</span>
+    <input type="text" class="search-input" id="materialSearch" placeholder="Search work description or unit…">
+    <span class="search-count" id="materialSearchCount"></span>
+  </div>
   <div class="toolbar">
     <div class="filter-row">
     <span class="filter-label">Level 1</span>
     <div class="chip-filter" id="materialBranchFilter"></div>
     </div>
     <div class="spacer"></div>
-    <input type="text" class="search-input" id="materialSearch" placeholder="Search materials…">
     <button class="btn btn-ghost btn-sm" id="btnMaterialExpand">Expand all</button>
     <button class="btn btn-ghost btn-sm" id="btnMaterialCollapse">Collapse all</button>
   </div>
@@ -462,13 +470,17 @@
     </div>
     <button class="btn btn-primary" id="btnAddLabor">+ Add level 1 row</button>
   </div>
+  <div class="toolbar searchbar">
+    <span class="search-glyph">&#128269;</span>
+    <input type="text" class="search-input" id="laborSearch" placeholder="Search work description or unit…">
+    <span class="search-count" id="laborSearchCount"></span>
+  </div>
   <div class="toolbar">
     <div class="filter-row">
     <span class="filter-label">Level 1</span>
     <div class="chip-filter" id="laborBranchFilter"></div>
     </div>
     <div class="spacer"></div>
-    <input type="text" class="search-input" id="laborSearch" placeholder="Search labor…">
     <button class="btn btn-ghost btn-sm" id="btnLaborExpand">Expand all</button>
     <button class="btn btn-ghost btn-sm" id="btnLaborCollapse">Collapse all</button>
   </div>
@@ -665,7 +677,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26f ($ unit prices · centered)");
+  console.log("Site Ledger — build 2026-09-26g (rate list search)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1227,10 +1239,10 @@
   (function walk(list, depth, prefix) {
   (list || []).forEach(function (n, i) {
     const ref = prefix.concat([i + 1]);
-    if (depth === 0 && opts.branch !== "All" && (n.name || "(untitled)") !== opts.branch) return;
+    if (depth === 0 && opts.branch !== "All" && !opts.term && (n.name || "(untitled)") !== opts.branch) return;
     if (opts.term && !subtreeMatches(n, opts.term, opts.match)) return;
     rows.push({ node: n, depth: depth, ref: ref, hit: opts.term ? opts.match(n, opts.term) : true });
-    if (collapsedIds.has(n.id)) return;
+    if (!opts.term && collapsedIds.has(n.id)) return;
     walk(n.children || [], depth + 1, ref);
   });
   })(nodes, 0, []);
@@ -1726,6 +1738,11 @@
   body.appendChild(tr);
   });
 
+  const matchCount = rows.filter(function (r) { return r.hit; }).length;
+  const sc = document.getElementById("materialSearchCount");
+  if (sc) sc.textContent = materialSearchTerm.trim()
+  ? matchCount + (matchCount === 1 ? " item found" : " items found") : "";
+
   refreshToolbar("materials", state.materials);
   }
 
@@ -1740,7 +1757,9 @@
   });
   document.getElementById("btnMaterialCollapse").addEventListener("click", collapseAll);
   document.getElementById("materialSearch").addEventListener("input", function (e) {
-  materialSearchTerm = e.target.value; renderMaterials();
+  materialSearchTerm = e.target.value;
+  if (materialSearchTerm.trim()) materialBranchActive = "All";
+  renderMaterials();
   });
   /* ================= LABOR ================= */
   let laborBranchActive = "All";
@@ -1795,6 +1814,11 @@
   body.appendChild(tr);
   });
 
+  const matchCount = rows.filter(function (r) { return r.hit; }).length;
+  const sc = document.getElementById("laborSearchCount");
+  if (sc) sc.textContent = laborSearchTerm.trim()
+  ? matchCount + (matchCount === 1 ? " item found" : " items found") : "";
+
   refreshToolbar("labor", state.labor);
   }
 
@@ -1809,7 +1833,9 @@
   });
   document.getElementById("btnLaborCollapse").addEventListener("click", collapseAll);
   document.getElementById("laborSearch").addEventListener("input", function (e) {
-  laborSearchTerm = e.target.value; renderLabor();
+  laborSearchTerm = e.target.value;
+  if (laborSearchTerm.trim()) laborBranchActive = "All";
+  renderLabor();
   });
   /* ================= BILL OF QUANTITIES ================= */
   let boqBranchActive = "All";
