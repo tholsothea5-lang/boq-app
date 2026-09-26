@@ -26,6 +26,7 @@ Then open http://localhost:5000
 import csv
 import io
 import json
+import math
 import mimetypes
 import os
 import re
@@ -479,12 +480,68 @@ def row_rate(state, row, which):
     return float(hit.get("price") or 0) if hit else 0.0
 
 
-def own_amount(state, row):
-    """What a row is worth on its own: quantity x (material + labor)."""
+def round_up2(v):
+    """Excel ROUNDUP(x, 2): always round up to 2 decimals."""
+    return math.ceil(float(v or 0) * 100) / 100
+
+
+def qty_markup_pct(row):
+    p = float(row.get("qtyMarkupPct") or 0)
+    return p if p > 0 else 0.0
+
+
+def qty_charged(row):
+    """Charged quantity = drawing quantity x (1 + quantity mark-up %), rounded
+    up to 2 decimals, exactly like the Excel detail sheets."""
     quantity = float(row.get("quantity") or 0)
     if not quantity:
         return 0.0
-    return (row_rate(state, row, "material") + row_rate(state, row, "labor")) * quantity
+    return round_up2(quantity * (1 + qty_markup_pct(row) / 100))
+
+
+def original_rate(state, row, which):
+    """Original (base) unit rate: the row's Original Rate when given, else the
+    per-row custom price, else the rate inherited from the referenced list."""
+    is_material = which == "material"
+    orig = float(row.get("originalMaterial") or 0) if is_material \
+        else float(row.get("originalLabor") or 0)
+    if orig > 0:
+        return orig
+    return row_rate(state, row, which)
+
+
+def final_rate(state, row, which):
+    """Final unit rate used for pricing. When an Original Rate is entered apply
+    the mark-up percentage like the Excel sheets (Rate = ROUNDUP(Original +
+    Original x mark-up %)). Rows without an Original Rate keep the legacy
+    behavior (custom price or the referenced rate list)."""
+    is_material = which == "material"
+    orig = float(row.get("originalMaterial") or 0) if is_material \
+        else float(row.get("originalLabor") or 0)
+    if orig > 0:
+        markup = float(row.get("materialMarkup") or 0) if is_material \
+            else float(row.get("laborMarkup") or 0)
+        return round_up2(orig * (1 + markup / 100))
+    return row_rate(state, row, which)
+
+
+def material_total(state, row):
+    return final_rate(state, row, "material") * qty_charged(row)
+
+
+def labor_total(state, row):
+    return final_rate(state, row, "labor") * qty_charged(row)
+
+
+def own_amount(state, row):
+    """What a row is worth on its own: Amount = Total M + Total L."""
+    return material_total(state, row) + labor_total(state, row)
+
+
+def own_budget(state, row):
+    """Budget = original rates x charged quantity (M + L)."""
+    return (original_rate(state, row, "material") +
+            original_rate(state, row, "labor")) * qty_charged(row)
 
 
 def subtree_total(state, row):
@@ -494,6 +551,17 @@ def subtree_total(state, row):
     for child in row.get("children") or []:
         total += subtree_total(state, child)
     return total
+
+
+def subtree_budget(state, row):
+    total = own_budget(state, row)
+    for child in row.get("children") or []:
+        total += subtree_budget(state, child)
+    return total
+
+
+def subtree_profit(state, row):
+    return subtree_total(state, row) - subtree_budget(state, row)
 
 
 def is_heading(row):
@@ -735,9 +803,12 @@ def export_csv():
     boq = project.get("boq") if project else []
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Ref", "Level", "Work description", "Unit", "Quantity",
-                     "Material unit price", "Labor unit price",
-                     "Total unit price", "Total price"])
+    writer.writerow(["Ref", "Level", "Work description", "Brand", "Unit", "Quantity",
+                     "Qty markup %", "Charged qty", "Material price", "Labor price",
+                     "Original rate material", "Original rate labour",
+                     "Mark up % material", "Mark up % labour", "Rate material",
+                     "Rate labour", "Total material", "Total labour", "Amount",
+                     "Budget", "Profit", "Remark"])
 
     for ref, row in walk(boq):
         level = len(ref)
@@ -747,27 +818,43 @@ def export_csv():
         description = "    " * (level - 1) + (row.get("name") or "")
 
         if is_heading(row):
-            # A heading carries no unit and no rate of its own, only the subtotal
-            # of everything filed under it.
+            # A heading carries no unit and no rate of its own, only the
+            # subtotals of everything filed under it.
             writer.writerow([ref_text, level, description, "", "", "", "", "", "",
-                             money(subtree_total(state, row))])
+                             "", "", "", "", "", "", "", "", "",
+                             money(subtree_total(state, row)),
+                             money(subtree_budget(state, row)),
+                             money(subtree_profit(state, row)), ""])
             continue
 
-        mat_price = row_rate(state, row, "material")
-        lab_price = row_rate(state, row, "labor")
-        quantity = float(row.get("quantity") or 0)
-        unit_price = mat_price + lab_price
         writer.writerow([
-            ref_text, level, description, row.get("unit") or "", quantity,
-            money(mat_price),
-            money(lab_price),
-            money(unit_price),
-            money(unit_price * quantity),
+            ref_text, level, description, row.get("brand") or "",
+            row.get("unit") or "",
+            float(row.get("quantity") or 0),
+            qty_markup_pct(row),
+            "{:.2f}".format(round(qty_charged(row) * 100) / 100),
+            money(row_rate(state, row, "material")),
+            money(row_rate(state, row, "labor")),
+            money(original_rate(state, row, "material")),
+            money(original_rate(state, row, "labor")),
+            float(row.get("materialMarkup") or 0),
+            float(row.get("laborMarkup") or 0),
+            money(final_rate(state, row, "material")),
+            money(final_rate(state, row, "labor")),
+            money(material_total(state, row)),
+            money(labor_total(state, row)),
+            money(own_amount(state, row)),
+            money(own_budget(state, row)),
+            money(own_amount(state, row) - own_budget(state, row)),
+            row.get("remark") or "",
         ])
 
     grand_total = sum(subtree_total(state, row) for row in boq)
-    writer.writerow(["", "", "GRAND TOTAL", "", "", "", "", "", "",
-                     money(grand_total)])
+    grand_budget = sum(subtree_budget(state, row) for row in boq)
+    writer.writerow(["", "", "GRAND TOTAL", "", "", "", "", "", "", "", "", "",
+                     "", "", "", "", "", "",
+                     money(grand_total), money(grand_budget),
+                     money(grand_total - grand_budget), ""])
 
     filename = ((project.get("name") if project else "") or "bill-of-quantities").strip() \
         or "bill-of-quantities"

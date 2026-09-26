@@ -130,8 +130,10 @@
   tbody tr { cursor: pointer; }
   tbody tr.selected > td { background: var(--steel-soft) !important; box-shadow: inset 3px 0 0 var(--steel); }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-  .table-wrap { overflow-x: hidden; }
+  .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  #boqTable { min-width: 1320px; }
+  #boqTable thead th { white-space: nowrap; }
   thead th {
   position: relative; text-align: left; font-family: var(--font-mono);
   font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase;
@@ -386,7 +388,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>All changes are saved on the server and recorded per user. · build 2026-09-20b</span>
+  <span>All changes are saved on the server and recorded per user. · build 2026-09-26a (BOQ mark-up &amp; original rates)</span>
   </div>
   </aside>
   <main>
@@ -517,6 +519,8 @@
     <div class="summary-cell"><span class="label">WORK ITEMS</span><span class="value" id="sumItems">0</span></div>
     <div class="summary-cell"><span class="label">MATERIAL COST</span><span class="value" id="sumMaterial">0.00</span></div>
     <div class="summary-cell"><span class="label">LABOR COST</span><span class="value" id="sumLabor">0.00</span></div>
+    <div class="summary-cell"><span class="label">EST. BUDGET</span><span class="value" id="sumBudget">0.00</span></div>
+    <div class="summary-cell"><span class="label">EST. PROFIT</span><span class="value" id="sumProfit">0.00</span></div>
     <div class="summary-cell hero"><span class="label">GRAND TOTAL</span><span class="value" id="sumTotal">0.00</span></div>
   </div>
   <div class="toolbar">
@@ -551,19 +555,35 @@
       <tr>
         <th>Ref</th>
         <th>Work description</th>
+        <th>Brand</th>
         <th>Unit</th>
         <th class="num">Qty</th>
-        <th class="num">Material price</th>
-        <th class="num">Labor price</th>
-        <th class="num">Total unit price</th>
-        <th class="num">Total price</th>
+        <th class="num" title="Quantity mark-up % added to the drawing quantity (Excel: Mark up 10%)">Qty M/U %</th>
+        <th class="num" title="Charged quantity = Qty x (1 + Qty M/U %) rounded up">Qty chg</th>
+        <th class="num" title="Per-row custom final unit price (kept for existing bills)">Mat price</th>
+        <th class="num" title="Per-row custom final unit price (kept for existing bills)">Lab price</th>
+        <th class="num" title="Original base unit rate, Material">Orig M</th>
+        <th class="num" title="Original base unit rate, Labour">Orig L</th>
+        <th class="num" title="Material mark-up % (Excel default 0.3 = 30%)">M/U % M</th>
+        <th class="num" title="Labour mark-up % (Excel default 0.3 = 30%)">M/U % L</th>
+        <th class="num" title="Rate = ROUNDUP(Original x (1 + mark-up %))">Rate M</th>
+        <th class="num" title="Rate = ROUNDUP(Original x (1 + mark-up %))">Rate L</th>
+        <th class="num" title="Total = Rate x Charged qty">Total M</th>
+        <th class="num" title="Total = Rate x Charged qty">Total L</th>
+        <th class="num" title="Amount = Total M + Total L">Amount</th>
+        <th class="num" title="Budget = Original x Charged qty">Budget</th>
+        <th class="num" title="Profit = Amount - Budget">Profit</th>
+        <th>Remark</th>
       </tr>
       </thead>
       <tbody id="boqBody"></tbody>
       <tfoot>
       <tr>
-        <td colspan="7" style="text-align:right;">Grand total</td>
+        <td colspan="17" style="text-align:right;">Grand total</td>
         <td class="num" id="boqFootTotal">0.00</td>
+        <td class="num" id="boqFootBudget">0.00</td>
+        <td class="num" id="boqFootProfit">0.00</td>
+        <td></td>
       </tr>
       </tfoot>
     </table>
@@ -653,17 +673,24 @@
   return r.json();
   }
   async function persist() {
-  // Keep draft projects backed up in this browser before anything else, so a
-  // reload does not lose them.
-  const drafts = (state.projects || []).filter(function (p) { return p.draft; });
-  if (drafts.length) storeDrafts(drafts);
   try {
   const body = Object.assign({}, state);
   // state.boq is a live mirror of the active project's bill; the projects list
   // itself is what the server stores, so the mirror is not sent as a top-level key.
-  // Draft projects stay out of the stored ledger until "Save project information".
   delete body.boq;
-  body.projects = (body.projects || []).filter(function (p) { return !p.draft; });
+  // Merge with the server copy before writing, so one account's save never
+  // clobbers a project another account just added: keep every project the
+  // server has, local copies win on the same id, and save the union.
+  try {
+  const fresh = await (await fetch("/api/data")).json();
+  if (fresh && Array.isArray(fresh.projects)) {
+    const byId = {};
+    (fresh.projects || []).forEach(function (p) { byId[p.id] = p; });
+    (body.projects || []).forEach(function (p) { delete byId[p.id]; });
+    body.projects = (body.projects || []).concat(Object.keys(byId).map(function (id) { return byId[id]; }));
+  }
+  } catch (e) { /* offline or race: still save what we have */ }
+  (body.projects || []).forEach(function (p) { delete p.draft; });
   if (body.projects.length && body.activeProjectId &&
     body.projects.every(function (p) { return p.id !== body.activeProjectId; })) {
     body.activeProjectId = body.projects[0].id;
@@ -686,7 +713,7 @@
     return JSON.stringify((list || []).map(function (p) { return String(p.id); }).sort());
   };
   if (ids(saved && saved.projects) !== ids(body.projects)) {
-    showToast("Could not save \u2014 the server copy did not match, draft kept");
+    showToast("Could not save \u2014 the server copy did not match");
     return false;
   }
   return true;
@@ -734,9 +761,12 @@
   function blankNode(kind) {
   if (kind === "boq") {
   return {
-    id: uid("b"), name: "", unit: "", quantity: 0,
+    id: uid("b"), name: "", brand: "", unit: "", quantity: 0,
     materialRef: "none", laborRef: "none",
-    customMaterialPrice: 0, customLaborPrice: 0, children: []
+    customMaterialPrice: 0, customLaborPrice: 0,
+    originalMaterial: 0, originalLabor: 0,
+    materialMarkup: 30, laborMarkup: 30, qtyMarkupPct: 10, remark: "",
+    children: []
   };
   }
   return { id: uid(kind === "materials" ? "m" : "l"), name: "", unit: "", price: 0, children: [] };
@@ -906,6 +936,18 @@
   return input;
   }
 
+  function textInput(owner, key) {
+  const input = document.createElement("input");
+  input.className = "cell-input";
+  const v = owner[key];
+  input.value = v === undefined || v === null ? "" : String(v);
+  input.addEventListener("change", function (e) {
+  owner[key] = e.target.value;
+  persist(); renderAll();
+  });
+  return input;
+  }
+
   function refCell(ref, depth) {
   const td = document.createElement("td");
   td.className = "ref-num" + (depth === 0 ? " lvl1" : "");
@@ -1046,43 +1088,31 @@
   /* ================= SITE LEDGER NAVIGATION ================= */
   let ledgerProjectOpen = true;
 
-  // Newly added projects start as drafts: they exist only in this browser
-  // (backed up to localStorage so a reload does not lose them) until the
-  // user clicks "Save project information", which publishes them to the
-  // shared ledger and the audit log.
+  // Every change — including new projects — is written straight to the shared
+  // ledger from this device and read back from it on every load, so the same
+  // account on any device sees the same projects. There used to be a per-browser
+  // "draft pool" in localStorage; on first load any drafts left over from that
+  // are promoted into the shared ledger once, then forgotten.
   const DRAFT_KEY = "boq_drafts_v1";
-  function loadDrafts() {
+  function promoteLocalDrafts() {
+  let drafts = [];
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
-    const list = raw ? JSON.parse(raw) : [];
-    return Array.isArray(list) ? list : [];
-  } catch (e) { return []; }
-  }
-  function storeDrafts(list) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(list)); } catch (e) { /* storage unavailable */ }
-  }
-  function upsertDraft(p) {
-  const list = loadDrafts().filter(function (d) { return d.id !== p.id; });
-  list.push(p);
-  storeDrafts(list);
-  }
-  function dropDraft(id) {
-  storeDrafts(loadDrafts().filter(function (d) { return d.id !== id; }));
-  }
-  function mergeDrafts() {
-  const drafts = loadDrafts();
-  if (!drafts.length) return;
+    drafts = raw ? JSON.parse(raw) : [];
+  } catch (e) { drafts = []; }
+  if (!Array.isArray(drafts) || !drafts.length) return;
   const byId = {};
   (state.projects || []).forEach(function (p) { byId[p.id] = p; });
+  let changed = false;
   drafts.forEach(function (d) {
-    if (byId[d.id]) {
-      if (!byId[d.id].draft) dropDraft(d.id); // already saved elsewhere
-    } else {
-      state.projects = state.projects || [];
-      d.draft = true;
-      state.projects.push(d);
-    }
+    if (!d || !d.id || byId[d.id] !== undefined) return;
+    delete d.draft;
+    state.projects = state.projects || [];
+    state.projects.push(d);
+    changed = true;
   });
+  try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* noop */ }
+  if (changed) persist();
   }
 
   function activeProject() {
@@ -1122,35 +1152,26 @@
   const names = list.map(function (p) { return p.name || ""; });
   let k = 1;
   while (names.indexOf(n) !== -1) { k += 1; n = "Project " + (list.length + k); }
-  const p = { id: uid("p"), name: n, boq: [], draft: true };
+  const p = { id: uid("p"), name: n, boq: [] };
   list.push(p);
-  upsertDraft(p);
   state.activeProjectId = p.id;
   ledgerProjectOpen = true;
   syncBoqRef();
   selectedIds.boq = null;
   setActiveTab("boq");
+  persist().then(function (ok) { if (ok) showToast("New project added and saved to the shared ledger"); });
   renderAll();
-  showToast("New draft project added \u2014 fill it in, then click Save project information");
   }
 
   function saveProjectInfo() {
   const p = activeProject();
   if (!p) return;
   if (!me) { showToast("Sign in to save the project"); return; }
-  const wasDraft = !!p.draft;
-  if (wasDraft) delete p.draft; // include it in the save
   persist().then(function (ok) {
-    if (ok) {
-    dropDraft(p.id);
+    if (!ok) return; // persist() already explained the failure
     syncBoqRef();
     renderLedger();
     showToast("Project information saved");
-    } else {
-    if (wasDraft) { p.draft = true; upsertDraft(p); renderLedger(); }
-    // persist() already showed the specific reason on screen; do not overwrite
-    // it with a generic "check your connection" message.
-    }
   });
   }
 
@@ -1161,7 +1182,6 @@
   const p = list[idx];
   if (!confirm("Delete the whole project \u201C" + (p.name || "untitled") +
   "\u201D and its bill of quantities? This cannot be undone.")) return;
-  dropDraft(id);
   list.splice(idx, 1);
   if (!list.length) {
   const fresh = { id: uid("p"), name: "Project 1", boq: [] };
@@ -1253,12 +1273,6 @@
     title: "Open \u201C" + (p.name || "Untitled project") + "\u201D",
     click: function () { switchProject(p.id); }
   });
-  if (p.draft) {
-    const tag = document.createElement("span");
-    tag.className = "ledger-badge";
-    tag.textContent = "draft";
-    pr.appendChild(tag);
-  }
 
   const del = document.createElement("button");
   del.type = "button";
@@ -1593,6 +1607,61 @@
   return refRate(state.labor, n.laborRef);
   }
 
+  function roundUp2(v) {
+  return Math.ceil(toNum(v) * 100) / 100;
+  }
+  function numFmt(v) {
+  return (Math.round(toNum(v) * 100) / 100).toFixed(2);
+  }
+
+  function qtyMarkupPctFor(n) {
+  const p = toNum(n.qtyMarkupPct);
+  return p > 0 ? p : 0;
+  }
+  function qtyCharged(n) {
+  const q = toNum(n.quantity);
+  return q ? roundUp2(q * (1 + qtyMarkupPctFor(n) / 100)) : 0;
+  }
+
+  // Original (base) unit rates: the row's Original Rate when given, else the
+  // per-row custom price, else the referenced material/labor rate list.
+  function originalMaterialFor(n) {
+  if (toNum(n.originalMaterial) > 0) return toNum(n.originalMaterial);
+  return materialPriceFor(n);
+  }
+  function originalLaborFor(n) {
+  if (toNum(n.originalLabor) > 0) return toNum(n.originalLabor);
+  return laborPriceFor(n);
+  }
+
+  // Final unit rate used for pricing. When an Original Rate is entered, apply
+  // the mark-up percentage like the Excel sheets (Rate = ROUNDUP(Original +
+  // Original x mark-up %)). Rows without an Original Rate keep the legacy
+  // behavior (custom price or the referenced rate list), so existing bills
+  // are unaffected.
+  function materialRateFor(n) {
+  if (toNum(n.originalMaterial) > 0) {
+    return roundUp2(toNum(n.originalMaterial) * (1 + toNum(n.materialMarkup) / 100));
+  }
+  return materialPriceFor(n);
+  }
+  function laborRateFor(n) {
+  if (toNum(n.originalLabor) > 0) {
+    return roundUp2(toNum(n.originalLabor) * (1 + toNum(n.laborMarkup) / 100));
+  }
+  return laborPriceFor(n);
+  }
+
+  function materialTotalFor(n) { return materialRateFor(n) * qtyCharged(n); }
+  function laborTotalFor(n) { return laborRateFor(n) * qtyCharged(n); }
+  function amountFor(n) { return materialTotalFor(n) + laborTotalFor(n); }
+  function materialBudgetFor(n) { return originalMaterialFor(n) * qtyCharged(n); }
+  function laborBudgetFor(n) { return originalLaborFor(n) * qtyCharged(n); }
+  function budgetFor(n) { return materialBudgetFor(n) + laborBudgetFor(n); }
+  function materialProfitFor(n) { return materialTotalFor(n) - materialBudgetFor(n); }
+  function laborProfitFor(n) { return laborTotalFor(n) - laborBudgetFor(n); }
+  function profitFor(n) { return materialProfitFor(n) + laborProfitFor(n); }
+
   // Unit rate a bill row inherits from the rate lists. Rows with sub-rows are
   // headings, so they are skipped: a heading is never used as a rate.
   function refRate(tree, id) {
@@ -1605,8 +1674,7 @@
   }
 
   function ownAmount(n) {
-  const qty = toNum(n.quantity);
-  return qty ? (materialPriceFor(n) + laborPriceFor(n)) * qty : 0;
+  return amountFor(n);
   }
 
   function nodeTotal(n) {
@@ -1615,19 +1683,31 @@
   return total;
   }
 
-  function boqTotals() {
-  let material = 0, labor = 0, grand = 0, items = 0;
-  walkTree(state.boq, 0, function (n) {
-  const qty = toNum(n.quantity);
-  if (qty) {
-    const m = materialPriceFor(n), l = laborPriceFor(n);
-    material += m * qty;
-    labor += l * qty;
-    grand += (m + l) * qty;
+  function nodeBudget(n) {
+  let total = budgetFor(n);
+  (n.children || []).forEach(function (c) { total += nodeBudget(c); });
+  return total;
   }
+
+  function nodeProfit(n) {
+  let total = profitFor(n);
+  (n.children || []).forEach(function (c) { total += nodeProfit(c); });
+  return total;
+  }
+
+  function boqTotals() {
+  let material = 0, labor = 0, grand = 0, budget = 0, items = 0;
+  walkTree(state.boq, 0, function (n) {
+  const q = qtyCharged(n);
+  const m = materialRateFor(n), l = laborRateFor(n);
+  material += m * q;
+  labor += l * q;
+  grand += (m + l) * q;
+  budget += originalMaterialFor(n) * q + originalLaborFor(n) * q;
   if (!isHeading(n)) items += 1;
   });
-  return { material: material, labor: labor, grand: grand, items: items };
+  return { material: material, labor: labor, grand: grand,
+    budget: budget, profit: grand - budget, items: items };
   }
 
   function boqMatches(n, term) {
@@ -1724,22 +1804,42 @@
   if (heading) tr.classList.add("heading-row");
   if (!entry.hit) tr.classList.add("context-row");
 
-  const tdUnit = document.createElement("td");
-  const tdQty = document.createElement("td");
-  const tdMatPrice = document.createElement("td");
-  const tdLabPrice = document.createElement("td");
-  const tdUnitPrice = document.createElement("td");
-  const tdTotal = document.createElement("td");
+  const td = {
+    brand: document.createElement("td"),
+    unit: document.createElement("td"),
+    qty: document.createElement("td"),
+    qtyMarkup: document.createElement("td"),
+    qtyChg: document.createElement("td"),
+    matPrice: document.createElement("td"),
+    labPrice: document.createElement("td"),
+    origM: document.createElement("td"),
+    origL: document.createElement("td"),
+    markupM: document.createElement("td"),
+    markupL: document.createElement("td"),
+    rateM: document.createElement("td"),
+    rateL: document.createElement("td"),
+    totalM: document.createElement("td"),
+    totalL: document.createElement("td"),
+    amount: document.createElement("td"),
+    budget: document.createElement("td"),
+    profit: document.createElement("td"),
+    remark: document.createElement("td")
+  };
+  function dash(el) { el.className = "num"; el.textContent = "\u2014"; }
 
   if (heading) {
-    tdMatPrice.className = "num";
-    tdLabPrice.className = "num";
-    tdUnitPrice.className = "num";
-    tdMatPrice.textContent = "\u2014";
-    tdLabPrice.textContent = "\u2014";
-    tdUnitPrice.textContent = "\u2014";
-    tdTotal.className = "num subtotal-cell";
-    tdTotal.textContent = fmt(nodeTotal(n));
+    dash(td.matPrice); dash(td.labPrice);
+    dash(td.origM); dash(td.origL); dash(td.markupM); dash(td.markupL);
+    dash(td.rateM); dash(td.rateL); dash(td.totalM); dash(td.totalL);
+    td.qty.className = "num";
+    td.qtyMarkup.className = "num";
+    td.qtyChg.className = "num";
+    td.amount.className = "num subtotal-cell";
+    td.amount.textContent = fmt(nodeTotal(n));
+    td.budget.className = "num subtotal-cell";
+    td.budget.textContent = fmt(nodeBudget(n));
+    td.profit.className = "num subtotal-cell";
+    td.profit.textContent = fmt(nodeProfit(n));
     const own = ownAmount(n);
     if (own) {
     const note = document.createElement("div");
@@ -1747,28 +1847,45 @@
     note.textContent = "incl. own " + fmt(own);
     note.title = "This heading also carries a quantity and rate of its own, " +
       "which is added to the subtotal of its sub-items.";
-    tdTotal.appendChild(note);
+    td.amount.appendChild(note);
     }
   } else {
-    const matPrice = toNum(n.customMaterialPrice);
-    const labPrice = toNum(n.customLaborPrice);
-    const unitPrice = matPrice + labPrice;
-    const lineTotal = unitPrice * toNum(n.quantity);
-
-    tdUnit.appendChild(buildUnitSelect(n));
-    tdQty.className = "num";
-    tdQty.appendChild(numberInput(n, "quantity"));
-    tdMatPrice.className = "num";
-    tdMatPrice.appendChild(numberInput(n, "customMaterialPrice"));
-    tdLabPrice.className = "num";
-    tdLabPrice.appendChild(numberInput(n, "customLaborPrice"));
-    tdUnitPrice.className = "num"; tdUnitPrice.textContent = fmt(unitPrice);
-    tdTotal.className = "num subtotal-cell"; tdTotal.textContent = fmt(lineTotal);
+    td.brand.appendChild(textInput(n, "brand"));
+    td.unit.appendChild(buildUnitSelect(n));
+    td.qty.className = "num";
+    td.qty.appendChild(numberInput(n, "quantity"));
+    td.qtyMarkup.className = "num";
+    td.qtyMarkup.appendChild(numberInput(n, "qtyMarkupPct"));
+    td.qtyChg.className = "num";
+    td.qtyChg.textContent = numFmt(qtyCharged(n));
+    td.matPrice.className = "num";
+    td.matPrice.appendChild(numberInput(n, "customMaterialPrice"));
+    td.labPrice.className = "num";
+    td.labPrice.appendChild(numberInput(n, "customLaborPrice"));
+    td.origM.className = "num";
+    td.origM.appendChild(numberInput(n, "originalMaterial"));
+    td.origL.className = "num";
+    td.origL.appendChild(numberInput(n, "originalLabor"));
+    td.markupM.className = "num";
+    td.markupM.appendChild(numberInput(n, "materialMarkup"));
+    td.markupL.className = "num";
+    td.markupL.appendChild(numberInput(n, "laborMarkup"));
+    td.rateM.className = "num"; td.rateM.textContent = fmt(materialRateFor(n));
+    td.rateL.className = "num"; td.rateL.textContent = fmt(laborRateFor(n));
+    td.totalM.className = "num"; td.totalM.textContent = fmt(materialTotalFor(n));
+    td.totalL.className = "num"; td.totalL.textContent = fmt(laborTotalFor(n));
+    td.amount.className = "num subtotal-cell"; td.amount.textContent = fmt(amountFor(n));
+    td.budget.className = "num"; td.budget.textContent = fmt(budgetFor(n));
+    td.profit.className = "num"; td.profit.textContent = fmt(profitFor(n));
+    td.remark.appendChild(textInput(n, "remark"));
   }
 
   bindRowClick(tr, n, "boq");
-  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdQty,
-        tdMatPrice, tdLabPrice, tdUnitPrice, tdTotal);
+  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth),
+        td.brand, td.unit, td.qty, td.qtyMarkup, td.qtyChg,
+        td.matPrice, td.labPrice, td.origM, td.origL, td.markupM, td.markupL,
+        td.rateM, td.rateL, td.totalM, td.totalL,
+        td.amount, td.budget, td.profit, td.remark);
   body.appendChild(tr);
   });
 
@@ -1776,8 +1893,12 @@
   document.getElementById("sumItems").textContent = totals.items;
   document.getElementById("sumMaterial").textContent = fmt(totals.material);
   document.getElementById("sumLabor").textContent = fmt(totals.labor);
+  document.getElementById("sumBudget").textContent = fmt(totals.budget);
+  document.getElementById("sumProfit").textContent = fmt(totals.profit);
   document.getElementById("sumTotal").textContent = fmt(totals.grand);
   document.getElementById("boqFootTotal").textContent = fmt(totals.grand);
+  document.getElementById("boqFootBudget").textContent = fmt(totals.budget);
+  document.getElementById("boqFootProfit").textContent = fmt(totals.profit);
 
   refreshToolbar("boq", state.boq);
   }
@@ -1826,7 +1947,7 @@
   const COL_DEFAULTS = {
   materialsTable: [6, 34, 8, 7, 9, 9, 14, 13],
   laborTable:     [7, 58, 15, 20],
-  boqTable:       [7, 28, 8, 8, 12, 12, 11, 14]
+  boqTable:       [4, 15, 6, 4, 5, 5, 5, 6, 6, 6, 6, 5, 5, 6, 6, 6, 6, 8, 7, 7, 8]
   };
   const colWeights = {};
 
@@ -2071,7 +2192,7 @@
   ensureAdminTab();
   loadState().then(function (data) {
   state = data;
-  mergeDrafts();
+  promoteLocalDrafts();
   syncBoqRef();
   bindRowToolbar("materials");
   bindRowToolbar("labor");
