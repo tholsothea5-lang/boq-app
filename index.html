@@ -130,8 +130,10 @@
   tbody tr { cursor: pointer; }
   tbody tr.selected > td { background: var(--steel-soft) !important; box-shadow: inset 3px 0 0 var(--steel); }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-  .table-wrap { overflow-x: hidden; }
+  .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  #boqTable { min-width: 1320px; }
+  #boqTable thead th { white-space: nowrap; }
   thead th {
   position: relative; text-align: left; font-family: var(--font-mono);
   font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase;
@@ -386,7 +388,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-20h (RLS error guidance)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26a (BOQ mark-up &amp; original rates)</span>
   </div>
   </aside>
   <main>
@@ -517,6 +519,8 @@
     <div class="summary-cell"><span class="label">WORK ITEMS</span><span class="value" id="sumItems">0</span></div>
     <div class="summary-cell"><span class="label">MATERIAL COST</span><span class="value" id="sumMaterial">0.00</span></div>
     <div class="summary-cell"><span class="label">LABOR COST</span><span class="value" id="sumLabor">0.00</span></div>
+    <div class="summary-cell"><span class="label">EST. BUDGET</span><span class="value" id="sumBudget">0.00</span></div>
+    <div class="summary-cell"><span class="label">EST. PROFIT</span><span class="value" id="sumProfit">0.00</span></div>
     <div class="summary-cell hero"><span class="label">GRAND TOTAL</span><span class="value" id="sumTotal">0.00</span></div>
   </div>
   <div class="toolbar">
@@ -552,19 +556,35 @@
       <tr>
         <th>Ref</th>
         <th>Work description</th>
+        <th>Brand</th>
         <th>Unit</th>
         <th class="num">Qty</th>
-        <th class="num">Material price</th>
-        <th class="num">Labor price</th>
-        <th class="num">Total unit price</th>
-        <th class="num">Total price</th>
+        <th class="num" title="Quantity mark-up % added to the drawing quantity (Excel: Mark up 10%)">Qty M/U %</th>
+        <th class="num" title="Charged quantity = Qty x (1 + Qty M/U %) rounded up">Qty chg</th>
+        <th class="num" title="Per-row custom final unit price (kept for existing bills)">Mat price</th>
+        <th class="num" title="Per-row custom final unit price (kept for existing bills)">Lab price</th>
+        <th class="num" title="Original base unit rate, Material">Orig M</th>
+        <th class="num" title="Original base unit rate, Labour">Orig L</th>
+        <th class="num" title="Material mark-up % (Excel default 0.3 = 30%)">M/U % M</th>
+        <th class="num" title="Labour mark-up % (Excel default 0.3 = 30%)">M/U % L</th>
+        <th class="num" title="Rate = ROUNDUP(Original x (1 + mark-up %))">Rate M</th>
+        <th class="num" title="Rate = ROUNDUP(Original x (1 + mark-up %))">Rate L</th>
+        <th class="num" title="Total = Rate x Charged qty">Total M</th>
+        <th class="num" title="Total = Rate x Charged qty">Total L</th>
+        <th class="num" title="Amount = Total M + Total L">Amount</th>
+        <th class="num" title="Budget = Original x Charged qty">Budget</th>
+        <th class="num" title="Profit = Amount - Budget">Profit</th>
+        <th>Remark</th>
       </tr>
       </thead>
       <tbody id="boqBody"></tbody>
       <tfoot>
       <tr>
-        <td colspan="7" style="text-align:right;">Grand total</td>
+        <td colspan="17" style="text-align:right;">Grand total</td>
         <td class="num" id="boqFootTotal">0.00</td>
+        <td class="num" id="boqFootBudget">0.00</td>
+        <td class="num" id="boqFootProfit">0.00</td>
+        <td></td>
       </tr>
       </tfoot>
     </table>
@@ -639,7 +659,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-20h (shared ledger sync)");
+  console.log("Site Ledger — build 2026-09-26a (BOQ mark-up & original rates)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -922,9 +942,12 @@
   function blankNode(kind) {
   if (kind === "boq") {
   return {
-    id: uid("b"), name: "", unit: "", quantity: 0,
+    id: uid("b"), name: "", brand: "", unit: "", quantity: 0,
     materialRef: "none", laborRef: "none",
-    customMaterialPrice: 0, customLaborPrice: 0, children: []
+    customMaterialPrice: 0, customLaborPrice: 0,
+    originalMaterial: 0, originalLabor: 0,
+    materialMarkup: 30, laborMarkup: 30, qtyMarkupPct: 10, remark: "",
+    children: []
   };
   }
   return { id: uid(kind === "materials" ? "m" : "l"), name: "", unit: "", price: 0, children: [] };
@@ -1089,6 +1112,18 @@
   input.value = toNum(owner[key]);
   input.addEventListener("change", function (e) {
   owner[key] = toNum(e.target.value);
+  persist(); renderAll();
+  });
+  return input;
+  }
+
+  function textInput(owner, key) {
+  const input = document.createElement("input");
+  input.className = "cell-input";
+  const v = owner[key];
+  input.value = v === undefined || v === null ? "" : String(v);
+  input.addEventListener("change", function (e) {
+  owner[key] = e.target.value;
   persist(); renderAll();
   });
   return input;
@@ -1775,6 +1810,61 @@
   return refRate(state.labor, n.laborRef);
   }
 
+  function roundUp2(v) {
+  return Math.ceil(toNum(v) * 100) / 100;
+  }
+  function numFmt(v) {
+  return (Math.round(toNum(v) * 100) / 100).toFixed(2);
+  }
+
+  function qtyMarkupPctFor(n) {
+  const p = toNum(n.qtyMarkupPct);
+  return p > 0 ? p : 0;
+  }
+  function qtyCharged(n) {
+  const q = toNum(n.quantity);
+  return q ? roundUp2(q * (1 + qtyMarkupPctFor(n) / 100)) : 0;
+  }
+
+  // Original (base) unit rates: the row's Original Rate when given, else the
+  // per-row custom price, else the referenced material/labor rate list.
+  function originalMaterialFor(n) {
+  if (toNum(n.originalMaterial) > 0) return toNum(n.originalMaterial);
+  return materialPriceFor(n);
+  }
+  function originalLaborFor(n) {
+  if (toNum(n.originalLabor) > 0) return toNum(n.originalLabor);
+  return laborPriceFor(n);
+  }
+
+  // Final unit rate used for pricing. When an Original Rate is entered, apply
+  // the mark-up percentage like the Excel sheets (Rate = ROUNDUP(Original +
+  // Original x mark-up %)). Rows without an Original Rate keep the legacy
+  // behavior (custom price or the referenced rate list), so existing bills
+  // are unaffected.
+  function materialRateFor(n) {
+  if (toNum(n.originalMaterial) > 0) {
+    return roundUp2(toNum(n.originalMaterial) * (1 + toNum(n.materialMarkup) / 100));
+  }
+  return materialPriceFor(n);
+  }
+  function laborRateFor(n) {
+  if (toNum(n.originalLabor) > 0) {
+    return roundUp2(toNum(n.originalLabor) * (1 + toNum(n.laborMarkup) / 100));
+  }
+  return laborPriceFor(n);
+  }
+
+  function materialTotalFor(n) { return materialRateFor(n) * qtyCharged(n); }
+  function laborTotalFor(n) { return laborRateFor(n) * qtyCharged(n); }
+  function amountFor(n) { return materialTotalFor(n) + laborTotalFor(n); }
+  function materialBudgetFor(n) { return originalMaterialFor(n) * qtyCharged(n); }
+  function laborBudgetFor(n) { return originalLaborFor(n) * qtyCharged(n); }
+  function budgetFor(n) { return materialBudgetFor(n) + laborBudgetFor(n); }
+  function materialProfitFor(n) { return materialTotalFor(n) - materialBudgetFor(n); }
+  function laborProfitFor(n) { return laborTotalFor(n) - laborBudgetFor(n); }
+  function profitFor(n) { return materialProfitFor(n) + laborProfitFor(n); }
+
   // Unit rate a bill row inherits from the rate lists. Rows with sub-rows are
   // headings, so they are skipped: a heading is never used as a rate.
   function refRate(tree, id) {
@@ -1787,8 +1877,7 @@
   }
 
   function ownAmount(n) {
-  const qty = toNum(n.quantity);
-  return qty ? (materialPriceFor(n) + laborPriceFor(n)) * qty : 0;
+  return amountFor(n);
   }
 
   function nodeTotal(n) {
@@ -1797,19 +1886,31 @@
   return total;
   }
 
-  function boqTotals() {
-  let material = 0, labor = 0, grand = 0, items = 0;
-  walkTree(state.boq, 0, function (n) {
-  const qty = toNum(n.quantity);
-  if (qty) {
-    const m = materialPriceFor(n), l = laborPriceFor(n);
-    material += m * qty;
-    labor += l * qty;
-    grand += (m + l) * qty;
+  function nodeBudget(n) {
+  let total = budgetFor(n);
+  (n.children || []).forEach(function (c) { total += nodeBudget(c); });
+  return total;
   }
+
+  function nodeProfit(n) {
+  let total = profitFor(n);
+  (n.children || []).forEach(function (c) { total += nodeProfit(c); });
+  return total;
+  }
+
+  function boqTotals() {
+  let material = 0, labor = 0, grand = 0, budget = 0, items = 0;
+  walkTree(state.boq, 0, function (n) {
+  const q = qtyCharged(n);
+  const m = materialRateFor(n), l = laborRateFor(n);
+  material += m * q;
+  labor += l * q;
+  grand += (m + l) * q;
+  budget += originalMaterialFor(n) * q + originalLaborFor(n) * q;
   if (!isHeading(n)) items += 1;
   });
-  return { material: material, labor: labor, grand: grand, items: items };
+  return { material: material, labor: labor, grand: grand,
+    budget: budget, profit: grand - budget, items: items };
   }
 
   function boqMatches(n, term) {
@@ -1906,22 +2007,42 @@
   if (heading) tr.classList.add("heading-row");
   if (!entry.hit) tr.classList.add("context-row");
 
-  const tdUnit = document.createElement("td");
-  const tdQty = document.createElement("td");
-  const tdMatPrice = document.createElement("td");
-  const tdLabPrice = document.createElement("td");
-  const tdUnitPrice = document.createElement("td");
-  const tdTotal = document.createElement("td");
+  const td = {
+    brand: document.createElement("td"),
+    unit: document.createElement("td"),
+    qty: document.createElement("td"),
+    qtyMarkup: document.createElement("td"),
+    qtyChg: document.createElement("td"),
+    matPrice: document.createElement("td"),
+    labPrice: document.createElement("td"),
+    origM: document.createElement("td"),
+    origL: document.createElement("td"),
+    markupM: document.createElement("td"),
+    markupL: document.createElement("td"),
+    rateM: document.createElement("td"),
+    rateL: document.createElement("td"),
+    totalM: document.createElement("td"),
+    totalL: document.createElement("td"),
+    amount: document.createElement("td"),
+    budget: document.createElement("td"),
+    profit: document.createElement("td"),
+    remark: document.createElement("td")
+  };
+  function dash(el) { el.className = "num"; el.textContent = "\u2014"; }
 
   if (heading) {
-    tdMatPrice.className = "num";
-    tdLabPrice.className = "num";
-    tdUnitPrice.className = "num";
-    tdMatPrice.textContent = "\u2014";
-    tdLabPrice.textContent = "\u2014";
-    tdUnitPrice.textContent = "\u2014";
-    tdTotal.className = "num subtotal-cell";
-    tdTotal.textContent = fmt(nodeTotal(n));
+    dash(td.matPrice); dash(td.labPrice);
+    dash(td.origM); dash(td.origL); dash(td.markupM); dash(td.markupL);
+    dash(td.rateM); dash(td.rateL); dash(td.totalM); dash(td.totalL);
+    td.qty.className = "num";
+    td.qtyMarkup.className = "num";
+    td.qtyChg.className = "num";
+    td.amount.className = "num subtotal-cell";
+    td.amount.textContent = fmt(nodeTotal(n));
+    td.budget.className = "num subtotal-cell";
+    td.budget.textContent = fmt(nodeBudget(n));
+    td.profit.className = "num subtotal-cell";
+    td.profit.textContent = fmt(nodeProfit(n));
     const own = ownAmount(n);
     if (own) {
     const note = document.createElement("div");
@@ -1929,28 +2050,45 @@
     note.textContent = "incl. own " + fmt(own);
     note.title = "This heading also carries a quantity and rate of its own, " +
       "which is added to the subtotal of its sub-items.";
-    tdTotal.appendChild(note);
+    td.amount.appendChild(note);
     }
   } else {
-    const matPrice = toNum(n.customMaterialPrice);
-    const labPrice = toNum(n.customLaborPrice);
-    const unitPrice = matPrice + labPrice;
-    const lineTotal = unitPrice * toNum(n.quantity);
-
-    tdUnit.appendChild(buildUnitSelect(n));
-    tdQty.className = "num";
-    tdQty.appendChild(numberInput(n, "quantity"));
-    tdMatPrice.className = "num";
-    tdMatPrice.appendChild(numberInput(n, "customMaterialPrice"));
-    tdLabPrice.className = "num";
-    tdLabPrice.appendChild(numberInput(n, "customLaborPrice"));
-    tdUnitPrice.className = "num"; tdUnitPrice.textContent = fmt(unitPrice);
-    tdTotal.className = "num subtotal-cell"; tdTotal.textContent = fmt(lineTotal);
+    td.brand.appendChild(textInput(n, "brand"));
+    td.unit.appendChild(buildUnitSelect(n));
+    td.qty.className = "num";
+    td.qty.appendChild(numberInput(n, "quantity"));
+    td.qtyMarkup.className = "num";
+    td.qtyMarkup.appendChild(numberInput(n, "qtyMarkupPct"));
+    td.qtyChg.className = "num";
+    td.qtyChg.textContent = numFmt(qtyCharged(n));
+    td.matPrice.className = "num";
+    td.matPrice.appendChild(numberInput(n, "customMaterialPrice"));
+    td.labPrice.className = "num";
+    td.labPrice.appendChild(numberInput(n, "customLaborPrice"));
+    td.origM.className = "num";
+    td.origM.appendChild(numberInput(n, "originalMaterial"));
+    td.origL.className = "num";
+    td.origL.appendChild(numberInput(n, "originalLabor"));
+    td.markupM.className = "num";
+    td.markupM.appendChild(numberInput(n, "materialMarkup"));
+    td.markupL.className = "num";
+    td.markupL.appendChild(numberInput(n, "laborMarkup"));
+    td.rateM.className = "num"; td.rateM.textContent = fmt(materialRateFor(n));
+    td.rateL.className = "num"; td.rateL.textContent = fmt(laborRateFor(n));
+    td.totalM.className = "num"; td.totalM.textContent = fmt(materialTotalFor(n));
+    td.totalL.className = "num"; td.totalL.textContent = fmt(laborTotalFor(n));
+    td.amount.className = "num subtotal-cell"; td.amount.textContent = fmt(amountFor(n));
+    td.budget.className = "num"; td.budget.textContent = fmt(budgetFor(n));
+    td.profit.className = "num"; td.profit.textContent = fmt(profitFor(n));
+    td.remark.appendChild(textInput(n, "remark"));
   }
 
   bindRowClick(tr, n, "boq");
-  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdQty,
-        tdMatPrice, tdLabPrice, tdUnitPrice, tdTotal);
+  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth),
+        td.brand, td.unit, td.qty, td.qtyMarkup, td.qtyChg,
+        td.matPrice, td.labPrice, td.origM, td.origL, td.markupM, td.markupL,
+        td.rateM, td.rateL, td.totalM, td.totalL,
+        td.amount, td.budget, td.profit, td.remark);
   body.appendChild(tr);
   });
 
@@ -1958,8 +2096,12 @@
   document.getElementById("sumItems").textContent = totals.items;
   document.getElementById("sumMaterial").textContent = fmt(totals.material);
   document.getElementById("sumLabor").textContent = fmt(totals.labor);
+  document.getElementById("sumBudget").textContent = fmt(totals.budget);
+  document.getElementById("sumProfit").textContent = fmt(totals.profit);
   document.getElementById("sumTotal").textContent = fmt(totals.grand);
   document.getElementById("boqFootTotal").textContent = fmt(totals.grand);
+  document.getElementById("boqFootBudget").textContent = fmt(totals.budget);
+  document.getElementById("boqFootProfit").textContent = fmt(totals.profit);
 
   refreshToolbar("boq", state.boq);
   }
@@ -2004,28 +2146,39 @@
   const p = activeProject();
   if (!p) { showToast("Nothing to export yet"); return; }
   const lines = [];
-  lines.push(["Ref", "Level", "Work description", "Unit", "Quantity",
-    "Material unit price", "Labor unit price", "Total unit price", "Total price"]
+  lines.push(["Ref", "Level", "Work description", "Brand", "Unit", "Quantity",
+    "Qty markup %", "Charged qty", "Material price", "Labor price",
+    "Original rate material", "Original rate labour",
+    "Mark up % material", "Mark up % labour", "Rate material", "Rate labour",
+    "Total material", "Total labour", "Amount", "Budget", "Profit", "Remark"]
     .map(csvCell).join(","));
   walkTree(p.boq, 0, function (n, meta) {
     const level = meta.depth + 1;
     const refText = meta.ref.join(".");
     const description = Array(level).join("    ") + (n.name || "");
     if (isHeading(n)) {
-      lines.push([refText, level, description, "", "", "", "", "", fmt(nodeTotal(n))].map(csvCell).join(","));
+      lines.push([refText, level, description, "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", fmt(nodeTotal(n)), fmt(nodeBudget(n)),
+        fmt(nodeProfit(n)), ""].map(csvCell).join(","));
       return;
     }
-    const matPrice = materialPriceFor(n);
-    const labPrice = laborPriceFor(n);
-    const quantity = toNum(n.quantity);
-    const unitPrice = matPrice + labPrice;
-    lines.push([refText, level, description, n.unit || "", quantity,
-      fmt(matPrice), fmt(labPrice), fmt(unitPrice), fmt(unitPrice * quantity)]
-      .map(csvCell).join(","));
+    lines.push([refText, level, description, n.brand || "", n.unit || "",
+      toNum(n.quantity), qtyMarkupPctFor(n), numFmt(qtyCharged(n)),
+      fmt(materialPriceFor(n)), fmt(laborPriceFor(n)),
+      fmt(originalMaterialFor(n)), fmt(originalLaborFor(n)),
+      toNum(n.materialMarkup), toNum(n.laborMarkup),
+      fmt(materialRateFor(n)), fmt(laborRateFor(n)),
+      fmt(materialTotalFor(n)), fmt(laborTotalFor(n)),
+      fmt(amountFor(n)), fmt(budgetFor(n)), fmt(profitFor(n)),
+      n.remark || ""].map(csvCell).join(","));
   });
-  let grand = 0;
-  (p.boq || []).forEach(function (row) { grand += nodeTotal(row); });
-  lines.push(["", "", "GRAND TOTAL", "", "", "", "", "", fmt(grand)].map(csvCell).join(","));
+  let grand = 0, grandBudget = 0, grandProfit = 0;
+  (p.boq || []).forEach(function (row) {
+    grand += nodeTotal(row); grandBudget += nodeBudget(row); grandProfit += nodeProfit(row);
+  });
+  lines.push(["", "", "GRAND TOTAL", "", "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", fmt(grand), fmt(grandBudget), fmt(grandProfit), ""]
+    .map(csvCell).join(","));
   const filename = ((p.name || "").replace(/[^A-Za-z0-9 _-]/g, "").trim().replace(/ /g, "-") || "bill-of-quantities");
   const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
@@ -2047,7 +2200,7 @@
   const COL_DEFAULTS = {
   materialsTable: [6, 34, 8, 7, 9, 9, 14, 13],
   laborTable:     [7, 58, 15, 20],
-  boqTable:       [7, 28, 8, 8, 12, 12, 11, 14]
+  boqTable:       [4, 15, 6, 4, 5, 5, 5, 6, 6, 6, 6, 5, 5, 6, 6, 6, 6, 8, 7, 7, 8]
   };
   const colWeights = {};
 

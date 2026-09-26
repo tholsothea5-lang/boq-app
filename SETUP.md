@@ -28,7 +28,10 @@ project and paste two keys.
 
 > **Already ran this script before?** Just run it again — it is written to be
 > re-run safely, and the latest copy adds the **Moderator** role (three titles:
-> Admin, Moderator, User) and the online presence box.
+> Admin, Moderator, User), the online presence box, and (build 2026-09-20d)
+> removes the per-writer lock on the shared ledger so every account can save.
+> If two accounts could not see each other's new projects, re-running this
+> whole file is the required step.
 
 ## 3. Point confirmation emails at the real site
 
@@ -97,3 +100,20 @@ now it starts with a **sign-in screen**:
 **Note:** this replaces the old "saved in this browser only" behaviour — edits
 now go to the shared ledger, so everyone with an account sees the same numbers.
 That is exactly what an audit log depends on.
+
+## Bill of Quantities columns (build 2026-09-26a)
+
+The BOQ table mirrors your `Blank BOQ.xlsx` detail sheets (1.1–1.4). Per row:
+
+- **Brand**, **Qty**, **Qty M/U %** (quantity mark-up %, like the sheet's
+  "Mark up 10%"), **Qty chg** (charged qty, rounded up).
+- **Orig M / Orig L** (original base unit rates), **M/U % M / M/U % L**
+  (mark-up % — the sheets default to 30%), and computed **Rate M / Rate L**
+  (`ROUNDUP(Original × (1 + mark-up %))`).
+- Computed **Total M / Total L / Amount**, plus **Budget** (original × charged
+  qty) and **Profit** (Amount − Budget). Totals appear in the summary strip,
+  the table footer and the CSV export.
+
+The old **Mat price / Lab price** columns stay — a row that has no Orig M/L is
+priced exactly as before, so existing bills are unaffected. Rows with an Orig
+rate get the Excel mark-up treatment automatically.

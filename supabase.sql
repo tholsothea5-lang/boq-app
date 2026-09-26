@@ -101,7 +101,13 @@ create policy profiles_select_auth on public.profiles
   for select to authenticated using (true);
 
 -- ledger: signed-in users may read it and save changes to it (the whole point
--- of the tool — the ledger is shared). Everyone is trusted with edits.
+-- of the tool — the ledger is shared). Everyone is trusted with edits. The
+-- single row (id = 1) belongs to the whole workspace, NOT to the last writer:
+-- if a save were locked to the account that wrote the row last, a second
+-- account could never save and its projects would never reach the shared
+-- ledger. So select/insert/update are all open to any signed-in user and the
+-- ONLY rule is "the row still has id = 1". Re-run this whole file (it is safe
+-- to run more than once) to replace the old per-writer lock.
 drop policy if exists ledger_select_auth on public.ledger;
 create policy ledger_select_auth on public.ledger
   for select to authenticated using (true);
@@ -110,7 +116,7 @@ create policy ledger_insert_auth on public.ledger
   for insert to authenticated with check (id = 1);
 drop policy if exists ledger_update_auth on public.ledger;
 create policy ledger_update_auth on public.ledger
-  for update to authenticated with check (id = 1 and auth.uid() = updated_by);
+  for update to authenticated with check (id = 1);
 
 -- audit: anyone may add THEIR OWN entry (the user_id is forced inside postgres
 -- so nobody can log a change as somebody else), and only admins and moderators
@@ -181,7 +187,36 @@ revoke all on function public.admin_set_active(uuid, boolean) from public;
 revoke all on function public.admin_delete_user(uuid) from public;
 
 -- ---------------------------------------------------------------------------
--- 6. quick check (should say profiles / ledger / audit)
+-- 6. robust ledger access (RPC) — the SITE reads and writes the ledger through
+--    these two functions, not the ledger table directly. They run as the table
+--    owner (security definer) so a wrong row-level-security policy can never
+--    lock the one shared row away from an account again. The table policies in
+--    section 4 stay as defense-in-depth; the site does not depend on them.
+-- ---------------------------------------------------------------------------
+create or replace function public.ledger_get()
+returns jsonb
+language sql security definer set search_path = public stable
+as $$
+  select state from public.ledger where id = 1
+$$;
+
+create or replace function public.ledger_save(new_state jsonb)
+returns void
+language sql security definer set search_path = public
+as $$
+  insert into public.ledger (id, state, updated_by, updated_at)
+  values (1, new_state, auth.uid(), now())
+  on conflict (id) do update
+    set state = excluded.state, updated_by = excluded.updated_by, updated_at = excluded.updated_at
+$$;
+
+revoke all on function public.ledger_get() from public;
+grant execute on function public.ledger_get() to authenticated;
+revoke all on function public.ledger_save(jsonb) from public;
+grant execute on function public.ledger_save(jsonb) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 7. quick check (should say profiles / ledger / audit)
 -- ---------------------------------------------------------------------------
 select table_name from information_schema.tables
 where table_schema = 'public' and table_name in ('profiles', 'ledger', 'audit')
