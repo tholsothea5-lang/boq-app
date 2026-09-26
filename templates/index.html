@@ -530,6 +530,7 @@
     <button class="btn btn-ghost btn-sm" id="btnBoqExpand">Expand all</button>
     <button class="btn btn-ghost btn-sm" id="btnBoqCollapse">Collapse all</button>
     <button class="btn btn-ghost" id="btnExportCsv">Export CSV</button>
+    <button class="btn btn-ghost" id="btnExportExcel" title="Download this project's bill as a workbook that looks like the reference Excel file">Export Excel</button>
     <button class="btn btn-danger-ghost" id="btnClearBoq">Clear all</button>
   </div>
   <div class="toolbar row-toolbar" id="boqRowTools">
@@ -1937,6 +1938,9 @@
   if (saveProjectBtn) saveProjectBtn.addEventListener("click", saveProjectInfo);
   document.getElementById("btnExportCsv").addEventListener("click", () => {
   window.location.href = "/api/export.csv";
+  });
+  document.getElementById("btnExportExcel").addEventListener("click", () => {
+  window.location.href = "/api/export.xlsx";
   });
   /* ---------------- Column layout ---------------- */
   // Each column owns a share of the table's width and the shares always add

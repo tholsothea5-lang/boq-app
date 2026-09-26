@@ -870,6 +870,342 @@ def export_csv():
     )
 
 
+# ------------------------------------------------------------- Excel export
+# Number formats copied from the reference workbook (Excel "accounting" style:
+# money shows a "$" sign, budget/profit columns align without one, mark-ups
+# display as percentages).
+ACCT_CUR = '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)'
+ACCT_NUM = '_(* #,##0_);_(* \\(#,##0\\);_(* "-"_);_(@_)'
+PCT_FMT = "0%"
+QTY_FMT = "0.00"
+
+
+def _markup_decimal(row, which):
+    """Mark-up % stored the way the Excel sheets multiply it (30 -> 0.3). A row
+    without an Original Rate keeps its flat price, so its mark-up is 0."""
+    if which == "material":
+        orig = float(row.get("originalMaterial") or 0)
+        markup = float(row.get("materialMarkup") or 0)
+    else:
+        orig = float(row.get("originalLabor") or 0)
+        markup = float(row.get("laborMarkup") or 0)
+    return markup / 100 if orig > 0 else 0.0
+
+
+def _collect_bills(boq):
+    """Split the BOQ tree into bill groups, one per top-level section. Loose
+    top-level rows that are not headings share a 'WORK ITEMS' sheet."""
+    leaves = [row for row in boq if not is_heading(row)]
+    heads = [row for row in boq if is_heading(row)]
+    groups = []
+    if leaves:
+        groups.append({"title": "WORK ITEMS", "nodes": leaves})
+    for head in heads:
+        groups.append({"title": head.get("name") or "ITEM", "nodes": [head]})
+    return groups
+
+
+def _build_bill_sheet(ws, name, sum_row, nodes, state):
+    """One detail sheet (e.g. '1.1') laid out and calculated exactly like the
+    reference workbook: title, project block, two-row grouped column header,
+    section headings with SUB-TOTAL rows, a GRAND TOTAL row and the estimated
+    profit block. Returns the GRAND TOTAL row number."""
+    from openpyxl.styles import Font
+
+    bold = Font(bold=True)
+
+    def cell(r, c, v=None):
+        return ws.cell(row=r, column=c, value=v)
+
+    cell(1, 2, "BILL OF QUANTITY").font = bold
+    ws.merge_cells("B1:R1")
+    cell(2, 2, "Project :")
+    cell(2, 3, name)
+    cell(3, 2, "Item :")
+    cell(4, 2, "Location :")
+    cell(5, 2, "Date :")
+    cell(5, 3, datetime.now().strftime("%d/%m/%Y"))
+    cell(6, 2, "Work Scope :")
+
+    g7 = cell(7, 7, "=10%")
+    g7.number_format = PCT_FMT
+    cell(7, 17, "=SUM!B{}".format(sum_row))  # which Bill No. this sheet is
+
+    header8 = [(2, "No."), (3, "Description"), (4, "Brand"), (5, "Unit"),
+               (6, "Quantity"), (8, "Quantity"), (9, "Original Rate"),
+               (11, "Material Mark up (%)"), (12, "Labour Mark up (%)"),
+               (13, "Rate"), (15, "Total"), (17, "Amount"), (18, "Remark"),
+               (21, "Budget"), (23, "Total"), (25, "Profit"), (27, "Total")]
+    for col, text in header8:
+        cell(8, col, text)
+    row9 = {6: "Drawing", 7: "Mark up 10%", 9: "Material", 10: "Labour",
+            11: 0.3, 12: 0.3, 13: "Material", 14: "Labour",
+            15: "Material", 16: "Labour", 21: "Material", 22: "Labour",
+            25: "Material", 26: "Labour"}
+    for col, v in row9.items():
+        c = cell(9, col, v)
+        if col in (11, 12):
+            c.number_format = PCT_FMT
+    for rng in ["B8:B9", "C8:C9", "D8:D9", "E8:E9", "H8:H9", "Q8:Q9",
+                "R8:R9", "W8:W9", "AA8:AA9", "F8:G8", "I8:J8", "M8:N8",
+                "O8:P8", "U8:V8", "Y8:Z8"]:
+        ws.merge_cells(rng)
+
+    r = 10  # first data row is 11, exactly like the reference sheet
+    sec_no = 0
+    leaf_no = 0
+    pending = []
+
+    def new_row():
+        nonlocal r
+        r += 1
+        return r
+
+    def flush_subtotal():
+        # A bill made only of loose rows (no section heading) has no SUB-TOTAL;
+        # its rows are still inside the GRAND TOTAL range below.
+        if not pending or sec_no == 0:
+            return
+        first, last = pending[0], pending[-1]
+        row = new_row()
+        cell(row, 3, "SUB-TOTAL {}".format(sec_no))
+        for col, letter in [(17, "Q"), (21, "U"), (22, "V"), (23, "W"),
+                            (25, "Y"), (26, "Z"), (27, "AA")]:
+            c = cell(row, col, "=SUBTOTAL(9,{0}{1}:{0}{2})".format(letter, first, last))
+            c.number_format = ACCT_CUR if col == 17 else ACCT_NUM
+        pending[:] = []
+
+    def write_leaf(node):
+        nonlocal leaf_no
+        row = new_row()
+        leaf_no += 1
+        cell(row, 2, leaf_no)
+        cell(row, 3, node.get("name") or "")
+        cell(row, 4, node.get("brand") or "")
+        cell(row, 5, node.get("unit") or "")
+        quantity = float(node.get("quantity") or 0)
+        cell(row, 6, quantity)
+        g = cell(row, 7, round(quantity * (1 + qty_markup_pct(node) / 100), 2))
+        g.number_format = QTY_FMT
+        h = cell(row, 8, "=ROUNDUP(G{0},2)".format(row))
+        h.number_format = QTY_FMT
+        cell(row, 9, round(original_rate(state, node, "material"), 2))
+        cell(row, 10, round(original_rate(state, node, "labor"), 2))
+        km = cell(row, 11, _markup_decimal(node, "material"))
+        km.number_format = PCT_FMT
+        kl = cell(row, 12, _markup_decimal(node, "labor"))
+        kl.number_format = PCT_FMT
+        formulas = [(13, "=ROUNDUP(I{0}+I{0}*K{0},2)".format(row)),
+                    (14, "=ROUNDUP(J{0}+J{0}*L{0},2)".format(row)),
+                    (15, "=M{0}*H{0}".format(row)),
+                    (16, "=N{0}*H{0}".format(row)),
+                    (17, "=O{0}+P{0}".format(row)),
+                    (21, "=I{0}*H{0}".format(row)),
+                    (22, "=J{0}*H{0}".format(row)),
+                    (23, "=V{0}+U{0}".format(row)),
+                    (25, "=O{0}-U{0}".format(row)),
+                    (26, "=P{0}-V{0}".format(row)),
+                    (27, "=Z{0}+Y{0}".format(row))]
+        for col, formula in formulas:
+            c = cell(row, col, formula)
+            c.number_format = ACCT_CUR if col in (13, 14, 15, 16, 17) else ACCT_NUM
+        if node.get("remark"):
+            cell(row, 18, node.get("remark"))
+        pending.append(row)
+
+    def emit(node):
+        nonlocal sec_no
+        if is_heading(node):
+            flush_subtotal()
+            sec_no += 1
+            row = new_row()
+            cell(row, 2, sec_no)
+            cell(row, 3, node.get("name") or "").font = bold
+            for child in node.get("children") or []:
+                emit(child)
+        else:
+            write_leaf(node)
+
+    for node in nodes:
+        emit(node)
+    flush_subtotal()
+
+    gt = new_row()
+    cell(gt, 3, "GRAND TOTAL").font = bold
+    last = gt - 1
+    for col, letter in [(17, "Q"), (21, "U"), (22, "V"), (23, "W"),
+                        (25, "Y"), (26, "Z"), (27, "AA")]:
+        c = cell(gt, col, "=SUBTOTAL(9,{0}11:{0}{1})".format(letter, last))
+        c.number_format = ACCT_CUR if col == 17 else ACCT_NUM
+
+    p_label = gt + 3
+    p_amt = gt + 4
+    p_pct = gt + 6
+    cell(p_label, 21, "ESTIMATED PROFIT :")
+    cell(p_amt, 23, "=Q{0}-W{0}".format(gt)).number_format = ACCT_CUR
+    cell(p_pct, 21, "ESTIMATED PROFIT (%) :")
+    cell(p_pct + 1, 23, "=W{0}/Q{1}".format(p_amt, gt)).number_format = "0.00%"
+    cell(p_pct + 1, 24, "Project")
+    cell(p_pct + 2, 23, "=W{0}/W{1}".format(p_amt, gt)).number_format = "0.00%"
+    cell(p_pct + 2, 24, "Budget")
+
+    for col, w in {"B": 5.7, "C": 50.7, "D": 9.1, "E": 8.5, "F": 9.1,
+                   "G": 11.7, "H": 9.1, "I": 9.1, "J": 9.1, "K": 19.7,
+                   "L": 21.4, "M": 9.1, "N": 9.1, "O": 9.1, "P": 9.1,
+                   "Q": 10.7, "R": 9.1, "U": 9.1, "V": 9.1, "W": 9.1,
+                   "Y": 9.1, "Z": 9.1, "AA": 9.1}.items():
+        ws.column_dimensions[col].width = w
+    return gt
+
+
+def _build_sum_sheet(ws, name, bill_sheets):
+    """QUOTATION sheet: one row per bill linking to that sheet's GRAND TOTAL,
+    then SUB-TOTAL (exclude VAT), DISCOUNT, VAT 10% and GRAND TOTAL, plus the
+    note and signature blocks. Returns the SUM GRAND TOTAL row for the cover."""
+    from openpyxl.styles import Font
+
+    bold = Font(bold=True)
+
+    def cell(r, c, v=None):
+        return ws.cell(row=r, column=c, value=v)
+
+    cell(2, 2, "QUOTATION").font = bold
+    ws.merge_cells("B2:H2")
+    cell(3, 2, "Project :")
+    cell(3, 3, name)
+    cell(4, 2, "Items :")
+    cell(5, 2, "Location :")
+    cell(6, 2, "Date :")
+    cell(6, 3, datetime.now().strftime("%d/%m/%Y"))
+    cell(8, 2, "From :")
+    cell(9, 2, "H/P :")
+    cell(11, 2, "Attend to :")
+    cell(12, 2, "H/P :")
+    cell(14, 2, "Quote Ref :")
+    for col, text in [(2, "Items"), (3, "Description"), (4, "Unit"),
+                      (5, "Quantity"), (6, "Unit Price"), (7, "Amount"),
+                      (8, "Remark")]:
+        cell(15, col, text)
+
+    row = 17  # Bill No. 1 starts on SUM row 17, exactly like the reference
+    for index, bill in enumerate(bill_sheets, start=1):
+        cell(row, 2, "Bill No. {}".format(index))
+        cell(row, 3, bill["title"])
+        cell(row, 4, "LOT")
+        cell(row, 5, 1)
+        cell(row, 6, "='{0}'!Q{1}".format(bill["sheet"], bill["gt"]))
+        cell(row, 7, "=F{0}*E{0}".format(row))
+        row += 2
+
+    sub = row
+    cell(sub, 6, "SUB-TOTAL (EXCLUDE VAT)")
+    cell(sub, 7, "=SUM(G16:G{})".format(row - 2))
+    dis = sub + 1
+    cell(dis, 6, "DISCOUNT")
+    vat = sub + 2
+    cell(vat, 6, "VAT")
+    cell(vat, 7, "=G{0}*0.1".format(sub))
+    grand = sub + 3
+    cell(grand, 6, "GRAND TOTAL").font = bold
+    cell(grand, 7, "=G{0}+G{1}".format(vat, sub))
+
+    note = grand + 3
+    cell(note, 2, "Note :")
+    for i in range(1, 6):
+        cell(note + i, 2, str(i))
+    sig = grand + 9
+    cell(sig, 2, "Prepared by :")
+    cell(sig, 4, "Checked by :")
+    cell(sig, 8, "Accepted by :")
+
+    for col, w in {"B": 10.1, "C": 30.7, "D": 4.6, "E": 8.6, "F": 10.0,
+                   "G": 12.0, "H": 21.0}.items():
+        ws.column_dimensions[col].width = w
+    return grand
+
+
+def _build_cover_sheet(ws, name, grand_row):
+    from openpyxl.styles import Font
+
+    bold = Font(bold=True)
+
+    def cell(r, c, v=None):
+        return ws.cell(row=r, column=c, value=v)
+
+    cell(2, 9, "Quote Ref :")
+    cell(3, 9, "Date :")
+    cell(7, 1, "Lot 93, St.598, Phum Toul Kork, Sangkat Toul Sangke")
+    cell(8, 1, "Khan Russey Keo, PNP, Kingdom of Cambodia")
+    cell(9, 1, "Phone/Fax: +855 23 210 894")
+    cell(11, 1, "QUOTATION").font = bold
+    ws.merge_cells("A11:J11")
+    cell(15, 3, "Project :")
+    cell(16, 3, name)
+    cell(17, 3, "Items :")
+    cell(19, 3, "Location :")
+    cell(27, 1, "GRAND TOTAL").font = bold
+    ws.merge_cells("A27:J27")
+    cell(30, 1, "=SUM!G{}".format(grand_row))
+    for col, w in {"A": 15.0, "I": 12.9, "J": 12.9}.items():
+        ws.column_dimensions[col].width = w
+
+
+def build_excel(state, project):
+    """Build the .xlsx download: COVER, SUM and one detail sheet per top-level
+    BOQ section, laid out and calculated exactly like the reference workbook."""
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    wb.remove(wb.active)
+    name = (project.get("name") if project else "") or ""
+    bills = _collect_bills((project.get("boq") if project else []) or [])
+
+    cover = wb.create_sheet("COVER")
+    summary = wb.create_sheet("SUM")
+    bill_sheets = []
+    for index, bill in enumerate(bills, start=1):
+        sheet = "1.{}".format(index)
+        ws = wb.create_sheet(sheet)
+        gt = _build_bill_sheet(ws, name, 17 + 2 * (index - 1), bill["nodes"], state)
+        bill_sheets.append({"sheet": sheet, "gt": gt, "title": bill["title"]})
+
+    grand = _build_sum_sheet(summary, name, bill_sheets)
+    _build_cover_sheet(cover, name, grand)
+
+    output = io.BytesIO()
+    wb.save(output)
+    return output.getvalue()
+
+
+@app.route("/api/export.xlsx")
+@login_required
+def export_excel():
+    try:
+        import openpyxl  # noqa: F401  (lazy: the rest of the app runs without it)
+    except Exception:
+        return jsonify({"error": "Excel export needs openpyxl. "
+                                 "Run: pip install openpyxl"}), 500
+    state = read_state()
+    projects = state.get("projects") or []
+    wanted = request.args.get("project") or state.get("activeProjectId")
+    project = next((p for p in projects if p.get("id") == wanted), None) \
+        or (projects[0] if projects else None)
+    filename = ((project.get("name") if project else "") or "bill-of-quantities").strip() \
+        or "bill-of-quantities"
+    filename = "".join(c for c in filename if c.isalnum() or c in "-_ ").replace(" ", "-") \
+        or "bill-of-quantities"
+    try:
+        data = build_excel(state, project)
+    except Exception as exc:
+        return jsonify({"error": "Excel export failed: {}".format(exc)}), 500
+    return Response(
+        data,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition":
+                 "attachment; filename={}.xlsx".format(filename)},
+    )
+
+
 @app.route("/api/photo/<path:name>")
 @login_required
 def get_photo(name):
