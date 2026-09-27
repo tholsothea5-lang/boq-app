@@ -144,3 +144,49 @@ the fade and the smooth scroll off.
 
 Switching tab or ledger section also returns you to the top, since a tab change
 always means new content further up the page.
+
+## Search speed (build 2026-09-27b)
+
+Typing in the Materials, Labor, Lump Sum Work or Bill of Quantities search box
+used to rebuild the whole matching list on every keystroke. Because a match
+keeps its parent headings, a broad letter dragged in most of the ledger: `c`
+matched 844 of the 1,061 material rows, and each rebuild built around 19,000
+elements, bound 8,000 listeners and mutated the live table 900 times. That is
+what made the box feel stuck.
+
+Four things changed. None of them change what a search finds.
+
+| | before | after |
+| --- | --- | --- |
+| type `concrete` in Materials | 77ms of blocking work | 4ms |
+| type `plaster` in Materials | 38ms | 1ms |
+| one keystroke on `c` | 48ms, 19,036 elements | 15ms, 7,594 elements |
+| live table mutations per rebuild | up to 11,836 | 14–15, whatever the result |
+
+- **Debounce** (`SEARCH_DEBOUNCE_MS = 160`). A burst of keys costs one rebuild
+  instead of one per key. Enter, blur and `change` flush immediately, so the
+  list is never left showing a filter you have already typed past. While a
+  rebuild is queued the result count is greyed, so the number under the box is
+  never silently out of date.
+- **One swap per rebuild.** Each renderer builds its rows into a detached
+  `DocumentFragment` and swaps it in with a single `replaceChildren`, so the
+  table is not re-laid-out on every append. What is left is the branch filter
+  chips (14 for Materials, 13 Labor, 2 Lump Sum, 5 BoQ), which are few enough
+  not to matter.
+- **A row cap, with disclosure** (`SEARCH_ROW_CAP = 300`, only while a term is
+  active). A one-letter search cannot ask for an unbounded list. When the cap
+  bites, an amber note under the search box says so in plain words — *Showing
+  the first 300 of 844 matching rows* — and disappears on the next keystroke,
+  so it never describes a list that is no longer on screen. **With no term
+  there is no cap at all**, so Expand all and ordinary browsing still draw every
+  row, and the result count always reports the true number of hits even when
+  the drawing is capped.
+- **Lazy thumbnails.** 500-odd material rows carry a photo. Those images now
+  load lazily and decode asynchronously, so a search no longer fetches and
+  decodes every thumbnail in the list.
+
+Two smaller cleanups came with it: `visibleRows` remembers each node's match
+verdict so a name is lower-cased once instead of twice, and the four search
+boxes are wired through one `bindSearch` helper rather than four copies of the
+same listener. The audit trail's own search was already debounced at 350ms; the
+four lists had simply never been given the same treatment.

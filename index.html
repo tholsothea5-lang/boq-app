@@ -164,6 +164,17 @@
   .searchbar .search-glyph { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.55; font-size: 13px; pointer-events: none; z-index: 1; }
   .searchbar .search-input { flex: 1; width: 100%; min-width: 0; padding-left: 32px; }
   .search-count { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); white-space: nowrap; }
+  /* shown only when a search matched more rows than the cap, so the list can never be
+     silently truncated — it says how many were held back and how to see them */
+  .search-note {
+  display: none; margin: -4px 0 10px 0; padding: 8px 12px;
+  border: 1px solid var(--line-strong); border-left: 3px solid var(--amber);
+  border-radius: var(--radius); background: var(--surface);
+  color: var(--ink-muted); font-size: 12.5px; line-height: 1.45;
+  }
+  .search-note.show { display: block; }
+  /* the rebuild is queued for a moment after the last keypress; this says so */
+  .search-count.pending { color: var(--steel); }
   /* row toolbar: the seven row functions, standing at the top-right of the list */
   .row-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
   .row-toolbar .row-toolbar-hint {
@@ -450,7 +461,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-27a (Go to top)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-27b (Search speed)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -471,6 +482,7 @@
     <input type="text" class="search-input" id="materialSearch" placeholder="Search work description or unit…">
     <span class="search-count" id="materialSearchCount"></span>
   </div>
+  <div class="search-note" id="materialSearchNote"></div>
   <div class="toolbar">
     <div class="filter-row">
     <span class="filter-label">Level 1</span>
@@ -532,6 +544,7 @@
     <input type="text" class="search-input" id="laborSearch" placeholder="Search work description or unit…">
     <span class="search-count" id="laborSearchCount"></span>
   </div>
+  <div class="search-note" id="laborSearchNote"></div>
   <div class="toolbar">
     <div class="filter-row">
     <span class="filter-label">Level 1</span>
@@ -589,6 +602,7 @@
     <input type="text" class="search-input" id="lumpSumSearch" placeholder="Search work description or unit…">
     <span class="search-count" id="lumpSumSearchCount"></span>
   </div>
+  <div class="search-note" id="lumpSumSearchNote"></div>
   <div class="toolbar">
     <div class="filter-row">
     <span class="filter-label">Level 1</span>
@@ -664,6 +678,7 @@
     <button class="btn btn-ghost btn-sm" id="btnResetData" title="Discard changes saved in this browser and reload the bundled ledger">Reset saved copy</button>
     <button class="btn btn-danger-ghost" id="btnClearBoq">Clear all</button>
   </div>
+  <div class="search-note" id="boqSearchNote"></div>
   <div class="toolbar row-toolbar" id="boqRowTools">
     <span class="row-toolbar-hint">Select a row, then:</span>
     <button type="button" class="btn btn-ghost btn-row" data-act="sub">+ Sub item</button>
@@ -794,7 +809,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-27a (Go to top)");
+  console.log("Site Ledger — build 2026-09-27b (Search speed)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1348,24 +1363,95 @@
   return found ? active : "All";
   }
 
-  function subtreeMatches(n, term, match) {
-  if (match(n, term)) return true;
-  return (n.children || []).some(function (c) { return subtreeMatches(c, term, match); });
-  }
-
   function visibleRows(nodes, opts) {
   const rows = [];
+  // A single walk wants each node's verdict twice: once to decide whether the subtree is worth
+  // descending into, and once for the row's own hit flag. match() lowercases both the name and
+  // the unit, so remember the answer per node rather than paying for it twice over 1,000+ rows.
+  const verdicts = opts.term ? new Map() : null;
+  function hit(n) {
+  if (!verdicts.has(n)) verdicts.set(n, opts.match(n, opts.term));
+  return verdicts.get(n);
+  }
+  function subtreeMatches(n) {
+  if (hit(n)) return true;
+  return (n.children || []).some(subtreeMatches);
+  }
   (function walk(list, depth, prefix) {
   (list || []).forEach(function (n, i) {
     const ref = prefix.concat([i + 1]);
     if (depth === 0 && opts.branch !== "All" && !opts.term && (n.name || "(untitled)") !== opts.branch) return;
-    if (opts.term && !subtreeMatches(n, opts.term, opts.match)) return;
-    rows.push({ node: n, depth: depth, ref: ref, hit: opts.term ? opts.match(n, opts.term) : true });
+    if (opts.term && !subtreeMatches(n)) return;
+    rows.push({ node: n, depth: depth, ref: ref, hit: opts.term ? hit(n) : true });
     if (!opts.term && collapsedIds.has(n.id)) return;
     walk(n.children || [], depth + 1, ref);
   });
   })(nodes, 0, []);
   return rows;
+  }
+
+  /* ---------------- Search that stays responsive on 1,000+ row lists ----------------
+     The lists are big — 1,061 material rows, 530 labour — and every row is built from about
+     twenty elements: editable inputs, a unit/price cell, a photo cell. Re-filtering on each
+     keystroke and appending every row straight into the live <tbody> is what made search feel
+     broken rather than slow. One broad term such as "c" pulls 844 material rows, and doing that
+     four times over, once per keystroke, is enough to lock the tab up. Three fixes, none of
+     which change what a search finds:
+       - debounce, so a burst of keys costs one rebuild rather than one per key;
+       - build the rows in a detached DocumentFragment and swap it in once, instead of
+         re-running table layout on every single append;
+       - cap how many rows are drawn while a term is active, and say plainly how many were held
+         back, so no one keystroke can ever be unbounded. With no term there is no cap, so
+         Expand all and ordinary browsing still draw every row. */
+  const SEARCH_DEBOUNCE_MS = 160;
+  const SEARCH_ROW_CAP = 300;
+
+  // Debounce a search box. The term is recorded on every keystroke so nothing is lost, but the
+  // list is only rebuilt once typing pauses. Enter, blur or a change event flushes at once, so
+  // the list is never left showing a filter the user has already moved past.
+  function bindSearch(inputId, countId, noteId, onTerm, onRun) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  const count = countId ? document.getElementById(countId) : null;
+  const note = noteId ? document.getElementById(noteId) : null;
+  let timer = null;
+  function run() {
+  timer = null;
+  if (count) count.classList.remove("pending");
+  onRun();
+  }
+  el.addEventListener("input", function (e) {
+  onTerm(e.target.value);
+  if (count) count.classList.add("pending");
+  // the note describes the rows currently on screen, and they are about to be replaced
+  if (note) { note.classList.remove("show"); note.textContent = ""; }
+  if (timer) clearTimeout(timer);
+  timer = setTimeout(run, SEARCH_DEBOUNCE_MS);
+  });
+  el.addEventListener("change", function () { if (timer) { clearTimeout(timer); run(); } });
+  el.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && timer) { clearTimeout(timer); run(); }
+  });
+  }
+
+  // Draw at most SEARCH_ROW_CAP rows while a term is active. Returns how many were held back so
+  // the caller can tell the user, rather than quietly showing a truncated list.
+  function capForSearch(rows, term) {
+  if (!term || rows.length <= SEARCH_ROW_CAP) return { rows: rows, hidden: 0 };
+  return { rows: rows.slice(0, SEARCH_ROW_CAP), hidden: rows.length - SEARCH_ROW_CAP };
+  }
+
+  function setSearchNote(noteId, term, shown, hidden) {
+  const note = document.getElementById(noteId);
+  if (!note) return;
+  if (!term || !hidden) {
+  note.classList.remove("show");
+  note.textContent = "";
+  return;
+  }
+  note.classList.add("show");
+  note.textContent = "Showing the first " + shown + " of " + (shown + hidden) +
+  " matching rows. Keep typing to narrow it down, or clear the search to see the whole list.";
   }
   const TABS = [
   { id: "materials", label: "Materials" },
@@ -1767,6 +1853,10 @@
   thumb.className = "photo-thumb";
   const img = document.createElement("img");
   img.src = url;
+  // 500+ material rows carry a photo, so without this a search would fetch and decode every
+  // thumbnail in the list on every rebuild. Off-screen thumbs stay deferred until scrolled to.
+  img.loading = "lazy";
+  img.decoding = "async";
   img.alt = "";
   img.title = "Click an action to view, replace or remove";
   thumb.appendChild(img);
@@ -1808,14 +1898,14 @@
   renderBranchFilter("materialBranchFilter", state.materials, branch, function (name) {
   materialBranchActive = name; renderAll();
   });
-  const rows = visibleRows(state.materials, {
-  branch: branch, term: materialSearchTerm.trim().toLowerCase(), match: materialMatches
-  });
-  document.getElementById("materialsEmpty").style.display = rows.length ? "none" : "block";
+  const term = materialSearchTerm.trim().toLowerCase();
+  const found = visibleRows(state.materials, { branch: branch, term: term, match: materialMatches });
+  const capped = capForSearch(found, term);
+  document.getElementById("materialsEmpty").style.display = found.length ? "none" : "block";
   const body = document.getElementById("materialsBody");
-  body.innerHTML = "";
+  const frag = document.createDocumentFragment();
 
-  rows.forEach(function (entry) {
+  capped.rows.forEach(function (entry) {
   const n = entry.node;
   const heading = isHeading(n);
   const tr = document.createElement("tr");
@@ -1860,13 +1950,16 @@
   bindRowClick(tr, n, "materials");
   tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth),
         tdUnit, tdQty, tdPrice, tdAmount, tdPhotos, tdNote);
-  body.appendChild(tr);
+  frag.appendChild(tr);
   });
+  body.replaceChildren(frag);
 
-  const matchCount = rows.filter(function (r) { return r.hit; }).length;
+  // the count is the true number of hits, even when the cap is holding rows back
+  const matchCount = found.filter(function (r) { return r.hit; }).length;
   const sc = document.getElementById("materialSearchCount");
   if (sc) sc.textContent = materialSearchTerm.trim()
   ? matchCount + (matchCount === 1 ? " item found" : " items found") : "";
+  setSearchNote("materialSearchNote", term, capped.rows.length, capped.hidden);
 
   refreshToolbar("materials", state.materials);
   }
@@ -1881,11 +1974,9 @@
   collapsedIds.clear(); renderAll();
   });
   document.getElementById("btnMaterialCollapse").addEventListener("click", collapseAll);
-  document.getElementById("materialSearch").addEventListener("input", function (e) {
-  materialSearchTerm = e.target.value;
-  if (materialSearchTerm.trim()) materialBranchActive = "All";
-  renderMaterials();
-  });
+  bindSearch("materialSearch", "materialSearchCount", "materialSearchNote",
+  function (v) { materialSearchTerm = v; if (v.trim()) materialBranchActive = "All"; },
+  function () { renderMaterials(); });
   /* ================= LABOR ================= */
   let laborBranchActive = "All";
   let laborSearchTerm = "";
@@ -1900,14 +1991,14 @@
   renderBranchFilter("laborBranchFilter", state.labor, branch, function (name) {
   laborBranchActive = name; renderAll();
   });
-  const rows = visibleRows(state.labor, {
-  branch: branch, term: laborSearchTerm.trim().toLowerCase(), match: laborMatches
-  });
-  document.getElementById("laborEmpty").style.display = rows.length ? "none" : "block";
+  const term = laborSearchTerm.trim().toLowerCase();
+  const found = visibleRows(state.labor, { branch: branch, term: term, match: laborMatches });
+  const capped = capForSearch(found, term);
+  document.getElementById("laborEmpty").style.display = found.length ? "none" : "block";
   const body = document.getElementById("laborBody");
-  body.innerHTML = "";
+  const frag = document.createDocumentFragment();
 
-  rows.forEach(function (entry) {
+  capped.rows.forEach(function (entry) {
   const n = entry.node;
   const heading = isHeading(n);
   const tr = document.createElement("tr");
@@ -1936,13 +2027,16 @@
 
   bindRowClick(tr, n, "labor");
   tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdPrice);
-  body.appendChild(tr);
+  frag.appendChild(tr);
   });
+  body.replaceChildren(frag);
 
-  const matchCount = rows.filter(function (r) { return r.hit; }).length;
+  // the count is the true number of hits, even when the cap is holding rows back
+  const matchCount = found.filter(function (r) { return r.hit; }).length;
   const sc = document.getElementById("laborSearchCount");
   if (sc) sc.textContent = laborSearchTerm.trim()
   ? matchCount + (matchCount === 1 ? " item found" : " items found") : "";
+  setSearchNote("laborSearchNote", term, capped.rows.length, capped.hidden);
 
   refreshToolbar("labor", state.labor);
   }
@@ -1957,11 +2051,9 @@
   collapsedIds.clear(); renderAll();
   });
   document.getElementById("btnLaborCollapse").addEventListener("click", collapseAll);
-  document.getElementById("laborSearch").addEventListener("input", function (e) {
-  laborSearchTerm = e.target.value;
-  if (laborSearchTerm.trim()) laborBranchActive = "All";
-  renderLabor();
-  });
+  bindSearch("laborSearch", "laborSearchCount", "laborSearchNote",
+  function (v) { laborSearchTerm = v; if (v.trim()) laborBranchActive = "All"; },
+  function () { renderLabor(); });
   /* ================= LUMP SUM WORK ================= */
   let lumpSumBranchActive = "All";
   let lumpSumSearchTerm = "";
@@ -1977,14 +2069,14 @@
   renderBranchFilter("lumpSumBranchFilter", state.lumpSum, branch, function (name) {
   lumpSumBranchActive = name; renderAll();
   });
-  const rows = visibleRows(state.lumpSum, {
-  branch: branch, term: lumpSumSearchTerm.trim().toLowerCase(), match: lumpSumMatches
-  });
-  document.getElementById("lumpSumEmpty").style.display = rows.length ? "none" : "block";
+  const term = lumpSumSearchTerm.trim().toLowerCase();
+  const found = visibleRows(state.lumpSum, { branch: branch, term: term, match: lumpSumMatches });
+  const capped = capForSearch(found, term);
+  document.getElementById("lumpSumEmpty").style.display = found.length ? "none" : "block";
   const body = document.getElementById("lumpSumBody");
-  body.innerHTML = "";
+  const frag = document.createDocumentFragment();
 
-  rows.forEach(function (entry) {
+  capped.rows.forEach(function (entry) {
   const n = entry.node;
   const heading = isHeading(n);
   const tr = document.createElement("tr");
@@ -2013,13 +2105,16 @@
 
   bindRowClick(tr, n, "lumpsum");
   tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdPrice);
-  body.appendChild(tr);
+  frag.appendChild(tr);
   });
+  body.replaceChildren(frag);
 
-  const matchCount = rows.filter(function (r) { return r.hit; }).length;
+  // the count is the true number of hits, even when the cap is holding rows back
+  const matchCount = found.filter(function (r) { return r.hit; }).length;
   const sc = document.getElementById("lumpSumSearchCount");
   if (sc) sc.textContent = lumpSumSearchTerm.trim()
   ? matchCount + (matchCount === 1 ? " item found" : " items found") : "";
+  setSearchNote("lumpSumSearchNote", term, capped.rows.length, capped.hidden);
 
   refreshToolbar("lumpsum", state.lumpSum);
   }
@@ -2035,11 +2130,9 @@
   collapsedIds.clear(); renderAll();
   });
   document.getElementById("btnLumpSumCollapse").addEventListener("click", collapseAll);
-  document.getElementById("lumpSumSearch").addEventListener("input", function (e) {
-  lumpSumSearchTerm = e.target.value;
-  if (lumpSumSearchTerm.trim()) lumpSumBranchActive = "All";
-  renderLumpSum();
-  });
+  bindSearch("lumpSumSearch", "lumpSumSearchCount", "lumpSumSearchNote",
+  function (v) { lumpSumSearchTerm = v; if (v.trim()) lumpSumBranchActive = "All"; },
+  function () { renderLumpSum(); });
   /* ================= BILL OF QUANTITIES ================= */
   let boqBranchActive = "All";
   let boqSearchTerm = "";
@@ -2239,14 +2332,14 @@
   renderBranchFilter("boqBranchFilter", state.boq, branch, function (name) {
   boqBranchActive = name; renderAll();
   });
-  const rows = visibleRows(state.boq, {
-  branch: branch, term: boqSearchTerm.trim().toLowerCase(), match: boqMatches
-  });
-  document.getElementById("boqEmpty").style.display = rows.length ? "none" : "block";
+  const term = boqSearchTerm.trim().toLowerCase();
+  const found = visibleRows(state.boq, { branch: branch, term: term, match: boqMatches });
+  const capped = capForSearch(found, term);
+  document.getElementById("boqEmpty").style.display = found.length ? "none" : "block";
   const body = document.getElementById("boqBody");
-  body.innerHTML = "";
+  const frag = document.createDocumentFragment();
 
-  rows.forEach(function (entry) {
+  capped.rows.forEach(function (entry) {
   const n = entry.node;
   const heading = isHeading(n);
   const tr = document.createElement("tr");
@@ -2335,8 +2428,10 @@
         td.matPrice, td.labPrice, td.origM, td.origL, td.markupM, td.markupL,
         td.rateM, td.rateL, td.totalM, td.totalL,
         td.amount, td.budget, td.profit, td.remark);
-  body.appendChild(tr);
+  frag.appendChild(tr);
   });
+  body.replaceChildren(frag);
+  setSearchNote("boqSearchNote", term, capped.rows.length, capped.hidden);
 
   const totals = boqTotals();
   document.getElementById("sumItems").textContent = totals.items;
@@ -2362,9 +2457,9 @@
   collapsedIds.clear(); renderAll();
   });
   document.getElementById("btnBoqCollapse").addEventListener("click", collapseAll);
-  document.getElementById("boqSearch").addEventListener("input", function (e) {
-  boqSearchTerm = e.target.value; renderBoq();
-  });
+  bindSearch("boqSearch", null, "boqSearchNote",
+  function (v) { boqSearchTerm = v; },
+  function () { renderBoq(); });
   document.getElementById("btnClearBoq").addEventListener("click", () => {
   const p = activeProject();
   if (!p || !p.boq.length) return;
