@@ -431,7 +431,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26j (NASLA rates)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26k (Market rates)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -554,6 +554,63 @@
   <footer class="hint">
     <span>ⓘ</span>
     <span>Labor follows the same hierarchy: <strong>1</strong> → <strong>1.1</strong> → <strong>1.1.1</strong>. Only the deepest rows (<em>items</em>) carry a unit and a price. Click a row to select it, then use the big buttons above the list.</span>
+  </footer>
+  </section>
+  <!-- LUMP SUM WORK -->
+  <section class="panel" id="panel-lumpsum">
+  <div class="topline">
+    <div>
+    <h2>Lump sum work</h2>
+    <p>Work paid as one whole amount per lot (PRELIMINARY WORK rates) instead of a measured unit rate.</p>
+    </div>
+    <button class="btn btn-primary" id="btnAddLumpSum">+ Add level 1 row</button>
+  </div>
+  <div class="toolbar searchbar">
+    <span class="search-glyph">&#128269;</span>
+    <input type="text" class="search-input" id="lumpSumSearch" placeholder="Search work description or unit…">
+    <span class="search-count" id="lumpSumSearchCount"></span>
+  </div>
+  <div class="toolbar">
+    <div class="filter-row">
+    <span class="filter-label">Level 1</span>
+    <div class="chip-filter" id="lumpSumBranchFilter"></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" id="btnLumpSumExpand">Expand all</button>
+    <button class="btn btn-ghost btn-sm" id="btnLumpSumCollapse">Collapse all</button>
+  </div>
+  <div class="toolbar row-toolbar" id="lumpSumRowTools">
+    <span class="row-toolbar-hint">Select a row, then:</span>
+    <button type="button" class="btn btn-ghost btn-row" data-act="sub">+ Sub item</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="new">+ New row</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="up">&#9650; Move up</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="down">&#9660; Move down</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="out">&#8676; Move out one level</button>
+    <button type="button" class="btn btn-ghost btn-row" data-act="in">&#8677; Move in under</button>
+    <button type="button" class="btn btn-danger-ghost btn-row" data-act="del">&#10005; Delete row</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+    <table id="lumpSumTable">
+      <thead>
+      <tr>
+        <th>Ref</th>
+        <th>Lump sum item</th>
+        <th>Unit</th>
+        <th class="num num-cen">Unit price ($)</th>
+      </tr>
+      </thead>
+      <tbody id="lumpSumBody"></tbody>
+    </table>
+    </div>
+    <div class="empty-state" id="lumpSumEmpty" style="display:none;">
+    <div class="glyph">◻︎</div>
+    <p>No lump sum items match. Clear the filters or add a new lump sum rate.</p>
+    </div>
+  </div>
+  <footer class="hint">
+    <span>ⓘ</span>
+    <span>Lump sum work follows the same hierarchy: <strong>1</strong> → <strong>1.1</strong> → <strong>1.1.1</strong>. Only the deepest rows (<em>items</em>) carry a unit and a price. Click a row to select it, then use the big buttons above the list.</span>
   </footer>
   </section>
   <!-- BOQ -->
@@ -715,7 +772,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26j (NASLA rates)");
+  console.log("Site Ledger — build 2026-09-26k (Market rates)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -743,7 +800,8 @@
     boq: { name: "description", unit: "unit", quantity: "quantity", materialRef: "material",
            laborRef: "labor", customMaterialPrice: "material price", customLaborPrice: "labor price" },
     materials: { name: "name", unit: "unit", price: "unit price", quantity: "quantity", note: "note" },
-    labor: { name: "name", unit: "unit", price: "unit price" }
+    labor: { name: "name", unit: "unit", price: "unit price" },
+    lumpsum: { name: "name", unit: "unit", price: "unit price" }
   };
 
   function treeIndex(rows) {
@@ -767,7 +825,7 @@
   }
 
   function itemWord(kind) {
-    return kind === "boq" ? "bill row" : kind === "materials" ? "material" : "labor item";
+    return kind === "boq" ? "bill row" : kind === "materials" ? "material" : kind === "lumpsum" ? "lump sum item" : "labor item";
   }
 
   function changedFields(kind, oldR, newR) {
@@ -822,6 +880,7 @@
     newState = newState || {};
     lines.push.apply(lines, summarizeStateChange(oldState.materials || [], newState.materials || [], "materials", "Materials"));
     lines.push.apply(lines, summarizeStateChange(oldState.labor || [], newState.labor || [], "labor", "Labor"));
+    lines.push.apply(lines, summarizeStateChange(oldState.lumpSum || [], newState.lumpSum || [], "lumpsum", "Lump Sum"));
     const oldP = {}, newP = {};
     (oldState.projects || []).forEach(function (p) { oldP[p.id] = p; });
     (newState.projects || []).forEach(function (p) { newP[p.id] = p; });
@@ -1006,7 +1065,7 @@
     children: []
   };
   }
-  return { id: uid(kind === "materials" ? "m" : "l"), name: "", unit: "", price: 0, children: [] };
+  return { id: uid(kind === "materials" ? "m" : kind === "lumpsum" ? "s" : "l"), name: "", unit: "", price: 0, children: [] };
   }
   function addChild(n, kind) {
   n.children = n.children || [];
@@ -1080,17 +1139,17 @@
   }
 
   function collapseAll() {
-  [state.materials, state.labor, state.boq].forEach(function (list) {
+  [state.materials, state.labor, state.lumpSum || [], state.boq].forEach(function (list) {
   walkTree(list, 0, function (n) { if (isHeading(n)) collapsedIds.add(n.id); });
   });
   renderAll();
   }
-  const selectedIds = { materials: null, labor: null, boq: null };
-  const TOOLBAR_IDS = { materials: "materialRowTools", labor: "laborRowTools", boq: "boqRowTools" };
+  const selectedIds = { materials: null, labor: null, lumpsum: null, boq: null };
+  const TOOLBAR_IDS = { materials: "materialRowTools", labor: "laborRowTools", lumpsum: "lumpSumRowTools", boq: "boqRowTools" };
 
   function applySelection(kind) {
   const body = document.getElementById(
-  kind === "materials" ? "materialsBody" : kind === "labor" ? "laborBody" : "boqBody");
+  kind === "materials" ? "materialsBody" : kind === "labor" ? "laborBody" : kind === "lumpsum" ? "lumpSumBody" : "boqBody");
   if (!body) return;
   Array.prototype.forEach.call(body.rows, function (tr) {
   tr.classList.toggle("selected", tr.dataset.id === selectedIds[kind]);
@@ -1098,7 +1157,7 @@
   }
 
   function rowToolsDisabled(kind, node) {
-  const list = kind === "materials" ? state.materials : kind === "labor" ? state.labor : state.boq;
+  const list = kind === "materials" ? state.materials : kind === "labor" ? state.labor : kind === "lumpsum" ? (state.lumpSum || []) : state.boq;
   const loc = node ? locate(list, node.id) : null;
   if (!node || !loc) {
   return { sub: true, up: true, down: true, out: true, del: true, in: true, "new": false };
@@ -1131,7 +1190,7 @@
   if (!btn || btn.disabled) return;
   const id = selectedIds[kind];
   if (!id && btn.dataset.act !== "new") { showToast("Select a row first"); return; }
-  const list = kind === "materials" ? state.materials : kind === "labor" ? state.labor : state.boq;
+  const list = kind === "materials" ? state.materials : kind === "labor" ? state.labor : kind === "lumpsum" ? (state.lumpSum || []) : state.boq;
   let node = null;
   if (id) { const loc = locate(list, id); if (loc) node = loc.siblings[loc.index]; }
   if (!node && btn.dataset.act !== "new") { selectedIds[kind] = null; setToolState(kind, null); return; }
@@ -1289,6 +1348,7 @@
   const TABS = [
   { id: "materials", label: "Materials" },
   { id: "labor", label: "Labor" },
+  { id: "lumpsum", label: "Lump Sum Work" },
   { id: "boq", label: "Bill of quantities" }
   ];
   let activeTab = "boq";
@@ -1474,6 +1534,10 @@
   tree.appendChild(ledgerNode("\uD83D\uDC77", "Labor", {
   active: activeTab === "labor",
   click: function () { setActiveTab("labor"); }
+  }));
+  tree.appendChild(ledgerNode("\uD83D\uDCB5", "Lump Sum Work", {
+  active: activeTab === "lumpsum",
+  click: function () { setActiveTab("lumpsum"); }
   }));
   if (me && (me.role === "admin" || me.role === "moderator")) {
   tree.appendChild(ledgerNode("\uD83D\uDEE1\uFE0F", "Admin", {
@@ -1874,6 +1938,84 @@
   laborSearchTerm = e.target.value;
   if (laborSearchTerm.trim()) laborBranchActive = "All";
   renderLabor();
+  });
+  /* ================= LUMP SUM WORK ================= */
+  let lumpSumBranchActive = "All";
+  let lumpSumSearchTerm = "";
+
+  function lumpSumMatches(n, term) {
+  return (n.name || "").toLowerCase().indexOf(term) !== -1
+  || (!isHeading(n) && (n.unit || "").toLowerCase().indexOf(term) !== -1);
+  }
+
+  function renderLumpSum() {
+  if (!Array.isArray(state.lumpSum)) state.lumpSum = [];
+  const branch = resolveBranch(state.lumpSum, lumpSumBranchActive);
+  renderBranchFilter("lumpSumBranchFilter", state.lumpSum, branch, function (name) {
+  lumpSumBranchActive = name; renderAll();
+  });
+  const rows = visibleRows(state.lumpSum, {
+  branch: branch, term: lumpSumSearchTerm.trim().toLowerCase(), match: lumpSumMatches
+  });
+  document.getElementById("lumpSumEmpty").style.display = rows.length ? "none" : "block";
+  const body = document.getElementById("lumpSumBody");
+  body.innerHTML = "";
+
+  rows.forEach(function (entry) {
+  const n = entry.node;
+  const heading = isHeading(n);
+  const tr = document.createElement("tr");
+  if (heading) tr.classList.add("heading-row");
+  if (!entry.hit) tr.classList.add("context-row");
+
+  const tdUnit = document.createElement("td");
+  const tdPrice = document.createElement("td");
+  tdPrice.className = "num money-in";
+
+  if (heading) {
+    tdPrice.textContent = "\u2014";
+    if (n.unit || toNum(n.price)) {
+    const note = document.createElement("span");
+    note.className = "own-note";
+    note.textContent = "\u2022";
+    note.title = "This heading still holds a unit/rate from when it was an item. " +
+      "A heading only groups rows, so it is not used as a rate.";
+    tdUnit.appendChild(note);
+    }
+  } else {
+    tdUnit.appendChild(textInput(n, "unit", "unit"));
+    tdPrice.appendChild(moneyPrefix());
+    tdPrice.appendChild(numberInput(n, "price"));
+  }
+
+  bindRowClick(tr, n, "lumpsum");
+  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth), tdUnit, tdPrice);
+  body.appendChild(tr);
+  });
+
+  const matchCount = rows.filter(function (r) { return r.hit; }).length;
+  const sc = document.getElementById("lumpSumSearchCount");
+  if (sc) sc.textContent = lumpSumSearchTerm.trim()
+  ? matchCount + (matchCount === 1 ? " item found" : " items found") : "";
+
+  refreshToolbar("lumpsum", state.lumpSum);
+  }
+
+  document.getElementById("btnAddLumpSum").addEventListener("click", function () {
+  if (!Array.isArray(state.lumpSum)) state.lumpSum = [];
+  state.lumpSum.push(blankNode("lumpsum"));
+  selectedIds.lumpsum = state.lumpSum[state.lumpSum.length - 1].id;
+  persist(); renderAll();
+  showToast("Main lump sum item added");
+  });
+  document.getElementById("btnLumpSumExpand").addEventListener("click", function () {
+  collapsedIds.clear(); renderAll();
+  });
+  document.getElementById("btnLumpSumCollapse").addEventListener("click", collapseAll);
+  document.getElementById("lumpSumSearch").addEventListener("input", function (e) {
+  lumpSumSearchTerm = e.target.value;
+  if (lumpSumSearchTerm.trim()) lumpSumBranchActive = "All";
+  renderLumpSum();
   });
   /* ================= BILL OF QUANTITIES ================= */
   let boqBranchActive = "All";
@@ -3436,6 +3578,7 @@
     ensureAdminTab();
     loadState().then(function (data) {
       state = data;
+      if (!Array.isArray(state.lumpSum)) state.lumpSum = [];
       promoteLocalDrafts();
       const snap = Object.assign({}, state);
       delete snap.boq;
@@ -3443,6 +3586,7 @@
       syncBoqRef();
       bindRowToolbar("materials");
       bindRowToolbar("labor");
+      bindRowToolbar("lumpsum");
       bindRowToolbar("boq");
       initColumns();
       applyTheme();
@@ -3730,6 +3874,7 @@
   renderLedger();
   renderMaterials();
   renderLabor();
+  renderLumpSum();
   renderBoq();
   }
 

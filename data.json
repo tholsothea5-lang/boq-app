@@ -2800,6 +2800,322 @@
       "name": "NASLA \u00b7 Bill 4-Infrastructure",
       "price": 0,
       "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "mkl_1_1",
+          "name": "Spun Pile P1=\u00d8 300x15m",
+          "price": 1.2,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_2",
+          "name": "Spun Pile P2=\u00d8 300x18m",
+          "price": 1.2,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_3",
+          "name": "Spun Pile P3=\u00d8 300x22m",
+          "price": 1.2,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_4",
+          "name": "Pile Cut Off",
+          "price": 7.2,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_5",
+          "name": "Soil Excavation to forming level",
+          "price": 4.8,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_6",
+          "name": "Compacted stone(4x6) and sand thk 150mm",
+          "price": 4.8,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_7",
+          "name": "Lean concrete thk:50mm",
+          "price": 36,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_8",
+          "name": "Concrete",
+          "price": 18,
+          "unit": "m3"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_9",
+          "name": "Rebar DB 10m",
+          "price": 180,
+          "unit": "tons"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_10",
+          "name": "Rebar DB 12mm",
+          "price": 180,
+          "unit": "tons"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_11",
+          "name": "Rebar DB 14mm",
+          "price": 180,
+          "unit": "tons"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_12",
+          "name": "Reinforcement Bar",
+          "price": 180,
+          "unit": "tons"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_13",
+          "name": "Polycarbonate-skylight ampletie",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_14",
+          "name": "Polycarbonate-Roof Curve in middle",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_15",
+          "name": "Roof Zinc",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_16",
+          "name": "Cantilever roof steel structure",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_17",
+          "name": "W1: Sliding Window (3mX1.15m)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_18",
+          "name": "W2: Sliding Window (1.5mX1.15m)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_19",
+          "name": "W.C Door (0.8mx2m)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_20",
+          "name": "Wooden Ceiling (Timber finishes)",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_21",
+          "name": "Standard Gypsum Board 9mm (Black paint finishes)",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_22",
+          "name": "Wall with tile fisnished 30cmx60cm Height 1.2m",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_23",
+          "name": "Wall with marble finishes",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_24",
+          "name": "Floor Tiling 30cmx30cm",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_25",
+          "name": "Water Closet+Raising Spray+Paper Holder+Bin",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_26",
+          "name": "Urinal with flash valve (Cotto)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_27",
+          "name": "Urinal Partition (H=0.9m)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_28",
+          "name": "Basin and Lever Handle Basin (Cotto)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_29",
+          "name": "Mirror (1.2mx2.15m)",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_30",
+          "name": "Concrete casting counter for wahbasin (0.6mx2.15mm)",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_31",
+          "name": "Wahbasin counter with mable finishes (0.6mx2.15mm)",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_32",
+          "name": "Waterproofing W.C",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_33",
+          "name": "Alucaborn Installation",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_34",
+          "name": "Circle Bench with decoration",
+          "price": 1.2,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_35",
+          "name": "Wooden panel decoration",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_36",
+          "name": "Honey comb steel mesh",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_37",
+          "name": "Vertical molding in mable finishes",
+          "price": 1.2,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_38",
+          "name": "Pavement tile for parking area",
+          "price": 1.2,
+          "unit": "m2"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_39",
+          "name": "Road kerbing",
+          "price": 0,
+          "unit": "m"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_40",
+          "name": "Trees with curbs",
+          "price": 0,
+          "unit": "pcs"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_41",
+          "name": "Market Name Logos",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_42",
+          "name": "Louver grill for W.C (0.5mx5m)",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_43",
+          "name": "Logo W.C male and female",
+          "price": 0,
+          "unit": "set"
+        },
+        {
+          "children": [],
+          "id": "mkl_1_44",
+          "name": "Exterior cantilver roof glass",
+          "price": 0,
+          "unit": "m2"
+        }
+      ],
+      "id": "mkl_1",
+      "name": "Market \u00b7 Labor Rates",
+      "price": 0,
+      "unit": ""
     }
   ],
   "materials": [
@@ -13193,6 +13509,457 @@
       "price": 0,
       "quantity": 0,
       "unit": ""
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "mkm_1_1",
+          "name": "Spun Pile P1=\u00d8 300x15m",
+          "price": 1.2,
+          "unit": "pcs",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_2",
+          "name": "Spun Pile P2=\u00d8 300x18m",
+          "price": 1.2,
+          "unit": "pcs",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_3",
+          "name": "Spun Pile P3=\u00d8 300x22m",
+          "price": 1.2,
+          "unit": "pcs",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_4",
+          "name": "Pile Cut Off",
+          "price": 0,
+          "unit": "pcs",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_5",
+          "name": "Soil Excavation to forming level",
+          "price": 0,
+          "unit": "m3",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_6",
+          "name": "Compacted stone(4x6) and sand thk 150mm",
+          "price": 19.2,
+          "unit": "m3",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_7",
+          "name": "Lean concrete thk:50mm",
+          "price": 60,
+          "unit": "m3",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_8",
+          "name": "Concrete",
+          "price": 96,
+          "unit": "m3",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_9",
+          "name": "Rebar DB 10m",
+          "price": 960,
+          "unit": "tons",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_10",
+          "name": "Rebar DB 12mm",
+          "price": 960,
+          "unit": "tons",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_11",
+          "name": "Rebar DB 14mm",
+          "price": 960,
+          "unit": "tons",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_12",
+          "name": "Reinforcement Bar",
+          "price": 960,
+          "unit": "tons",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_13",
+          "name": "Polycarbonate-skylight ampletie",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_14",
+          "name": "Polycarbonate-Roof Curve in middle",
+          "price": 1.2,
+          "unit": "m",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_15",
+          "name": "Roof Zinc",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_16",
+          "name": "Cantilever roof steel structure",
+          "price": 1.2,
+          "unit": "m",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_17",
+          "name": "W1: Sliding Window (3mX1.15m)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_18",
+          "name": "W2: Sliding Window (1.5mX1.15m)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_19",
+          "name": "W.C Door (0.8mx2m)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_20",
+          "name": "Wooden Ceiling (Timber finishes)",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_21",
+          "name": "Standard Gypsum Board 9mm (Black paint finishes)",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_22",
+          "name": "Wall with tile fisnished 30cmx60cm Height 1.2m",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_23",
+          "name": "Wall with marble finishes",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_24",
+          "name": "Floor Tiling 30cmx30cm",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_25",
+          "name": "Water Closet+Raising Spray+Paper Holder+Bin",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_26",
+          "name": "Urinal with flash valve (Cotto)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_27",
+          "name": "Urinal Partition (H=0.9m)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_28",
+          "name": "Basin and Lever Handle Basin (Cotto)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_29",
+          "name": "Mirror (1.2mx2.15m)",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_30",
+          "name": "Concrete casting counter for wahbasin (0.6mx2.15mm)",
+          "price": 1.2,
+          "unit": "m",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_31",
+          "name": "Wahbasin counter with mable finishes (0.6mx2.15mm)",
+          "price": 1.2,
+          "unit": "m",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_32",
+          "name": "Waterproofing W.C",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_33",
+          "name": "Alucaborn Installation",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_34",
+          "name": "Circle Bench with decoration",
+          "price": 1.2,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_35",
+          "name": "Wooden panel decoration",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_36",
+          "name": "Honey comb steel mesh",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_37",
+          "name": "Vertical molding in mable finishes",
+          "price": 1.2,
+          "unit": "m",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_38",
+          "name": "Pavement tile for parking area",
+          "price": 1.2,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_39",
+          "name": "Road kerbing",
+          "price": 0,
+          "unit": "m",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_40",
+          "name": "Trees with curbs",
+          "price": 0,
+          "unit": "pcs",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_41",
+          "name": "Market Name Logos",
+          "price": 0,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_42",
+          "name": "Louver grill for W.C (0.5mx5m)",
+          "price": 0,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_43",
+          "name": "Logo W.C male and female",
+          "price": 0,
+          "unit": "set",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        },
+        {
+          "children": [],
+          "id": "mkm_1_44",
+          "name": "Exterior cantilver roof glass",
+          "price": 0,
+          "unit": "m2",
+          "note": "",
+          "photos": [],
+          "quantity": 0
+        }
+      ],
+      "id": "mkm_1",
+      "name": "Market \u00b7 Material Rates",
+      "price": 0,
+      "unit": "",
+      "note": "",
+      "photos": [],
+      "quantity": 0
     }
   ],
   "projectName": "Project 1",
@@ -13334,5 +14101,120 @@
       ]
     }
   ],
-  "theme": "light"
+  "theme": "light",
+  "lumpSum": [
+    {
+      "children": [
+        {
+          "children": [],
+          "id": "mkls_1_1",
+          "name": "Tools, equipment for testing & survey",
+          "price": 3000,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_2",
+          "name": "Shop drawings submission",
+          "price": 2400,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_3",
+          "name": "Material samples submission and cost for testing, submission of testing certificate",
+          "price": 2000,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_4",
+          "name": "As-built drawings submission",
+          "price": 800,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_5",
+          "name": "Project manager/Construction manager",
+          "price": 16800,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_6",
+          "name": "Site manager",
+          "price": 9600,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_7",
+          "name": "Site engineer",
+          "price": 10800,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_8",
+          "name": "QA/QC, safety engineer",
+          "price": 12000,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_9",
+          "name": "Site Admins, and others",
+          "price": 3600,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_10",
+          "name": "Temporary Power consumption",
+          "price": 3000,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_11",
+          "name": "Temporary Water consumption",
+          "price": 1500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_12",
+          "name": "Temporary Office and Storage",
+          "price": 3750,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_13",
+          "name": "Site daily cleaning include remove rubbish, debris, etc\u2026",
+          "price": 4500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_14",
+          "name": "PPE to be provided and renewed if damaged, including helmet, shoes, reflective vest, safety glasses for:",
+          "price": 1500,
+          "unit": "lot"
+        },
+        {
+          "children": [],
+          "id": "mkls_1_15",
+          "name": "Cost for provision of Workmen Compensation Insurance",
+          "price": 3000,
+          "unit": "lot"
+        }
+      ],
+      "id": "mkls_1",
+      "name": "Market \u00b7 Lump Sum Work",
+      "price": 0,
+      "unit": ""
+    }
+  ]
 }
