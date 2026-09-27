@@ -47,6 +47,22 @@
   body.rail-hidden .rail-show-fab { display: flex; }
   body.rail-peek .rail-show-fab { display: none; }
   .rail-show-fab .ic { width: 24px; height: 24px; }
+  /* Go to top: fades in once a list is scrolled past a screenful. Bottom-right, so it never
+     lands on the toast (bottom-centre) or the rail FAB (left edge). */
+  .to-top-fab {
+  position: fixed; right: 18px; bottom: 18px;
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--navy); color: #fff; border: 1px solid var(--line-strong);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.4); cursor: pointer; z-index: 55; padding: 0;
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(10px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s, background 0.15s ease;
+  }
+  .to-top-fab .ic { width: 22px; height: 22px; }
+  .to-top-fab:hover { background: var(--navy-deep); color: #fff; }
+  .to-top-fab:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+  body.scrolled-down .to-top-fab { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) { .to-top-fab { transition: none; } }
   .rail-brand .mark { font-family: var(--font-mono); font-size: 11px; color: var(--amber); letter-spacing: 0.08em; }
   .rail-brand h1 { margin: 4px 0 18px 0; font-size: 19px; font-weight: 600; color: #fff; }
   /* Site Ledger tree — the navigation in the left rail */
@@ -110,6 +126,8 @@
   }
   .theme-toggle button.active { background: var(--amber); color: #1F2E3D; font-weight: 600; }
   main { flex: 1 1 auto; padding: 28px 32px 60px 32px; max-width: none; min-width: 0; }
+  /* the Go to top button hands focus here on the way up; a ring around the whole column would be noise */
+  main:focus { outline: none; }
   .panel { display: none; }
   .panel.active { display: block; }
   .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
@@ -292,6 +310,7 @@
   body.rail-hidden .rail, body.rail-peek .rail { width: 100%; padding: 10px 14px; }
   .rail-controls { display: none; }
   .rail-show-fab { display: none; }
+  .to-top-fab { right: 12px; bottom: 12px; width: 42px; height: 42px; }
   .rail-brand h1 { margin: 0; font-size: 16px; }
   .ledger { flex-direction: row; flex-wrap: wrap; column-gap: 2px; max-height: 220px; overflow-y: auto; align-items: flex-start; }
   .ledger-node, .ledger-cat { width: auto; padding: 7px 10px; font-size: 12.5px; }
@@ -431,13 +450,13 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-26k (Market rates)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-27a (Go to top)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
   <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
   </button>
-  <main>
+  <main tabindex="-1">
   <!-- MATERIALS -->
   <section class="panel" id="panel-materials">
   <div class="topline">
@@ -738,6 +757,9 @@
   </section>
   </main>
 </div>
+<button type="button" class="to-top-fab" id="btnToTop" title="Go to top" aria-label="Go to top">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+</button>
 <div class="toast" id="toast"></div>
 <div class="auth-overlay" id="authScreen" hidden>
   <form class="auth-card" id="loginForm">
@@ -772,7 +794,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-26k (Market rates)");
+  console.log("Site Ledger — build 2026-09-27a (Go to top)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1373,6 +1395,7 @@
   if (panel) panel.classList.add("active");
   renderTabs();
   renderLedger();
+  goToTop(true);
   }
 
   function applyTheme() {
@@ -3927,8 +3950,46 @@
   applyRail();
   }
 
+  /* ================= GO TO TOP ================= */
+  /* A list runs to hundreds of rows, so the reader ends up a long way down the page with the
+     title and the search box off screen. Once past a screenful we fade in a floating way back.
+     Two details worth keeping: the click hands focus to <main> (the button itself is about to
+     go invisible, and leaving focus on a hidden control drops the user at the foot of the
+     document), and tab switching resets the scroll, since a tab change always means new content. */
+  const TO_TOP_AFTER = 320;
+  function syncToTop() {
+  document.body.classList.toggle("scrolled-down", window.scrollY > TO_TOP_AFTER);
+  }
+  function goToTop(instant) {
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, left: 0, behavior: instant || calm ? "auto" : "smooth" });
+  // Always re-check, never only on the instant path. A smooth scroll reports scrollY back at
+  // its old value for a frame, and a reduced-motion jump may not raise a scroll event at all.
+  syncToTop();
+  }
+  function initToTop() {
+  const main = document.querySelector("main");
+  const btn = document.getElementById("btnToTop");
+  if (!main) return;
+  if (btn) {
+  btn.addEventListener("click", function () {
+  goToTop(false);
+  main.focus({ preventScroll: true });
+  });
+  }
+  let queued = false;
+  window.addEventListener("scroll", function () {
+  if (queued) return;
+  queued = true;
+  requestAnimationFrame(function () { queued = false; syncToTop(); });
+  }, { passive: true });
+  window.addEventListener("resize", syncToTop);
+  syncToTop();
+  }
+
   function init() {
   initRail();
+  initToTop();
   bindAuthForms();
   bindAdminPanel();
   bootAuth();

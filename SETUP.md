@@ -126,3 +126,21 @@ Flask app it is generated server-side (`/api/export.xlsx`).
 The old **Material Price / Labour Price** columns stay — a row that has no
 Original Rate is priced exactly as before, so existing bills are unaffected.
 Rows with an Original Rate get the Excel mark-up treatment automatically.
+
+## Go to top button (build 2026-09-27a)
+
+The lists run to hundreds of rows, so scrolling far down leaves the panel
+title and the search box off screen. A circular **Go to top** button fades in
+at the bottom-right of the window once the page is scrolled more than 320px
+down, and fades out again on the way back. Clicking it scrolls smoothly to the
+top and hands keyboard focus to `<main>`, so the next Tab lands back inside the
+content instead of at the foot of the document.
+
+It is deliberately placed clear of the other floating pieces: bottom-right
+rather than bottom-centre (the toast) and right rather than left-middle (the
+show-left-panel button). Sign-in and photo overlays are stacked above it, and
+it shrinks and moves in on narrow screens. `prefers-reduced-motion` turns both
+the fade and the smooth scroll off.
+
+Switching tab or ledger section also returns you to the top, since a tab change
+always means new content further up the page.
