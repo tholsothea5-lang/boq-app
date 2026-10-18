@@ -492,3 +492,13 @@ wrapper/guard/cleanup-script wiring and the untitled-heading rule; stamps moved
 to `2026-10-19e (Lump-sum cleanup)` ×2 and all suites (check_syntax, check_static, check_search,
 check_totop, check_totop_dom, check_legend, gridtest, fbtest, psearch,
 bench_noregress, bench_debounce, motion_logic, test_lumpsum_logic) pass.
+
+2026-10-19e (cleanup executed) — the dupes are gone from the live ledger: Lump Sum 26 → 2
+groups ("Preliminary Work" 15 rows, "Flat House Z15A1 · Lump Sum Work" 5 rows, with Site
+Preparation kept at 16279.99), Materials 8 nameless 86-row copies and Labor 8 nameless 86-row
+copies deleted (14 and 13 groups remain). `cleanup_flat_house_dupes.sql` Part 3 was rewritten
+to the three plain UPDATE statements that were actually executed (one per Run of the SQL
+editor); the earlier DO-block version proved unreliable there. Backup snapshot:
+`public.ledger_backup_20261019e`. The only dangling BOQ refs are `m1`/`m4` (material) and
+`l1`/`l2`/`l3` (labor) in the demo project "Sample" — pre-existing old seed ids, already
+broken in the backup taken before the cleanup, so unrelated to it.

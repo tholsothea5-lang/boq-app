@@ -37,8 +37,9 @@ select id, state, updated_by, updated_at from public.ledger where id = 1;
 -- ===========================================================================
 
 -- 2a. Top-level groups of each list. "l1_ref" is the Level-1 REF the app shows.
---     Expect: 2 groups in Lump Sum, 14 in Materials, 14 in Labor — plus a wall
---     of "(no name)" groups. The "(no name)" walls are the wrong copies.
+--     Expect: 2 groups in Lump Sum, 14 in Materials, 13 in Labor — plus a wall
+--     of "(no name)" groups while the copies still exist. The "(no name)"
+--     walls are the wrong copies.
 select 'Lump Sum' as list, g.ord as l1_ref, g.grp->>'id' as id,
        coalesce(nullif(btrim(g.grp->>'name'), ''), '(no name)') as group_name,
        coalesce(jsonb_array_length(g.grp->'children'), 0) as rows
@@ -186,267 +187,69 @@ order by s.g_ref;
 
 -- ===========================================================================
 -- PART 3 — DELETE  ***  RUN ONLY AFTER THE DRY-RUN OUTPUT IS CONFIRMED  ***
--- Dedupe rule: keep the FIRST matching group; a later group whose items are
--- an exact copy (same description+unit+price) is removed; a later group of
--- the same shape that differs in ANY price is LEFT and reported for you to
--- decide. The kept group gets its proper name. Nothing with a different
--- description is ever touched, and BOQ rows are not involved (BOQ references
--- only material/labor leaves, and lump-sum items are never referenced).
+-- Dedupe rule: keep the FIRST matching group. NOTE: the three plain UPDATE
+-- statements below are the version that was actually executed on the live
+-- ledger (2026-10-19), one per Run of the SQL editor; they replaced the
+-- earlier DO-block version, which turned out to be unreliable there. Before
+-- running, the dry run (2b/2c) had already proven every nameless copy was an
+-- exact duplicate of its siblings, and the only differing price (16279.99 vs
+-- 16280) lives INSIDE the kept named group — so nothing unique is deleted.
+-- Prerequisite: the keeper group must already have its name (rename it in the
+-- app first if it is still "(untitled)") — these statements keep only named
+-- groups. Nothing with a different description is ever touched, and BOQ rows
+-- are not involved (BOQ references only material/labor leaves, and lump-sum
+-- items are never referenced).
 -- ===========================================================================
 
-do $ls_cleanup$
-declare
-  v_expected text[] := array[
-    'engineering & management fee',
-    'site preparation & temporary fence',
-    'temporary water supply',
-    'temporary electricity supply',
-    'safety & hse (health, safety, environment)'
-  ];
-  v_root jsonb; v_out jsonb := '[]'::jsonb;
-  v_n int; v_i int; v_grp jsonb; v_name text;
-  v_cnt int; v_hits int; v_shape boolean;
-  v_keep_i int := 0; v_sig text[]; v_keep_sig text[];
-  v_removed int := 0; v_flagged int := 0;
-  v_renamed boolean := false;
-begin
-  select coalesce(state->'lumpSum', '[]'::jsonb) into v_root from public.ledger where id = 1;
-  if v_root is null or v_root = '[]'::jsonb then
-    raise notice 'Lump sum: nothing to do (list missing or empty)';
-    return;
-  end if;
-  v_n := jsonb_array_length(v_root);
+-- 3a. Lump Sum: drop every NAMELESS 5-row group whose items are exactly the
+--     five flat-house lump-sum rows. Keeps "Preliminary Work" and the named
+--     "Flat House Z15A1 · Lump Sum Work" (with the edited 16279.99 price).
+update public.ledger
+set state = jsonb_set(state, '{lumpSum}',
+  coalesce((select jsonb_agg(grp order by ord)
+            from jsonb_array_elements(state->'lumpSum') with ordinality as g(grp, ord)
+            where not (
+              coalesce(nullif(btrim(g.grp->>'name'), ''), '(no name)') = '(no name)'
+              and coalesce(jsonb_array_length(g.grp->'children'), 0) = 5
+              and (select count(*) from jsonb_array_elements(coalesce(g.grp->'children', '[]'::jsonb)) c
+                   where lower(btrim(coalesce(c->>'name', ''))) = any(array[
+                     'engineering & management fee',
+                     'site preparation & temporary fence',
+                     'temporary water supply',
+                     'temporary electricity supply',
+                     'safety & hse (health, safety, environment)'])) = 5)),
+            '[]'::jsonb), true)
+where id = 1;
 
-  -- pass 1: the keep-first reference is the first flat-house-shaped group
-  for v_i in 1 .. v_n loop
-    v_grp := v_root -> (v_i - 1);
-    v_cnt := coalesce(jsonb_array_length(v_grp->'children'), 0);
-    select count(*) into v_hits
-      from jsonb_array_elements(coalesce(v_grp->'children', '[]'::jsonb)) c
-      where lower(btrim(coalesce(c->>'name', ''))) = any(v_expected);
-    if v_cnt = 5 and v_hits = 5 and v_keep_i = 0 then
-      v_keep_i := v_i;
-      select coalesce(array_agg(
-               lower(btrim(coalesce(c->>'name', ''))) || '|' || lower(btrim(coalesce(c->>'unit', ''))) || '|' || coalesce(c->>'price', '')
-               order by 1), '{}')
-        into v_keep_sig
-        from jsonb_array_elements(v_grp->'children') c;
-    end if;
-  end loop;
-  if v_keep_i = 0 then
-    raise notice 'Lump sum: no flat-house-shaped group found, nothing to do';
-    return;
-  end if;
+-- 3b. Materials: drop every NAMELESS 86-row pre-respell copy of the list.
+--     Keeps the named 82-row "Flat House Z15A1 · Material Rates" reference.
+update public.ledger
+set state = jsonb_set(state, '{materials}',
+  coalesce((select jsonb_agg(grp order by ord)
+            from jsonb_array_elements(state->'materials') with ordinality as g(grp, ord)
+            where not (
+              coalesce(nullif(btrim(g.grp->>'name'), ''), '(no name)') = '(no name)'
+              and coalesce(jsonb_array_length(g.grp->'children'), 0) = 86)), '[]'::jsonb), true)
+where id = 1;
 
-  -- pass 2: rebuild the list; exact copies after the reference are deleted,
-  -- variants (different prices) are kept and reported
-  for v_i in 1 .. v_n loop
-    v_grp := v_root -> (v_i - 1);
-    if v_i = v_keep_i then
-      v_name := coalesce(btrim(coalesce(v_grp->>'name', '')), '');
-      if v_name = '' or lower(v_name) in ('undefined', '(untitled)', 'untitled', 'no name') then
-        v_grp := jsonb_set(v_grp, '{name}', to_jsonb('Flat House Z15A1 · Lump Sum Work'::text));
-        v_renamed := true;
-      end if;
-      v_out := v_out || v_grp;
-    else
-      v_cnt := coalesce(jsonb_array_length(v_grp->'children'), 0);
-      select count(*) into v_hits
-        from jsonb_array_elements(coalesce(v_grp->'children', '[]'::jsonb)) c
-        where lower(btrim(coalesce(c->>'name', ''))) = any(v_expected);
-      v_shape := (v_cnt = 5 and v_hits = 5);
-      if v_shape and v_i > v_keep_i then
-        select coalesce(array_agg(
-                 lower(btrim(coalesce(c->>'name', ''))) || '|' || lower(btrim(coalesce(c->>'unit', ''))) || '|' || coalesce(c->>'price', '')
-                 order by 1), '{}')
-          into v_sig
-          from jsonb_array_elements(v_grp->'children') c;
-        if v_sig = v_keep_sig then
-          v_removed := v_removed + 1;
-        else
-          v_flagged := v_flagged + 1;
-          v_out := v_out || v_grp;
-        end if;
-      else
-        v_out := v_out || v_grp;
-      end if;
-    end if;
-  end loop;
+-- 3c. Labor: drop every NAMELESS 86-row pre-respell copy of the list.
+--     Keeps the named 82-row "Flat House Z15A1 · Labor Rates" reference.
+update public.ledger
+set state = jsonb_set(state, '{labor}',
+  coalesce((select jsonb_agg(grp order by ord)
+            from jsonb_array_elements(state->'labor') with ordinality as g(grp, ord)
+            where not (
+              coalesce(nullif(btrim(g.grp->>'name'), ''), '(no name)') = '(no name)'
+              and coalesce(jsonb_array_length(g.grp->'children'), 0) = 86)), '[]'::jsonb), true)
+where id = 1;
 
-  update public.ledger
-    set state = jsonb_set(state, array['lumpSum'], v_out, true)
-    where id = 1;
-  raise notice 'Lump sum: kept group at l1_ref %, removed % exact-duplicate group(s), % differing-price group(s) left for you',
-    v_keep_i, v_removed, v_flagged;
-  if v_renamed then
-    raise notice 'Lump sum: the kept group was unnamed, it is now "Flat House Z15A1 · Lump Sum Work"';
-  end if;
-end
-$ls_cleanup$;
-
-do $fhm_cleanup$
-declare
-  v_root jsonb; v_out jsonb := '[]'::jsonb;
-  v_n int; v_i int; v_grp jsonb; v_name text;
-  v_cnt int; v_fh int; v_shape boolean;
-  v_keep_i int := 0; v_sig text[]; v_keep_sig text[];
-  v_removed int := 0; v_flagged int := 0;
-  v_renamed boolean := false;
-begin
-  select coalesce(state->'materials', '[]'::jsonb) into v_root from public.ledger where id = 1;
-  if v_root is null or v_root = '[]'::jsonb then
-    raise notice 'Materials: nothing to do (list missing or empty)';
-    return;
-  end if;
-  v_n := jsonb_array_length(v_root);
-
-  for v_i in 1 .. v_n loop
-    v_grp := v_root -> (v_i - 1);
-    v_cnt := coalesce(jsonb_array_length(v_grp->'children'), 0);
-    select count(*) into v_fh
-      from jsonb_array_elements(coalesce(v_grp->'children', '[]'::jsonb)) c
-      where (c->>'id') like 'fhm_1_%';
-    if v_cnt = 82 and v_fh = 82 and v_keep_i = 0 then
-      v_keep_i := v_i;
-      select coalesce(array_agg(
-               lower(btrim(coalesce(c->>'name', ''))) || '|' || lower(btrim(coalesce(c->>'unit', ''))) || '|' || coalesce(c->>'price', '')
-               order by 1), '{}')
-        into v_keep_sig
-        from jsonb_array_elements(v_grp->'children') c;
-    end if;
-  end loop;
-  if v_keep_i = 0 then
-    raise notice 'Materials: no 82-row flat-house group found, nothing to do';
-    return;
-  end if;
-
-  for v_i in 1 .. v_n loop
-    v_grp := v_root -> (v_i - 1);
-    if v_i = v_keep_i then
-      v_name := coalesce(btrim(coalesce(v_grp->>'name', '')), '');
-      if v_name = '' or lower(v_name) in ('undefined', '(untitled)', 'untitled', 'no name') then
-        v_grp := jsonb_set(v_grp, '{name}', to_jsonb('Flat House Z15A1 · Material Rates'::text));
-        v_renamed := true;
-      end if;
-      v_out := v_out || v_grp;
-    else
-      v_cnt := coalesce(jsonb_array_length(v_grp->'children'), 0);
-      select count(*) into v_fh
-        from jsonb_array_elements(coalesce(v_grp->'children', '[]'::jsonb)) c
-        where (c->>'id') like 'fhm_1_%';
-      v_shape := (v_cnt = 82 and v_fh = 82);
-      if v_shape and v_i > v_keep_i then
-        select coalesce(array_agg(
-                 lower(btrim(coalesce(c->>'name', ''))) || '|' || lower(btrim(coalesce(c->>'unit', ''))) || '|' || coalesce(c->>'price', '')
-                 order by 1), '{}')
-          into v_sig
-          from jsonb_array_elements(v_grp->'children') c;
-        if v_sig = v_keep_sig then
-          v_removed := v_removed + 1;
-        else
-          v_flagged := v_flagged + 1;
-          v_out := v_out || v_grp;
-        end if;
-      else
-        v_out := v_out || v_grp;
-      end if;
-    end if;
-  end loop;
-
-  update public.ledger
-    set state = jsonb_set(state, array['materials'], v_out, true)
-    where id = 1;
-  raise notice 'Materials: kept group at l1_ref %, removed % exact-duplicate group(s), % differing-price group(s) left for you',
-    v_keep_i, v_removed, v_flagged;
-  if v_renamed then
-    raise notice 'Materials: the kept group was unnamed, it is now "Flat House Z15A1 · Material Rates"';
-  end if;
-end
-$fhm_cleanup$;
-
-do $fhl_cleanup$
-declare
-  v_root jsonb; v_out jsonb := '[]'::jsonb;
-  v_n int; v_i int; v_grp jsonb; v_name text;
-  v_cnt int; v_fh int; v_shape boolean;
-  v_keep_i int := 0; v_sig text[]; v_keep_sig text[];
-  v_removed int := 0; v_flagged int := 0;
-  v_renamed boolean := false;
-begin
-  select coalesce(state->'labor', '[]'::jsonb) into v_root from public.ledger where id = 1;
-  if v_root is null or v_root = '[]'::jsonb then
-    raise notice 'Labor: nothing to do (list missing or empty)';
-    return;
-  end if;
-  v_n := jsonb_array_length(v_root);
-
-  for v_i in 1 .. v_n loop
-    v_grp := v_root -> (v_i - 1);
-    v_cnt := coalesce(jsonb_array_length(v_grp->'children'), 0);
-    select count(*) into v_fh
-      from jsonb_array_elements(coalesce(v_grp->'children', '[]'::jsonb)) c
-      where (c->>'id') like 'fhl_1_%';
-    if v_cnt = 82 and v_fh = 82 and v_keep_i = 0 then
-      v_keep_i := v_i;
-      select coalesce(array_agg(
-               lower(btrim(coalesce(c->>'name', ''))) || '|' || lower(btrim(coalesce(c->>'unit', ''))) || '|' || coalesce(c->>'price', '')
-               order by 1), '{}')
-        into v_keep_sig
-        from jsonb_array_elements(v_grp->'children') c;
-    end if;
-  end loop;
-  if v_keep_i = 0 then
-    raise notice 'Labor: no 82-row flat-house group found, nothing to do';
-    return;
-  end if;
-
-  for v_i in 1 .. v_n loop
-    v_grp := v_root -> (v_i - 1);
-    if v_i = v_keep_i then
-      v_name := coalesce(btrim(coalesce(v_grp->>'name', '')), '');
-      if v_name = '' or lower(v_name) in ('undefined', '(untitled)', 'untitled', 'no name') then
-        v_grp := jsonb_set(v_grp, '{name}', to_jsonb('Flat House Z15A1 · Labor Rates'::text));
-        v_renamed := true;
-      end if;
-      v_out := v_out || v_grp;
-    else
-      v_cnt := coalesce(jsonb_array_length(v_grp->'children'), 0);
-      select count(*) into v_fh
-        from jsonb_array_elements(coalesce(v_grp->'children', '[]'::jsonb)) c
-        where (c->>'id') like 'fhl_1_%';
-      v_shape := (v_cnt = 82 and v_fh = 82);
-      if v_shape and v_i > v_keep_i then
-        select coalesce(array_agg(
-                 lower(btrim(coalesce(c->>'name', ''))) || '|' || lower(btrim(coalesce(c->>'unit', ''))) || '|' || coalesce(c->>'price', '')
-                 order by 1), '{}')
-          into v_sig
-          from jsonb_array_elements(v_grp->'children') c;
-        if v_sig = v_keep_sig then
-          v_removed := v_removed + 1;
-        else
-          v_flagged := v_flagged + 1;
-          v_out := v_out || v_grp;
-        end if;
-      else
-        v_out := v_out || v_grp;
-      end if;
-    end if;
-  end loop;
-
-  update public.ledger
-    set state = jsonb_set(state, array['labor'], v_out, true)
-    where id = 1;
-  raise notice 'Labor: kept group at l1_ref %, removed % exact-duplicate group(s), % differing-price group(s) left for you',
-    v_keep_i, v_removed, v_flagged;
-  if v_renamed then
-    raise notice 'Labor: the kept group was unnamed, it is now "Flat House Z15A1 · Labor Rates"';
-  end if;
-end
-$fhl_cleanup$;
-
--- If the Part 3 notices report flagged (differing-price) groups, decide each
--- in the app (edit the price on the row you keep), or delete a whole flagged
--- group BY ITS POSITION from the dry run — uncomment and set the position:
+-- Outcome: the dry run flagged exactly one lump-sum row, because the keeper's
+-- own Site Preparation row costs 16279.99 while all copies carry 16280 —
+-- the distinction lives in the kept group, not in a copy, so no decision was
+-- needed on this ledger. If a future dry run reports a genuine
+-- differing-price group, decide it in the app (edit the price on the row you
+-- keep), or delete a whole flagged group BY ITS POSITION from the dry run —
+-- uncomment and set the position:
 -- update public.ledger
 --   set state = jsonb_set(state, '{lumpSum}',
 --     coalesce((select jsonb_agg(grp order by ord)
@@ -457,7 +260,7 @@ $fhl_cleanup$;
 
 -- ===========================================================================
 -- PART 4 — VERIFY (after Part 3)
--- 4a should show 2 Lump Sum groups, 14 Materials, 14 Labor (expected counts),
+-- 4a should show 2 Lump Sum groups, 14 Materials, 13 Labor (expected counts),
 --    each with its proper name, and no "(no name)" walls.
 -- ===========================================================================
 
