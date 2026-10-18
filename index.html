@@ -700,11 +700,50 @@
   .fb-err { margin-top: 10px; font-size: 11.5px; color: var(--danger); }
   .fb-err:empty { display: none; }
 
-  /* A phone gets it as a bottom sheet. Still no backdrop. Deliberately not
+  /* Unit Price Search: the same pill as the Feedback button, one row above it. */
+  .price-search-fab { bottom: calc(18px + var(--h-btn-sm) + 12px); }
+
+  /* The panel floats above that pill. No backdrop either, for the same reason:
+     the page behind it stays visible and clickable. */
+  .ps-panel { position: fixed; right: 18px; bottom: calc(40px + var(--h-btn-sm) * 2);
+    z-index: 40; width: 340px; max-height: 70vh; box-sizing: border-box; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    background: var(--surface); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-3);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 200ms var(--ease), transform 200ms var(--ease); }
+  .ps-panel[hidden] { display: none; }
+  .ps-panel.open { opacity: 1; transform: none; }
+  .ps-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ps-head h3 { margin: 0; font-size: var(--t-total); color: var(--ink); }
+  .ps-panel .search-input { width: 100%; box-sizing: border-box; min-width: 0; }
+  .ps-results { list-style: none; margin: 0; padding: 0; overflow-y: auto;
+    border-top: 1px solid var(--line); max-height: 46vh; }
+  .ps-item { display: flex; align-items: center; gap: 8px; padding: 8px 6px;
+    border-bottom: 1px solid var(--line); cursor: pointer; }
+  .ps-item:last-child { border-bottom: 0; }
+  .ps-item:hover, .ps-item.cursor { background: var(--surface-alt); }
+  .ps-item .ps-name { flex: 1 1 auto; min-width: 0; font-size: 13px; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ps-item .ps-unit { flex: none; font-size: 11.5px; color: var(--ink-muted); }
+  .ps-item .ps-price { flex: none; font-weight: 600; color: var(--steel); font-size: 13px; }
+  .ps-tag { flex: none; font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em;
+    padding: 2px 7px; border-radius: 999px; color: #fff; font-weight: 700; }
+  .ps-tag.t-lumpsum { background: var(--navy); }
+  .ps-tag.t-labor { background: var(--amber); color: var(--navy-deep); }
+  .ps-tag.t-material { background: var(--steel); }
+  .ps-note { padding: 16px 6px; text-align: center; color: var(--ink-muted); font-size: 12.5px; }
+  .ps-hint { font-size: 11px; color: var(--ink-muted); }
+  .ps-use { width: 100%; justify-content: center; }
+
+  /* A phone gets either as a bottom sheet. Still no backdrop. Deliberately not
      keyed on 780px, which is the pair the go-to-top layout already owns. */
   @media (max-width: 560px) {
     .fb-pop { right: 0; left: 0; bottom: 0; width: auto;
       border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding-bottom: 24px; }
+    .ps-panel { right: 0; left: 0; width: auto;
+      bottom: calc(30px + var(--h-btn-sm) * 2);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
   }
 
   .fb-inbox { display: flex; flex-direction: column; gap: 8px; }
@@ -800,7 +839,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19c (Accounts, feedback, permissions)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19d (Price search)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -1231,6 +1270,10 @@
 <button type="button" class="to-top-fab" id="btnToTop" title="Go to top" aria-label="Go to top">
   <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
 </button>
+<button type="button" class="feedback-fab price-search-fab" id="btnPriceSearch" title="Search every price list at once">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+  <span>Price Search</span>
+</button>
 <button type="button" class="feedback-fab" id="btnFeedback" title="Send feedback about this tool">
   <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"></path></svg>
   <span>Feedback</span>
@@ -1251,6 +1294,19 @@
     <button class="btn btn-ghost btn-sm" type="button" id="fbCancel">Cancel</button>
     <button class="btn btn-sm" type="button" id="fbSubmit">Submit</button>
   </div>
+</div>
+<div class="ps-panel" id="psPanel" role="dialog" aria-labelledby="psTitle" hidden>
+  <div class="ps-head">
+    <h3 id="psTitle">Unit price search</h3>
+    <button class="fb-close" type="button" id="psClose" title="Close" aria-label="Close price search">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+  <input class="search-input" id="psInput" type="text" autocomplete="off" spellcheck="false" placeholder="Search lump sum, labor and materials…" aria-label="Search all price lists">
+  <div class="chip-filter" id="psChips"></div>
+  <ul class="ps-results" id="psResults"></ul>
+  <button class="btn btn-sm ps-use" type="button" id="psUse" hidden></button>
+  <div class="ps-hint">/ or Ctrl+K to open &middot; Up/Down to move &middot; Enter to copy the price</div>
 </div>
 <div class="toast" id="toast"></div>
 <div class="auth-overlay" id="authScreen" hidden>
@@ -1294,7 +1350,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-10-19c (Accounts, feedback, permissions)");
+  console.log("Site Ledger — build 2026-10-19d (Price search)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -5296,6 +5352,7 @@
   function openFeedback() {
     const pop = document.getElementById("fbDialog");
     if (!pop) return;
+    closePriceSearch();
     if (fbCloseTimer) { clearTimeout(fbCloseTimer); fbCloseTimer = null; }
     document.getElementById("fbErr").textContent = "";
     pop.hidden = false;
@@ -5365,6 +5422,264 @@
     });
   }
 
+  /* ---------------- Unit Price Search (panel, no backdrop) ----------------
+     Read-only. It walks the three price lists already in `state` — nothing is
+     stored, nothing is written back except the one row the user picks. */
+  const PS_SOURCES = [
+    { key: "lumpsum", label: "Lump Sum", cls: "t-lumpsum" },
+    { key: "labor", label: "Labor", cls: "t-labor" },
+    { key: "materials", label: "Material", cls: "t-material" }
+  ];
+  const PS_FILTERS = [
+    { id: "all", label: "All" },
+    { id: "lumpsum", label: "Lump Sum" },
+    { id: "labor", label: "Labor" },
+    { id: "materials", label: "Material" }
+  ];
+  const PS_DEBOUNCE_MS = 200;
+  const PS_MIN_LEN = 2;
+  const PS_CAP = 20;
+  let psFilter = "all";
+  let psTerm = "";
+  let psList = [];
+  let psItemEls = [];
+  let psCursor = -1;
+  let psTimer = null;
+  let psCloseTimer = null;
+
+  // Collapse runs of whitespace so "cement   bag" and "cement bag" match the same row.
+  function psNorm(v) { return String(v || "").replace(/\s+/g, " ").trim().toLowerCase(); }
+
+  function psTreeFor(key) {
+  return key === "lumpsum" ? (state.lumpSum || []) : key === "materials" ? state.materials : state.labor;
+  }
+
+  function psCollect(term) {
+  const out = [];
+  if (!term) return out;
+  PS_SOURCES.forEach(function (src) {
+  if (psFilter !== "all" && psFilter !== src.key) return;
+  walkTree(psTreeFor(src.key), 0, function (n) {
+  // headings carry neither a unit nor a price, so only real items are offered
+  if (isHeading(n)) return;
+  if (psNorm(n.name).indexOf(term) === -1 && psNorm(n.unit).indexOf(term) === -1) return;
+  out.push({ id: n.id, name: n.name || "", unit: n.unit || "", price: toNum(n.price),
+  label: src.label, cls: src.cls, key: src.key });
+  });
+  });
+  return out;
+  }
+
+  function psNote(text) {
+  const li = document.createElement("li");
+  li.className = "ps-note";
+  li.textContent = text;
+  return li;
+  }
+
+  function psRender() {
+  const box = document.getElementById("psResults");
+  if (!box) return;
+  box.textContent = "";
+  psList = []; psItemEls = []; psCursor = -1;
+  if (psTerm.length < PS_MIN_LEN) {
+  box.appendChild(psNote("Type at least " + PS_MIN_LEN + " characters to search every price list."));
+  psSyncUse();
+  return;
+  }
+  const found = psCollect(psTerm);
+  psList = found.slice(0, PS_CAP);
+  if (!psList.length) {
+  box.appendChild(psNote("No results found"));
+  psSyncUse();
+  return;
+  }
+  psCursor = 0;
+  psList.forEach(function (r, i) {
+  const li = document.createElement("li");
+  li.className = "ps-item" + (i === psCursor ? " cursor" : "");
+  const name = document.createElement("span");
+  name.className = "ps-name";
+  name.textContent = r.name || "(untitled)";
+  name.title = r.name || "";
+  const unit = document.createElement("span");
+  unit.className = "ps-unit";
+  unit.textContent = r.unit || "\u2014";
+  const price = document.createElement("span");
+  price.className = "ps-price";
+  price.textContent = fmt(r.price);
+  const tag = document.createElement("span");
+  tag.className = "ps-tag " + r.cls;
+  tag.textContent = r.label;
+  li.appendChild(name);
+  li.appendChild(unit);
+  li.appendChild(price);
+  li.appendChild(tag);
+  li.addEventListener("click", function () { psPick(i); });
+  box.appendChild(li);
+  psItemEls.push(li);
+  });
+  psSyncUse();
+  }
+
+  function psMove(delta) {
+  if (!psList.length) return;
+  psCursor = (psCursor + delta + psList.length) % psList.length;
+  psItemEls.forEach(function (el, i) { el.classList.toggle("cursor", i === psCursor); });
+  const el = psItemEls[psCursor];
+  if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+  psSyncUse();
+  }
+
+  // A lump-sum package has no price slot on a bill row, so those results are copy-only.
+  function psSlotFor(key) {
+  return key === "materials" ? "customMaterialPrice" : key === "labor" ? "customLaborPrice" : null;
+  }
+
+  function psSyncUse() {
+  const btn = document.getElementById("psUse");
+  if (!btn) return;
+  const r = psList[psCursor];
+  const slot = r && selectedIds.boq ? psSlotFor(r.key) : null;
+  btn.hidden = !slot;
+  if (!slot) return;
+  btn.textContent = "Use in selected row \u2014 " + fmt(r.price);
+  }
+
+  function psUseInRow() {
+  const r = psList[psCursor];
+  const slot = r ? psSlotFor(r.key) : null;
+  if (!slot || !selectedIds.boq) return;
+  const loc = locate(state.boq, selectedIds.boq);
+  if (!loc) return;
+  loc.siblings[loc.index][slot] = r.price;
+  persist();
+  renderAll();
+  showToast("Price applied to the selected row");
+  }
+
+  function psCopy(text) {
+  try {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+  navigator.clipboard.writeText(text);
+  return;
+  }
+  } catch (e) { /* clipboard blocked: fall through to the textarea trick */ }
+  try {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.setAttribute("readonly", "");
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  if (document.execCommand) document.execCommand("copy");
+  document.body.removeChild(ta);
+  } catch (e) { /* nothing to do: the price is still on screen */ }
+  }
+
+  function psPick(i) {
+  const r = psList[i];
+  if (!r) return;
+  psCursor = i;
+  psItemEls.forEach(function (el, k) { el.classList.toggle("cursor", k === psCursor); });
+  psSyncUse();
+  psCopy(fmt(r.price));
+  showToast("Copied");
+  }
+
+  function psRenderChips() {
+  const wrap = document.getElementById("psChips");
+  if (!wrap) return;
+  wrap.textContent = "";
+  PS_FILTERS.forEach(function (f) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "chip" + (f.id === psFilter ? " active" : "");
+  b.textContent = f.label;
+  b.title = f.id === "all" ? "Search every price list" : "Search only this list";
+  b.addEventListener("click", function () {
+  psFilter = f.id;
+  psRenderChips();
+  psRender();
+  });
+  wrap.appendChild(b);
+  });
+  }
+
+  function openPriceSearch() {
+  const pop = document.getElementById("psPanel");
+  if (!pop) return;
+  closeFeedback();
+  if (psCloseTimer) { clearTimeout(psCloseTimer); psCloseTimer = null; }
+  pop.hidden = false;
+  // one frame, so the fade/slide has a starting value to animate from
+  requestAnimationFrame(function () { pop.classList.add("open"); });
+  const input = document.getElementById("psInput");
+  if (input) { input.focus(); if (input.select) input.select(); }
+  }
+
+  function closePriceSearch() {
+  const pop = document.getElementById("psPanel");
+  if (!pop || pop.hidden) return;
+  pop.classList.remove("open");
+  if (psCloseTimer) clearTimeout(psCloseTimer);
+  psCloseTimer = setTimeout(function () { pop.hidden = true; psCloseTimer = null; }, 200);
+  }
+
+  function bindPriceSearch() {
+  const fab = document.getElementById("btnPriceSearch");
+  const pop = document.getElementById("psPanel");
+  const input = document.getElementById("psInput");
+  if (!fab || !pop || !input) return;
+  psRenderChips();
+
+  fab.addEventListener("click", function () {
+  if (!pop.hidden) closePriceSearch(); else openPriceSearch();
+  });
+  document.getElementById("psClose").addEventListener("click", closePriceSearch);
+  document.getElementById("psUse").addEventListener("click", psUseInRow);
+
+  input.addEventListener("input", function (e) {
+  psTerm = psNorm(e.target.value);
+  if (psTimer) clearTimeout(psTimer);
+  psTimer = setTimeout(function () { psTimer = null; psRender(); }, PS_DEBOUNCE_MS);
+  });
+
+  input.addEventListener("keydown", function (e) {
+  if (e.key === "ArrowDown") { e.preventDefault(); psMove(1); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); psMove(-1); }
+  else if (e.key === "Enter") {
+  // flush a search that has not been drawn yet, so Enter never acts on stale results
+  if (psTimer) { clearTimeout(psTimer); psTimer = null; psRender(); }
+  psPick(psCursor);
+  }
+  });
+
+  document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+  if (!pop.hidden) closePriceSearch();
+  return;
+  }
+  const t = e.target;
+  // never steal a keystroke from something the user is already typing into
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
+  if (e.key === "/" || ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K"))) {
+  e.preventDefault();
+  openPriceSearch();
+  }
+  });
+
+  // no backdrop to absorb a stray click
+  document.addEventListener("pointerdown", function (e) {
+  if (pop.hidden) return;
+  if (pop.contains(e.target) || fab.contains(e.target)) return;
+  closePriceSearch();
+  });
+
+  psRender();
+  }
+
   /* Admin/moderator read of the feedback rows. Nothing else may select them. */
   function loadAdminFeedback() {
     const box = document.getElementById("fbInbox");
@@ -5412,6 +5727,7 @@
   initToTop();
   bindAuthForms();
   bindFeedback();
+  bindPriceSearch();
   bindAdminPanel();
   bootAuth();
   }

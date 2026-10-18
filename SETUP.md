@@ -427,10 +427,42 @@ Below 560px it becomes a bottom sheet, still without a backdrop. The `feedback`
 policies are unchanged: any signed-in user may insert their own row, and reading
 requires `is_staff()`.
 
+**Unit Price Search, 2026-10-19d.** A floating "Price Search" pill sits directly
+above the Feedback button. Clicking it opens a small floating panel (340px wide,
+max 70vh) anchored above the stack, with no dark backdrop — the page stays visible
+and clickable behind it. Only one floating panel is ever open at a time (opening
+Search closes Feedback, and vice versa). The panel includes a search box (type at
+least 2 characters), filter chips (All, Lump Sum, Labor, Material), a scrollable
+results list (up to 20 results) and an X button. Typing searches as you go with a
+200ms debounce, is case-insensitive, ignores extra spaces and still matches Khmer
+text. Each result shows the description, unit, unit price ($x.xx) and a coloured
+source tag (Material/Labor/Lump Sum). Keyboard navigation (Up/Down/Enter), a `/`
+or Ctrl+K shortcut (ignored when typing into another field), Esc, clicking the
+pill again, and clicking away all close it. Clicking a result copies the price to
+the clipboard and shows a short "Copied" toast; the panel stays open. If a BOQ row
+is selected, the "Use in selected row" button appears and writes the price into that
+row's matching slot (Material → Material Price; Labor → Labour Price); Lump Sum
+results have no BOQ slot, so the button is hidden. The search is read-only: it
+walks the price lists already loaded in the app and never edits them. On phones
+it drops to a bottom sheet, uses the existing `@media (max-width: 560px)` block
+only, and does not add a third `@media (max-width: 780px)` block. The pill reuses
+the Feedback button's size and style; its vertical offset uses `calc` with
+`--h-btn-sm`, which keeps the to-go-top layout unchanged.
+
 **Checks.** `check_static` had no failure count and no exit code, so a failing
 assertion printed a line and was still treated as green. It now reports
 `structural checks: N failures: M` and exits 1, and it asserts the Google,
 username, presence and feedback handlers stay bound and that no full-screen
-feedback backdrop returns. `fbtest.js` drives the popover through the DOM shim —
-open, Cancel, X, Escape, click-away, click-inside, empty validation and the
-failed-save path — so a control that is rendered but unbound fails the build.
+feedback backdrop returns. It also asserts the new price-search bindings, the
+200ms debounce, the 2-character minimum, the cap at 20, the `/` and Ctrl+K
+shortcuts, that the panels are mutually exclusive, that the feature is read-only
+and that the new pill did not add a third 780px media block. `fbtest.js` drives
+the popover through the DOM shim — open, Cancel, X, Escape, click-away, click-
+inside, empty validation and the failed-save path — so a control that is rendered
+but unbound fails the build. `psearch.js` does the same for the Unit Price
+Search: open via pill and via keyboard, filter chips, Up/Down/Enter, click-away,
+case-insensitive/whitespace normalization, Khmer matching, the read-only guarantee
+and the "Use in selected row" slot mapping. The gates (check_syntax, check_static,
+check_search, check_totop, check_totop_dom, check_legend, gridtest, fbtest,
+psearch, bench_noregress, bench_debounce, motion_logic, test_lumpsum_logic) all
+pass with 31/0, 85/0 and the structural/numerical totals unchanged elsewhere.
