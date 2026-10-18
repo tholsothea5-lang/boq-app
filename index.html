@@ -642,6 +642,61 @@
   .online-row .rol.admin { color: var(--amber); }
   .online-row .rol.moderator { color: var(--steel); }
   .online-row .rol.user { color: #93A7BB; }
+  .online-row .seen { flex: none; font-size: 10.5px; color: #7D90A3; white-space: nowrap; }
+
+  /* ---- Accounts: Google sign-in, unique usernames, feedback, read-only ---- */
+  .auth-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0 12px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: var(--ls-label); color: #93A7BB; }
+  .auth-divider::before, .auth-divider::after { content: ""; flex: 1 1 auto; height: 1px; background: #2E445C; }
+  .btn-google { width: 100%; justify-content: center; }
+  .username-hint { margin-top: 6px; font-size: 11.5px; color: #93A7BB; }
+  .username-hint.bad { color: #E0885A; }
+  .username-hint.good { color: #3FBF6F; }
+
+  .owner-note { font-size: 11.5px; color: #93A7BB; }
+  .owner-note strong { color: var(--steel-soft); font-weight: 600; }
+  body.readonly .owner-note strong { color: var(--amber); }
+  body.readonly #boqTable .cell-input,
+  body.readonly #boqTable input,
+  body.readonly #boqTable textarea,
+  body.readonly #boqTable select { pointer-events: none; }
+  body.readonly #btnAddBoqRow, body.readonly #btnClearBoq,
+  body.readonly #btnResetData, body.readonly #btnSaveProject,
+  body.readonly .ledger-del, body.readonly .ledger-add { display: none !important; }
+
+  .feedback-fab { position: fixed; right: 18px; bottom: 18px; z-index: 40;
+    display: inline-flex; align-items: center; gap: 7px; height: var(--h-btn-sm);
+    padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: var(--shadow-2);
+    font: inherit; font-size: var(--t-label); font-weight: var(--w-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+  .feedback-fab:hover { transform: translateY(-1px); background: var(--surface-alt); }
+  .feedback-fab:active { transform: none; }
+  .feedback-fab .ic { width: 15px; height: 15px; }
+
+  .fb-overlay { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center;
+    justify-content: center; padding: 20px; background: rgba(15, 36, 56, .60); }
+  .fb-card { width: min(460px, 100%); max-height: 90vh; overflow: auto;
+    background: var(--surface); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-3); }
+  .fb-card h3 { margin: 0; font-size: var(--t-card); color: var(--ink); }
+  .fb-card label { display: block; margin: 12px 0 5px; font-size: var(--t-label);
+    font-weight: var(--w-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--ink-muted); }
+  .fb-card select, .fb-card textarea { width: 100%; box-sizing: border-box; padding: 8px 10px;
+    border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+    background: var(--surface-alt); color: var(--ink); font: inherit; font-size: var(--t-body); }
+  .fb-card textarea { resize: vertical; }
+  .fb-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+  .fb-inbox { display: flex; flex-direction: column; gap: 8px; }
+  .fb-item { border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: 10px 12px; background: var(--surface-alt); }
+  .fb-item .fb-meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-bottom: 5px; font-size: var(--t-label); color: var(--ink-muted); }
+  .fb-item .fb-type { border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 1px 8px; text-transform: uppercase; letter-spacing: var(--ls-label); color: var(--amber-ink); }
+  .fb-item .fb-msg { font-size: var(--t-body); color: var(--ink); white-space: pre-wrap; }
   .admin-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; align-items: center; }
   .admin-toolbar input {
   padding: 8px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
@@ -727,7 +782,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-18c (Visual redesign)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19a (Accounts, feedback, permissions)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -923,6 +978,7 @@
     <label for="projectName">PROJECT</label>
     <input type="text" id="projectName" placeholder="Untitled project" value="">
     <button type="button" class="btn btn-primary btn-sm save-project-btn" id="btnSaveProject" hidden title="Save this project and all of its information to the shared ledger">Save project information</button>
+    <span class="owner-note" id="ownerNote"></span>
     </div>
   </div>
   <div class="summary-strip">
@@ -1139,9 +1195,13 @@
   <div class="admin-block">
     <h3>Users</h3>
     <table class="user-table">
-    <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
+    <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
     <tbody id="adminUsersBody"></tbody>
     </table>
+  </div>
+  <div class="admin-block">
+    <h3>Feedback</h3>
+    <div class="fb-inbox" id="fbInbox"></div>
   </div>
   <div class="admin-block">
     <h3>Audit trail</h3>
@@ -1153,6 +1213,24 @@
 <button type="button" class="to-top-fab" id="btnToTop" title="Go to top" aria-label="Go to top">
   <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="20" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
 </button>
+<button type="button" class="feedback-fab" id="btnFeedback" title="Send feedback about this tool">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"></path></svg>
+  <span>Feedback</span>
+</button>
+<div class="fb-overlay" id="fbDialog" hidden>
+  <div class="fb-card" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+    <h3 id="fbTitle">Send feedback</h3>
+    <label for="fbType">Type</label>
+    <select id="fbType"><option>Improvement</option><option>Bug</option><option>Other</option></select>
+    <label for="fbMsg">Message</label>
+    <textarea id="fbMsg" rows="5" maxlength="2000" required placeholder="What worked, what did not, what you would like to see…"></textarea>
+    <div class="auth-err" id="fbErr"></div>
+    <div class="fb-actions">
+      <button class="btn btn-ghost" type="button" id="fbCancel">Cancel</button>
+      <button class="btn" type="button" id="fbSubmit">Submit</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="auth-overlay" id="authScreen" hidden>
   <form class="auth-card" id="loginForm">
@@ -1165,12 +1243,20 @@
   <input id="loginPassword" type="password" autocomplete="current-password" required>
   <div class="auth-err" id="loginErr"></div>
   <button class="btn" type="submit" id="loginSubmit">Sign in</button>
+  <div class="auth-divider">or</div>
+  <button class="btn btn-google" type="button" id="googleLogin">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8h4.5a4.5 4.5 0 1 1-1.3-3.2"></path><line x1="12" y1="8" x2="16.5" y2="4.8"></line></svg>
+    Continue with Google
+  </button>
   <div class="switch">New here? <button type="button" id="toRegister">Create an account</button></div>
   </form>
   <form class="auth-card" id="registerForm" hidden>
   <span class="mark">📐 SITE LEDGER</span>
   <h1 id="registerTitle">Create an account</h1>
   <p id="registerHint">Anyone can open an account here; the admin can promote you to manage other users.</p>
+  <label for="regUsername">Username</label>
+  <input id="regUsername" type="text" minlength="3" maxlength="24" autocomplete="username" required>
+  <div class="username-hint" id="regUsernameHint">3–24 letters, numbers, spaces, dot, dash or underscore. Shown everywhere instead of your email.</div>
   <label for="regEmail">Email</label>
   <input id="regEmail" type="email" autocomplete="email" required>
   <label for="regPassword">Password</label>
@@ -1187,7 +1273,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-10-18c (Visual redesign)");
+  console.log("Site Ledger — build 2026-10-19a (Accounts, feedback, permissions)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1337,6 +1423,63 @@
     const { data, error } = await supabase.from("ledger").select("state").eq("id", 1).maybeSingle();
     if (error) throw new Error(error.message);
     return data && data.state ? data.state : null;
+  }
+
+  /* ---- one row per project (see migration_2026-10-19.sql) ------------------
+     The database decides who may write: everyone signed in can READ a project,
+     only its owner or an admin may UPDATE or DELETE it. canEdit() mirrors those
+     rules in the UI so a viewer is not offered buttons that would be rejected. */
+  async function loadProjects() {
+    if (!supabase) return [];
+    const { data, error } = await supabase.from("projects")
+      .select("id,owner_id,name,data,created_at")
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data || []).map(function (r) {
+      const p = Object.assign({}, r.data || {});
+      p.id = r.id;
+      p.name = r.name || "";
+      p.owner_id = r.owner_id;
+      delete p.draft;
+      return p;
+    });
+  }
+
+  function ownerName(id) {
+    if (!id) return "";
+    const hit = (profilesCache || []).find(function (u) { return u && u.id === id; });
+    return hit ? (hit.username || hit.email || "") : "";
+  }
+
+  function canEdit(p) {
+    if (!me) return false;
+    p = p || activeProject();
+    if (!p) return false;
+    if (me.role === "admin") return true;
+    return !!p.owner_id && p.owner_id === me.id;
+  }
+
+  function applyReadOnly() {
+    try {
+      const ok = canEdit();
+      if (document.body && document.body.classList) document.body.classList.toggle("readonly", !ok);
+      const pn = document.getElementById("projectName");
+      if (pn) pn.disabled = !ok;
+      const note = document.getElementById("ownerNote");
+      if (note) {
+        note.textContent = "";
+        const p = activeProject();
+        if (p) {
+          const who = ownerName(p.owner_id);
+          note.appendChild(document.createTextNode(ok ? "You own this project" : "Read-only \u2014 owned by "));
+          if (!ok && who) {
+            const s = document.createElement("strong");
+            s.textContent = who;
+            note.appendChild(s);
+          }
+        }
+      }
+    } catch (e) { /* no DOM (test harness) */ }
   }
 
   async function seedSharedLedger(baseline) {
@@ -4799,19 +4942,37 @@
     });
   }
 
+  // The database does the length/charset/uniqueness checks and writes the
+  // audit entry itself, so an error here is shown as-is.
+  function renameUser(id, name) {
+    supabase.rpc("admin_set_username", { target_id: id, new_name: name }).then(function (res) {
+      if (res.error) { showToast(res.error.message); return; }
+      showToast("Username updated");
+      loadAdminUsers();
+      refreshOnlineProfiles();
+    });
+  }
+
   function loadAdminUsers() {
     const body = document.getElementById("adminUsersBody");
     if (!body) return;
     body.innerHTML = "";
     supabase.from("profiles")
-      .select("id,email,role,is_active,created_at")
+      .select("id,email,username,role,is_active,created_at")
       .order("created_at", { ascending: true })
       .then(function (res) {
         if (res.error) { body.innerHTML = '<tr><td colspan="5">Could not load users.</td></tr>'; return; }
         res.data.forEach(function (u) {
           const tr = document.createElement("tr");
           const tdEmail = document.createElement("td");
-          tdEmail.textContent = u.email;
+          const who = document.createElement("div");
+          who.textContent = u.username || "(no username)";
+          who.style.fontWeight = "600";
+          const mail = document.createElement("div");
+          mail.textContent = u.email || "";
+          mail.style.fontSize = "11.5px";
+          mail.style.color = "var(--ink-muted)";
+          tdEmail.append(who, mail);
           tdEmail.title = u.is_active ? "Active account" : "Deactivated account";
           const tdRole = document.createElement("td");
           const roleTag = document.createElement("span");
@@ -4826,6 +4987,11 @@
           const tdAct = document.createElement("td");
           tdAct.style.whiteSpace = "nowrap";
           if (me.role === "admin") {
+            tdAct.appendChild(adminActionBtn("Rename", "", "Change this user's username (3\u201324 characters)", function () {
+              const next = prompt("New username for " + (u.username || u.email) + ":", u.username || "");
+              if (next === null) return;
+              renameUser(u.id, next.trim());
+            }));
             if (u.role !== "admin") {
               tdAct.appendChild(adminActionBtn("Make admin", "", "Give this user full control", function () {
                 patchUser(u.id, { role: "admin" });

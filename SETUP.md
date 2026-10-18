@@ -340,3 +340,59 @@ reduced-motion preference stops all of it. It also pins the count-up's
 behaviour: the first write of a value is immediate, an unchanged value is not
 rewritten, a changed value rolls and then lands on exactly the text it was
 given, and a missing element returns quietly.
+
+## Build 2026-10-19a — accounts, feedback, per-project permissions
+
+This build moves the ledger from one shared database row to one row per
+project, and adds the account layer on top of it. It does not change the bill
+itself: the 21 columns, the formulas, the legend and the grid behaviour are
+untouched, and every check that passed before still passes.
+
+**One row per project.** `state.projects` used to hold every project inside a
+single `ledger` row, which made it impossible to say who could edit what,
+because any write replaced the whole bill for everyone. Projects now live in
+their own `projects` table with an `owner_id`. The global rate libraries, the
+theme and the other preferences stay in `ledger`. Saving writes only the
+project being edited.
+
+**Permissions are enforced in the database, not just in the interface.** Row
+level security lets every signed-in account read every project, but lets only
+the owner or an admin write one. The interface mirrors those rules through
+`canEdit()`: a viewer still sees the whole bill, but the inputs take no clicks
+and the add, delete and save controls are hidden rather than failing later. An
+admin may edit anything.
+
+**Usernames.** Registration asks for one, and Google sign-in derives one from
+the display name, de-duplicated so two accounts cannot collide. Length,
+character set and uniqueness are checked by `profiles_set_username()` on the
+server rather than in the browser, so the rules hold for any client. The email
+address is no longer shown anywhere in the app — the presence list, the
+project owner and the admin table all show the username. Admins can rename an
+account from the admin table through `admin_set_username()`, which applies the
+same checks and writes to the audit trail.
+
+**Presence.** The Online/Offline box used to loop: an empty list triggered a
+refresh that reset the list to empty and triggered the box to render again, so
+no row was ever drawn. Rendering is now guarded by a flag, so a user who is
+online appears on first draw. `last_seen` is written by `presence_beat()` on a
+heartbeat, so an offline account shows how long ago it was around rather than
+nothing at all.
+
+**Feedback.** A button in the bottom-right corner opens a dialog with a type
+and a message. Submissions land in the `feedback` table with the username and
+a timestamp. Reading them requires `is_staff()`, so the inbox in the admin tab
+is visible to admins and moderators and to nobody else.
+
+**Migrating existing data.** `backup_ledger_2026-10-19.sql` copies the ledger,
+profiles and audit tables before anything is touched.
+`migration_2026-10-19.sql` then splits the ledger into the projects table,
+assigns every project to the admin account, and installs a trigger that keeps
+the original ledger row frozen as a read-only snapshot. Its final query
+compares project counts and row counts on both sides and prints PASS or FAIL
+alongside a per-project breakdown. The split reads from the backup copy and is
+skipped entirely if `projects` already has rows, so a re-run cannot overwrite
+work done since.
+
+**Checks.** The existing harnesses still pass: syntax 0, static 113/0, search
+113/0, go-to-top 0 and 0, legend 0, grid 78/0. The legend check now asserts the
+new stamp, and the bill header remains byte-identical to the previous build.
