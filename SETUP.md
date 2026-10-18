@@ -466,3 +466,29 @@ and the "Use in selected row" slot mapping. The gates (check_syntax, check_stati
 check_search, check_totop, check_totop_dom, check_legend, gridtest, fbtest,
 psearch, bench_noregress, bench_debounce, motion_logic, test_lumpsum_logic) all
 pass with 31/0, 85/0 and the structural/numerical totals unchanged elsewhere.
+
+**Duplicate flat-house categories, 2026-10-19e.** The Lump Sum Work list (and,
+later found, also the Material and Labor lists) had grown nameless copies of the
+"Flat House Z15A1" categories — 20+ groups each titled "(untitled)" with the
+same five lump-sum items repeated. Root cause: `merge_flat_house_rates.sql`
+wrote its three categories as `{ "children": [...] }` with no group `"id"` and
+no `"name"`, so its own idempotency guard (which searches the list for id
+`fhs_1`/`fhm_1`/`fhl_1`) could never match what it had already inserted, and
+every re-run appended one more copy. Fixes: the merge script now writes proper
+`id`+`name` wrappers and its guard accepts either the id or the name; the app
+refuses to save a heading without a title (adding a sub-item under a blank row,
+indenting under a blank row, and clearing a heading's name all fall back to
+"New group"); and `cleanup_flat_house_dupes.sql` is the admin cleanup — Part 1
+snapshots the ledger row into `public.ledger_backup_20261019e` (with a restore
+one-liner), Part 2 is read-only dry-run queries (group listing and per-leaf
+DELETE/FLAG verdicts), Part 3 deletes only groups whose items exactly match the
+first kept one (same description+unit+price; anything whose prices differ is
+flagged, never auto-deleted) and names the kept group, Part 4 re-verifies and
+confirms no BOQ reference dangles. Lump-sum rows are never referenced by BOQ
+rows (those carry only `materialRef`/`laborRef`), so no project total moves.
+REF numbers are computed at render time, so they renumber themselves once the
+groups are gone. Gate additions: check_static grew 8 checks (46 total) for the
+wrapper/guard/cleanup-script wiring and the untitled-heading rule; stamps moved
+to `2026-10-19e (Lump-sum cleanup)` ×2 and all suites (check_syntax, check_static, check_search,
+check_totop, check_totop_dom, check_legend, gridtest, fbtest, psearch,
+bench_noregress, bench_debounce, motion_logic, test_lumpsum_logic) pass.

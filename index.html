@@ -839,7 +839,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19d (Price search)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19e (Lump-sum cleanup)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -1350,7 +1350,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-10-19d (Price search)");
+  console.log("Site Ledger — build 2026-10-19e (Lump-sum cleanup)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -1705,6 +1705,8 @@
   function addChild(n, kind) {
   n.children = n.children || [];
   n.children.push(blankNode(kind));
+  // a node with children is a heading, so it must not stay untitled
+  if (isHeading(n) && !String(n.name || "").trim()) n.name = "New group";
   collapsedIds.delete(n.id);
   selectedIds[kind] = n.children[n.children.length - 1].id;
   persist(); renderAll();
@@ -1741,6 +1743,8 @@
   loc.siblings.splice(loc.index, 1);
   above.children = above.children || [];
   above.children.push(n);
+  // indenting under a blank node makes it a heading — never save it untitled
+  if (!String(above.name || "").trim()) above.name = "New group";
   collapsedIds.delete(above.id);
   persist(); renderAll();
   showToast("Moved in under \u201C" + (above.name || "untitled") + "\u201D");
@@ -1920,6 +1924,8 @@
   input.placeholder = depth === 0 ? "Main item…" : "Sub-item…";
   input.addEventListener("change", function (e) {
   n.name = e.target.value;
+  // headings (groups) cannot be saved without a title
+  if (isHeading(n) && !String(n.name || "").trim()) n.name = "New group";
   persist(); renderAll();
   });
   wrap.appendChild(input);
