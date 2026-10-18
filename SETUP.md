@@ -190,3 +190,54 @@ verdict so a name is lower-cased once instead of twice, and the four search
 boxes are wired through one `bindSearch` helper rather than four copies of the
 same listener. The audit trail's own search was already debounced at 350ms; the
 four lists had simply never been given the same treatment.
+
+## BoQ grid (build 2026-10-18a)
+
+The Bill of Quantities table has 21 columns and used to be laid out at a fixed
+1,560px inside a panel that is narrower than that on most laptops. Everything
+past the panel edge was simply gone: no scrollbar to reach it, and the header
+text cut mid-word, so *Quantity Mark-up %* read as `QUANTITY MARK-UP %` on one
+line and *Original Rate – Material* as `ORIGINAL RATE –`. It now behaves like a
+spreadsheet instead.
+
+**The header stays put.** The BoQ table is inside a scrollport (`.boq-wrap`)
+that scrolls both ways, so the column headings remain visible while the body
+scrolls under them. The three other tables (Materials, Labor, Lump Sum) are
+untouched.
+
+**Columns.** A **Columns** button in the toolbar opens a checklist of all 21
+columns with a **Show all** and a **Reset**. Each column header also carries
+its own small menu for showing, hiding and pinning that one column. Hiding a
+column keeps it out of the table, the footer and the widths calculation; there
+is always at least one column on screen, so you cannot lock yourself out.
+
+**Pinning.** REF and WORK DESCRIPTION are pinned by default. Up to eight
+columns can be pinned to the left edge, and pinned columns stay put while the
+rest of the table scrolls sideways — the two defaults mean the row identity and
+its description never scroll away. Pinning from the header menu or the Columns
+checklist does the same thing. Hiding a pinned column unpins it (otherwise a
+hidden column would hold a slot it cannot be seen in). The top-left corner cell
+is pinned on both axes, so it survives a vertical and a horizontal scroll at the
+same time.
+
+**Column width.** Every column is now wide enough for its own heading. The
+width is measured rather than guessed: an off-screen probe draws each label at
+the header's real 8.5px bold uppercase face with the header's real padding, and
+the column takes that measurement plus room for the sort and menu buttons. The
+21 default widths add up to more than the old 1,560px, which is what gives you
+a reason to scroll — and dragging a column edge still works, so a width you set
+by hand is respected and survives a reload.
+
+**Scrolling.** The scrollport keeps its bottom scrollbar visible at all times
+rather than only while the pointer is over the table, so there is always
+something to drag to reach the far columns.
+
+All of this is remembered per user (or per browser when signed out) and **per
+project**, under the key `boq.grid.v1.<user>.<project>` — a layout set up for
+one project's export does not get pushed onto another. Reset in the Columns
+menu puts everything back to the defaults.
+
+None of it touches the ledger itself: the values, the mark-up arithmetic, the
+row hierarchy and collapse/expand behave exactly as before, and the footer's
+Total / Budget / Profit / Remark cells stay aligned under the columns that are
+actually visible.

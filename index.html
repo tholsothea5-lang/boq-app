@@ -264,6 +264,71 @@
   .th-grip::after { content: ""; position: absolute; top: 20%; bottom: 20%; right: 3px; width: 2px; border-radius: 1px; background: transparent; }
   .th-grip:hover::after { background: var(--steel); }
   body.col-resizing, body.col-resizing * { cursor: col-resize !important; user-select: none !important; }
+  /* Bill of Quantities grid. The wrapper is the scroll pane on both axes, so the
+     sticky header and the pinned columns stick to the pane instead of to the
+     page, and the bottom scrollbar stays in reach however long the bill is. */
+  .boq-wrap { overflow-x: scroll; overflow-y: auto; max-height: calc(100vh - 340px); min-height: 300px; }
+  #boqTable thead th { position: sticky; top: 0; z-index: 3; background: var(--surface-alt); padding-right: 30px; }
+  #boqTable thead th.pin { z-index: 5; }
+  #boqTable tbody td.pin { position: sticky; z-index: 2; background: var(--surface); box-shadow: 1px 0 0 var(--line); }
+  #boqTable tr.heading-row > td.pin { background: var(--surface-alt); }
+  #boqTable tr.selected > td.pin { box-shadow: inset 3px 0 0 var(--steel), 1px 0 0 var(--line); }
+  /* a dimmed search-context row must not dim its pinned cells as well, or the
+     list reads visibly through them while scrolling sideways */
+  #boqTable tr.context-row > td.pin { opacity: 1; color: var(--ink-muted); }
+  #boqTable tr.context-row > td.pin .cell-input { opacity: 0.66; }
+  /* the frozen block reads its left edges from the table itself, so one write
+     after a resize moves the whole block at once */
+  #boqTable .pin-0 { left: var(--pin-0, 0px); }
+  #boqTable .pin-1 { left: var(--pin-1, 0px); }
+  #boqTable .pin-2 { left: var(--pin-2, 0px); }
+  #boqTable .pin-3 { left: var(--pin-3, 0px); }
+  #boqTable .pin-4 { left: var(--pin-4, 0px); }
+  #boqTable .pin-5 { left: var(--pin-5, 0px); }
+  #boqTable .pin-6 { left: var(--pin-6, 0px); }
+  #boqTable .pin-7 { left: var(--pin-7, 0px); }
+  .th-menu {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; padding: 0; line-height: 1; cursor: pointer;
+  border: 1px solid transparent; border-radius: 4px;
+  background: none; color: var(--ink-muted); font-size: 9px;
+  }
+  .th-menu:hover { border-color: var(--steel); color: var(--steel); }
+  .col-menu {
+  position: fixed; z-index: 60; min-width: 262px; max-height: 64vh; overflow-y: auto;
+  padding: 8px; background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--radius); box-shadow: 0 12px 34px rgba(15, 36, 56, 0.22);
+  }
+  .col-menu[hidden] { display: none; }
+  .col-menu-title {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-muted); padding: 2px 6px 7px 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .col-menu-row { display: flex; align-items: center; gap: 4px; }
+  .col-menu-row label {
+  flex: 1 1 auto; display: flex; align-items: center; gap: 8px; min-width: 0;
+  padding: 5px 6px; border-radius: 5px; font-size: 12.5px; cursor: pointer;
+  }
+  .col-menu-row label span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .col-menu-row label:hover { background: var(--surface-alt); }
+  .col-menu-row input { margin: 0; accent-color: var(--steel); flex: 0 0 auto; }
+  .pin-btn {
+  flex: 0 0 auto; padding: 3px 8px; font-size: 10.5px; border-radius: 5px;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  color: var(--ink-muted); font-family: var(--font-mono); cursor: pointer;
+  }
+  .pin-btn.on { background: var(--steel-soft); border-color: var(--steel); color: var(--ink); }
+  .pin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .col-menu hr { border: none; border-top: 1px solid var(--line); margin: 8px 0 7px; }
+  .col-menu-actions { display: flex; gap: 6px; padding: 0 2px; }
+  .col-menu-actions button {
+  flex: 1; padding: 6px 8px; font-size: 11.5px; border-radius: 5px;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  color: var(--ink); font-family: var(--font-sans); cursor: pointer; white-space: nowrap;
+  }
+  .col-menu-actions button:hover { background: var(--surface-alt); }
+  .col-menu-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
   .ref-num { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-muted); white-space: nowrap; }
   .ref-num.lvl1 { color: var(--ink); font-weight: 600; }
   .tree-cell { display: flex; align-items: center; gap: 3px; }
@@ -461,7 +526,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-09-27b (Search speed)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-18a (BoQ grid)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -673,11 +738,13 @@
     <input type="text" class="search-input" id="boqSearch" placeholder="Search descriptions…">
     <button class="btn btn-ghost btn-sm" id="btnBoqExpand">Expand all</button>
     <button class="btn btn-ghost btn-sm" id="btnBoqCollapse">Collapse all</button>
+    <button class="btn btn-ghost btn-sm" id="btnBoqColumns" aria-haspopup="true" aria-expanded="false" title="Show, hide, pin or resize the bill&#39;s columns">Columns &#9662;</button>
     <button class="btn btn-ghost" id="btnExportCsv" title="Download this project's bill as a spreadsheet">Export CSV</button>
     <button class="btn btn-ghost" id="btnExportExcel" title="Download this project's bill as a workbook that looks like the reference Excel file">Export Excel</button>
     <button class="btn btn-ghost btn-sm" id="btnResetData" title="Discard changes saved in this browser and reload the bundled ledger">Reset saved copy</button>
     <button class="btn btn-danger-ghost" id="btnClearBoq">Clear all</button>
   </div>
+  <div class="col-menu" id="boqColMenu" hidden></div>
   <div class="search-note" id="boqSearchNote"></div>
   <div class="toolbar row-toolbar" id="boqRowTools">
     <span class="row-toolbar-hint">Select a row, then:</span>
@@ -696,31 +763,31 @@
     </div>
   </div>
   <div class="card">
-    <div class="table-wrap">
+    <div class="table-wrap boq-wrap">
     <table id="boqTable">
       <thead>
       <tr>
-        <th>Ref</th>
-        <th>Work description</th>
-        <th>Brand</th>
-        <th>Unit</th>
-        <th class="num" title="The quantity measured from the drawing">Quantity (Drawing)</th>
-        <th class="num" title="Mark-up % added to the drawing quantity (the sheet uses 10%)">Quantity Mark-up %</th>
-        <th class="num" title="Quantity x (1 + mark-up %) rounded up">Charged Quantity</th>
-        <th class="num" title="Optional per-row fixed unit price, used when no Original Rate is entered">Material Price</th>
-        <th class="num" title="Optional per-row fixed unit price, used when no Original Rate is entered">Labour Price</th>
-        <th class="num">Original Rate — Material</th>
-        <th class="num">Original Rate — Labour</th>
-        <th class="num">Mark-up % — Material</th>
-        <th class="num">Mark-up % — Labour</th>
-        <th class="num" title="ROUNDUP(Original x (1 + mark-up %))">Rate — Material</th>
-        <th class="num" title="ROUNDUP(Original x (1 + mark-up %))">Rate — Labour</th>
-        <th class="num" title="Rate x Charged Quantity">Total — Material</th>
-        <th class="num" title="Rate x Charged Quantity">Total — Labour</th>
-        <th class="num" title="Total Material + Total Labour">Amount</th>
-        <th class="num" title="Original Rate x Charged Quantity">Budget</th>
-        <th class="num" title="Amount - Budget">Profit</th>
-        <th>Remark</th>
+        <th data-col="ref">Ref</th>
+        <th data-col="name">Work description</th>
+        <th data-col="brand">Brand</th>
+        <th data-col="unit">Unit</th>
+        <th class="num" title="The quantity measured from the drawing" data-col="qty">Quantity (Drawing)</th>
+        <th class="num" title="Mark-up % added to the drawing quantity (the sheet uses 10%)" data-col="qtyMarkup">Quantity Mark-up %</th>
+        <th class="num" title="Quantity x (1 + mark-up %) rounded up" data-col="qtyChg">Charged Quantity</th>
+        <th class="num" title="Optional per-row fixed unit price, used when no Original Rate is entered" data-col="matPrice">Material Price</th>
+        <th class="num" title="Optional per-row fixed unit price, used when no Original Rate is entered" data-col="labPrice">Labour Price</th>
+        <th class="num" data-col="origM">Original Rate — Material</th>
+        <th class="num" data-col="origL">Original Rate — Labour</th>
+        <th class="num" data-col="markupM">Mark-up % — Material</th>
+        <th class="num" data-col="markupL">Mark-up % — Labour</th>
+        <th class="num" title="ROUNDUP(Original x (1 + mark-up %))" data-col="rateM">Rate — Material</th>
+        <th class="num" title="ROUNDUP(Original x (1 + mark-up %))" data-col="rateL">Rate — Labour</th>
+        <th class="num" title="Rate x Charged Quantity" data-col="totalM">Total — Material</th>
+        <th class="num" title="Rate x Charged Quantity" data-col="totalL">Total — Labour</th>
+        <th class="num" title="Total Material + Total Labour" data-col="amount">Amount</th>
+        <th class="num" title="Original Rate x Charged Quantity" data-col="budget">Budget</th>
+        <th class="num" title="Amount - Budget" data-col="profit">Profit</th>
+        <th data-col="remark">Remark</th>
       </tr>
       </thead>
       <tbody id="boqBody"></tbody>
@@ -809,7 +876,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-09-27b (Search speed)");
+  console.log("Site Ledger — build 2026-10-18a (BoQ grid)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -2332,6 +2399,10 @@
   renderBranchFilter("boqBranchFilter", state.boq, branch, function (name) {
   boqBranchActive = name; renderAll();
   });
+  loadBoqGrid();
+  applyBoqCols();
+  syncBoqFooter();
+  const boqOrderNow = boqOrder();
   const term = boqSearchTerm.trim().toLowerCase();
   const found = visibleRows(state.boq, { branch: branch, term: term, match: boqMatches });
   const capped = capForSearch(found, term);
@@ -2423,11 +2494,19 @@
   }
 
   bindRowClick(tr, n, "boq");
-  tr.append(refCell(entry.ref, entry.depth), nameCell(n, entry.depth),
-        td.brand, td.unit, td.qty, td.qtyMarkup, td.qtyChg,
-        td.matPrice, td.labPrice, td.origM, td.origL, td.markupM, td.markupL,
-        td.rateM, td.rateL, td.totalM, td.totalL,
-        td.amount, td.budget, td.profit, td.remark);
+  // cells go on in display order, so a pinned column always sits at the left
+  // edge of the row, and a hidden one is simply never attached
+  const cells = Object.assign({
+  ref: refCell(entry.ref, entry.depth),
+  name: nameCell(n, entry.depth)
+  }, td);
+  boqOrderNow.forEach(function (k) {
+  const el = cells[k];
+  if (!el) return;
+  const at = boqPinned.indexOf(k);
+  if (at >= 0) el.classList.add("pin", "pin-" + at);
+  tr.appendChild(el);
+  });
   frag.appendChild(tr);
   });
   body.replaceChildren(frag);
@@ -2440,9 +2519,13 @@
   document.getElementById("sumBudget").textContent = fmt(totals.budget);
   document.getElementById("sumProfit").textContent = fmt(totals.profit);
   document.getElementById("sumTotal").textContent = fmt(totals.grand);
-  document.getElementById("boqFootTotal").textContent = fmt(totals.grand);
-  document.getElementById("boqFootBudget").textContent = fmt(totals.budget);
-  document.getElementById("boqFootProfit").textContent = fmt(totals.profit);
+  // hiding a column takes its totals cell with it, so each write is optional
+  const footTotal = document.getElementById("boqFootTotal");
+  const footBudget = document.getElementById("boqFootBudget");
+  const footProfit = document.getElementById("boqFootProfit");
+  if (footTotal) footTotal.textContent = fmt(totals.grand);
+  if (footBudget) footBudget.textContent = fmt(totals.budget);
+  if (footProfit) footProfit.textContent = fmt(totals.profit);
 
   refreshToolbar("boq", state.boq);
   }
@@ -3484,6 +3567,9 @@
 
   function initColumns() {
   Object.keys(COL_DEFAULTS).forEach(function (id) {
+  // the bill's grid fits, pins and resizes its own columns in pixels, so it is
+  // set up separately (see initBoqColumns) and these shares do not apply
+  if (id === "boqTable") return;
   const table = document.getElementById(id);
   if (!table || !table.tHead) return;
   colWeights[id] = loadColWeights(id);
@@ -3528,6 +3614,477 @@
   });
   });
   }
+
+  /* ---------------- BoQ grid: column visibility / pinning / width ---------- */
+  /* The bill's grid can hide, pin and resize its columns, so it holds widths in
+     pixels - a percentage share cannot say "at least as wide as the header
+     label". Each column knows its key from the data-col on its <th>, and the
+     label is read from that same <th>, so the markup stays the only definition
+     of what a column is called. Pinned columns are moved to the front of the
+     row, which is what makes their sticky left edge contiguous; the default is
+     Ref + Work description. Hidden columns, pins and dragged widths are
+     remembered per account and per project. */
+  const BOQ_PIN_DEFAULT = ["ref", "name"];
+  const BOQ_PIN_MAX = 8;
+  const BOQ_COL_MIN_PX = 46;
+  const BOQ_HEADER_PAD = 40;   // 10px left + 30px right of header padding
+  const BOQ_LEGACY_W = 1560;   // the width the old percentage shares were tuned against
+  const BOQ_GRID_STORE = "boq.grid.v1.";
+  const BOQ_PIN_SLOTS = ["pin-0", "pin-1", "pin-2", "pin-3", "pin-4", "pin-5", "pin-6", "pin-7"];
+  const boqCols = [];          // [{ key, label }] in markup order
+  let boqMinFit = {};          // key -> px: the width that fits the header label
+  let boqDefaultW = {};        // key -> px: auto-fit, floored by the old proportions
+  let boqHidden = new Set();
+  let boqPinned = BOQ_PIN_DEFAULT.slice();
+  let boqWidths = {};          // key -> px: only the widths the user dragged to
+  let boqGridScope = null;
+  let boqMenuAnchor = null;
+  let boqMenuKey = null;
+
+  function boqKnown(key) { return boqMinFit[key] != null; }
+
+  // Visible columns in display order: pinned first (they are the left edge),
+  // then everything else in the order the markup lists it.
+  function boqOrder() {
+  const out = [];
+  boqPinned.forEach(function (k) { if (!boqHidden.has(k)) out.push(k); });
+  boqCols.forEach(function (c) {
+  if (boqPinned.indexOf(c.key) < 0 && !boqHidden.has(c.key)) out.push(c.key);
+  });
+  return out;
+  }
+
+  function boqWidthFor(key) {
+  const saved = boqWidths[key];
+  const base = saved > 0 ? saved : (boqDefaultW[key] || 0);
+  return Math.max(boqMinFit[key] || BOQ_COL_MIN_PX, base);
+  }
+
+  function boqScopeKey() {
+  const p = activeProject();
+  return (me && me.id ? me.id : "anon") + "|" + (p ? p.id : "none");
+  }
+
+  function loadBoqGrid() {
+  const scope = boqScopeKey();
+  if (scope === boqGridScope) return;      // the common case: one compare per render
+  boqGridScope = scope;
+  boqHidden = new Set();
+  boqPinned = BOQ_PIN_DEFAULT.slice();
+  boqWidths = {};
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(BOQ_GRID_STORE + scope)); } catch (e) { saved = null; }
+  if (!saved || typeof saved !== "object") return;
+  if (Array.isArray(saved.hidden)) {
+  saved.hidden.forEach(function (k) { if (boqKnown(k)) boqHidden.add(k); });
+  }
+  if (Array.isArray(saved.pinned) && saved.pinned.length) {
+  const list = [];
+  saved.pinned.forEach(function (k) { if (boqKnown(k) && list.indexOf(k) < 0) list.push(k); });
+  if (list.length) boqPinned = list;
+  }
+  if (saved.widths && typeof saved.widths === "object") {
+  Object.keys(saved.widths).forEach(function (k) {
+  const w = Number(saved.widths[k]);
+  if (boqKnown(k) && isFinite(w) && w > 0) boqWidths[k] = w;
+  });
+  }
+  // a stale or hand-edited copy must never leave the bill with nothing on screen
+  if (!boqOrder().length) { boqHidden = new Set(); boqPinned = BOQ_PIN_DEFAULT.slice(); }
+  }
+
+  function saveBoqGrid() {
+  if (!boqGridScope) return;
+  const hidden = [];
+  boqHidden.forEach(function (k) { hidden.push(k); });
+  try {
+  localStorage.setItem(BOQ_GRID_STORE + boqGridScope, JSON.stringify({
+  hidden: hidden,
+  pinned: boqPinned.slice(),
+  widths: boqWidths
+  }));
+  } catch (e) { /* storage unavailable */ }
+  }
+
+  // Measure every header label in the header's own font, then add the header
+  // padding: that is the column's minimum, and a column is never made narrower,
+  // so nothing is ever clipped.
+  function measureBoqCols() {
+  const probe = document.createElement("span");
+  probe.style.cssText = "position:absolute;left:-10000px;top:0;visibility:hidden;" +
+    "white-space:nowrap;font-family:var(--font-mono);font-size:8.5px;font-weight:bold;" +
+    "letter-spacing:0.02em;text-transform:uppercase;";
+  document.body.appendChild(probe);
+  boqCols.forEach(function (c) {
+  probe.textContent = c.label;
+  boqMinFit[c.key] = Math.max(BOQ_COL_MIN_PX, Math.ceil(probe.getBoundingClientRect().width) + BOQ_HEADER_PAD);
+  });
+  document.body.removeChild(probe);
+  const legacy = COL_DEFAULTS.boqTable || [];
+  boqCols.forEach(function (c, i) {
+  const share = Math.round((legacy[i] != null ? legacy[i] : 8) * BOQ_LEGACY_W / 100);
+  boqDefaultW[c.key] = Math.max(boqMinFit[c.key], share);
+  });
+  }
+
+  // The frozen block's left edges come from the header's rendered widths, so a
+  // column that grew to fill spare room is still measured exactly.
+  function syncBoqPinOffsets() {
+  const table = document.getElementById("boqTable");
+  if (!table || !table.tHead) return;
+  const headRow = table.tHead.rows[0];
+  let left = 0, n = 0;
+  Array.prototype.forEach.call(headRow.cells, function (th) {
+  if (th.hidden) return;
+  if (boqPinned.indexOf(th.dataset.col) < 0) return;
+  table.style.setProperty("--pin-" + n, left + "px");
+  left += th.offsetWidth;
+  n++;
+  });
+  }
+
+  function applyBoqCols() {
+  const table = document.getElementById("boqTable");
+  if (!table || !table.tHead) return;
+  const headRow = table.tHead.rows[0];
+  const order = boqOrder();
+  const byKey = {};
+  Array.prototype.forEach.call(headRow.cells, function (th) { byKey[th.dataset.col] = th; });
+  // Only touch the row when the order really changed: re-appending the very cell
+  // the pointer is dragging would drop its pointer capture mid-resize.
+  let needOrder = false;
+  for (let i = 0; i < order.length; i++) {
+  if (headRow.cells[i] !== byKey[order[i]]) { needOrder = true; break; }
+  }
+  if (needOrder) {
+  order.forEach(function (k) { headRow.appendChild(byKey[k]); });
+  Object.keys(byKey).forEach(function (k) { if (boqHidden.has(k)) headRow.appendChild(byKey[k]); });
+  }
+  Array.prototype.forEach.call(headRow.cells, function (th) {
+  const k = th.dataset.col;
+  th.hidden = boqHidden.has(k);
+  th.classList.remove(BOQ_PIN_SLOTS[0], BOQ_PIN_SLOTS[1], BOQ_PIN_SLOTS[2], BOQ_PIN_SLOTS[3],
+            BOQ_PIN_SLOTS[4], BOQ_PIN_SLOTS[5], BOQ_PIN_SLOTS[6], BOQ_PIN_SLOTS[7]);
+  const at = boqPinned.indexOf(k);
+  th.classList.toggle("pin", at >= 0);
+  if (at >= 0) th.classList.add(BOQ_PIN_SLOTS[at]);
+  });
+  // One <col> per visible column, in row order, so the fixed layout never leaves
+  // a gap where a hidden column used to be.
+  let group = table.querySelector("colgroup");
+  if (!group) { group = document.createElement("colgroup"); table.insertBefore(group, table.firstChild); }
+  while (group.firstChild) group.removeChild(group.firstChild);
+  let sum = 0;
+  order.forEach(function (k) {
+  const col = document.createElement("col");
+  const w = boqWidthFor(k);
+  col.style.width = w + "px";
+  sum += w;
+  group.appendChild(col);
+  });
+  table.style.minWidth = sum + "px";
+  syncBoqPinOffsets();
+  }
+
+  // The footer has to match the visible columns exactly, or its totals would sit
+  // under the wrong headers.
+  function syncBoqFooter() {
+  const table = document.getElementById("boqTable");
+  if (!table || !table.tFoot) return;
+  const row = table.tFoot.rows[0];
+  if (!row) return;
+  while (row.firstChild) row.removeChild(row.firstChild);
+  const vis = boqOrder();
+  const tail = ["amount", "budget", "profit", "remark"];
+  const lead = vis.filter(function (k) { return tail.indexOf(k) < 0; });
+  const label = document.createElement("td");
+  label.colSpan = Math.max(1, lead.length);
+  label.style.textAlign = "right";
+  label.textContent = "Grand total";
+  row.appendChild(label);
+  tail.forEach(function (k) {
+  if (vis.indexOf(k) < 0) return;
+  const cell = document.createElement("td");
+  if (k === "amount") { cell.className = "num"; cell.id = "boqFootTotal"; }
+  else if (k === "budget") { cell.className = "num"; cell.id = "boqFootBudget"; }
+  else if (k === "profit") { cell.className = "num"; cell.id = "boqFootProfit"; }
+  row.appendChild(cell);
+  });
+  }
+
+  function rerenderBoqGrid() { saveBoqGrid(); renderBoq(); }
+
+  function setBoqHidden(key, hide) {
+  if (!boqKnown(key)) return;
+  if (hide) {
+  if (boqOrder().length <= 1) return;   // never leave the bill with no columns
+  boqHidden.add(key);
+  const at = boqPinned.indexOf(key);
+  if (at >= 0) boqPinned.splice(at, 1);   // hiding a pinned column also unpins it
+  } else {
+  boqHidden.delete(key);
+  }
+  }
+
+  function toggleBoqPin(key) {
+  const at = boqPinned.indexOf(key);
+  if (at >= 0) { boqPinned.splice(at, 1); return; }
+  if (boqPinned.length >= BOQ_PIN_MAX) {
+  showToast("Up to " + BOQ_PIN_MAX + " columns can be pinned at once");
+  return;
+  }
+  boqPinned.push(key);
+  }
+
+  function placeBoqColMenu(anchor) {
+  const menu = document.getElementById("boqColMenu");
+  menu.hidden = false;
+  const r = anchor.getBoundingClientRect();
+  const mw = menu.offsetWidth, mh = menu.offsetHeight;
+  let left = Math.min(r.left, window.innerWidth - mw - 8);
+  let top = r.bottom + 6;
+  if (top + mh > window.innerHeight - 8) top = r.top - mh - 6;
+  menu.style.left = Math.max(8, left) + "px";
+  menu.style.top = Math.max(8, top) + "px";
+  }
+
+  function closeBoqColMenu() {
+  const menu = document.getElementById("boqColMenu");
+  if (!menu || menu.hidden) return;
+  menu.hidden = true;
+  menu.textContent = "";
+  boqMenuAnchor = null;
+  boqMenuKey = null;
+  const drop = document.getElementById("btnBoqColumns");
+  if (drop) drop.setAttribute("aria-expanded", "false");
+  }
+
+  function buildBoqColumnsMenu(menu) {
+  const title = document.createElement("div");
+  title.className = "col-menu-title";
+  title.textContent = "Columns";
+  menu.appendChild(title);
+  boqCols.forEach(function (c) {
+  const at = boqPinned.indexOf(c.key);
+  const row = document.createElement("div");
+  row.className = "col-menu-row";
+  const lab = document.createElement("label");
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = !boqHidden.has(c.key);
+  const name = document.createElement("span");
+  name.textContent = c.label;
+  lab.appendChild(box);
+  lab.appendChild(name);
+  const pin = document.createElement("button");
+  pin.type = "button";
+  pin.className = "pin-btn" + (at >= 0 ? " on" : "");
+  pin.textContent = at >= 0 ? "Pinned" : "Pin";
+  pin.title = at >= 0 ? "Let this column scroll away" : "Keep this column at the left edge";
+  pin.disabled = at < 0 && boqPinned.length >= BOQ_PIN_MAX;
+  box.addEventListener("change", function () {
+  setBoqHidden(c.key, !box.checked);
+  rerenderBoqGrid();
+  openBoqColMenu();                 // rebuild where it stands, from the new state
+  });
+  pin.addEventListener("click", function () {
+  toggleBoqPin(c.key);
+  rerenderBoqGrid();
+  openBoqColMenu();
+  });
+  row.appendChild(lab);
+  row.appendChild(pin);
+  menu.appendChild(row);
+  });
+  const hr = document.createElement("hr");
+  menu.appendChild(hr);
+  const acts = document.createElement("div");
+  acts.className = "col-menu-actions";
+  const showAll = document.createElement("button");
+  showAll.type = "button";
+  showAll.textContent = "Show all";
+  showAll.title = "Bring every column back";
+  showAll.addEventListener("click", function () {
+  boqHidden = new Set();
+  rerenderBoqGrid();
+  openBoqColMenu();
+  });
+  const reset = document.createElement("button");
+  reset.type = "button";
+  reset.textContent = "Reset";
+  reset.title = "Every column, the default pin and the default widths";
+  reset.addEventListener("click", function () {
+  boqHidden = new Set();
+  boqPinned = BOQ_PIN_DEFAULT.slice();
+  boqWidths = {};
+  rerenderBoqGrid();
+  openBoqColMenu();
+  });
+  acts.appendChild(showAll);
+  acts.appendChild(reset);
+  menu.appendChild(acts);
+  }
+
+  function buildBoqHeadMenu(menu, key) {
+  let label = key;
+  for (let i = 0; i < boqCols.length; i++) if (boqCols[i].key === key) label = boqCols[i].label;
+  const title = document.createElement("div");
+  title.className = "col-menu-title";
+  title.textContent = label;
+  menu.appendChild(title);
+  const acts = document.createElement("div");
+  acts.className = "col-menu-actions";
+  const at = boqPinned.indexOf(key);
+  const pin = document.createElement("button");
+  pin.type = "button";
+  pin.textContent = at >= 0 ? "Unpin" : "Pin";
+  pin.title = at >= 0 ? "Let this column scroll away" : "Keep this column at the left edge";
+  pin.disabled = at < 0 && boqPinned.length >= BOQ_PIN_MAX;
+  const hide = document.createElement("button");
+  hide.type = "button";
+  hide.textContent = "Hide";
+  hide.title = "Hide this column - the Columns menu brings it back";
+  hide.disabled = boqOrder().length <= 1;
+  pin.addEventListener("click", function () {
+  toggleBoqPin(key);
+  rerenderBoqGrid();
+  openBoqColMenu();
+  });
+  hide.addEventListener("click", function () {
+  setBoqHidden(key, true);
+  closeBoqColMenu();
+  rerenderBoqGrid();
+  });
+  acts.appendChild(pin);
+  acts.appendChild(hide);
+  menu.appendChild(acts);
+  const hr = document.createElement("hr");
+  menu.appendChild(hr);
+  const acts2 = document.createElement("div");
+  acts2.className = "col-menu-actions";
+  const reset = document.createElement("button");
+  reset.type = "button";
+  reset.textContent = "Reset width";
+  reset.title = "Back to the width that fits the header";
+  reset.addEventListener("click", function () {
+  delete boqWidths[key];
+  closeBoqColMenu();
+  rerenderBoqGrid();
+  });
+  acts2.appendChild(reset);
+  menu.appendChild(acts2);
+  }
+
+  // anchor is where the menu is placed and onlyKey limits it to one column (the
+  // header's own menu). Called with no arguments it rebuilds the open menu in
+  // place, which is how a checkbox or pin toggle refreshes itself.
+  function openBoqColMenu(anchor, onlyKey) {
+  if (anchor) { boqMenuAnchor = anchor; boqMenuKey = onlyKey; }
+  const menu = document.getElementById("boqColMenu");
+  if (!boqMenuAnchor) return;
+  menu.textContent = "";
+  if (boqMenuKey) buildBoqHeadMenu(menu, boqMenuKey);
+  else buildBoqColumnsMenu(menu);
+  placeBoqColMenu(boqMenuAnchor);
+  const drop = document.getElementById("btnBoqColumns");
+  if (drop) drop.setAttribute("aria-expanded", boqMenuKey ? "false" : "true");
+  }
+
+  function initBoqColumns() {
+  const table = document.getElementById("boqTable");
+  if (!table || !table.tHead) return;
+  const headRow = table.tHead.rows[0];
+  // the labels are read before the grips and menu buttons go in, so the markup
+  // stays the single definition of what each column is called
+  Array.prototype.forEach.call(headRow.cells, function (th) {
+  boqCols.push({ key: th.dataset.col, label: (th.textContent || "").trim() });
+  });
+  measureBoqCols();
+  Array.prototype.forEach.call(headRow.cells, function (th) {
+  const key = th.dataset.col;
+  const grip = document.createElement("span");
+  grip.className = "th-grip";
+  grip.title = "Drag to resize - double-click to fit the header";
+  grip.addEventListener("pointerdown", function (e) {
+  if (e.button !== 0) return;
+  e.preventDefault();
+  const startX = e.clientX;
+  const startW = th.offsetWidth || boqWidthFor(key);
+  document.body.classList.add("col-resizing");
+  try { grip.setPointerCapture(e.pointerId); } catch (err) { /* older browsers ignore */ }
+  const onMove = function (ev) {
+  boqWidths[key] = Math.max(boqMinFit[key] || BOQ_COL_MIN_PX, startW + (ev.clientX - startX));
+  applyBoqCols();
+  };
+  const onUp = function () {
+  document.body.classList.remove("col-resizing");
+  saveBoqGrid();
+  window.removeEventListener("pointermove", onMove);
+  window.removeEventListener("pointerup", onUp);
+  };
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  });
+  grip.addEventListener("dblclick", function () {
+  delete boqWidths[key];
+  applyBoqCols();
+  saveBoqGrid();
+  });
+  th.appendChild(grip);
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "th-menu";
+  btn.textContent = "\u25be";
+  btn.title = "Column options";
+  btn.setAttribute("aria-label", "Column options \u2014 " + (th.textContent || "").trim());
+  btn.addEventListener("click", function (e) {
+  e.stopPropagation();
+  openBoqColMenu(btn, th.dataset.col);
+  });
+  th.appendChild(btn);
+  });
+  applyBoqCols();
+  // the left panel can be hidden, which changes the pane's width without ever
+  // resizing the window, so the pane itself is what gets watched
+  if (window.ResizeObserver) {
+  const wrap = document.querySelector(".boq-wrap");
+  if (wrap) {
+  const ro = new ResizeObserver(function () { requestAnimationFrame(syncBoqPinOffsets); });
+  ro.observe(wrap);
+  }
+  }
+  }
+
+  // Runs here rather than from initColumns: the bill's grid needs its column
+  // keys and fitted widths before the first render, and initColumns runs later,
+  // once the ledger has loaded.
+  initBoqColumns();
+
+  (function bindBoqColumnMenus() {
+  const drop = document.getElementById("btnBoqColumns");
+  if (drop) drop.addEventListener("click", function (e) {
+  e.stopPropagation();
+  openBoqColMenu(drop, null);
+  });
+  document.addEventListener("click", function (e) {
+  const menu = document.getElementById("boqColMenu");
+  if (!menu || menu.hidden) return;
+  if (menu.contains(e.target)) return;
+  closeBoqColMenu();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeBoqColMenu(); });
+  // capture phase, so a scroll anywhere closes the menu - except a scroll inside
+  // the menu itself, which has its own scrollbar once the column list is long
+  window.addEventListener("scroll", function (e) {
+  const menu = document.getElementById("boqColMenu");
+  if (menu && !menu.hidden && e.target && menu.contains(e.target)) return;
+  closeBoqColMenu();
+  }, true);
+  window.addEventListener("resize", function () {
+  closeBoqColMenu();
+  requestAnimationFrame(syncBoqPinOffsets);
+  });
+  })();
 
   /* ---------------- Accounts (Supabase) ---------------- */
   function roleInfo(r) {
@@ -4057,6 +4614,9 @@
   }
   function goToTop(instant) {
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // the bill grid is now its own scroll pane, so "top" has to mean the pane too
+  const grid = document.querySelector(".boq-wrap");
+  if (grid) grid.scrollTop = 0;
   window.scrollTo({ top: 0, left: 0, behavior: instant || calm ? "auto" : "smooth" });
   // Always re-check, never only on the instant path. A smooth scroll reports scrollY back at
   // its old value for a frame, and a reduced-motion jump may not raise a scroll event at all.
