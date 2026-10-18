@@ -272,3 +272,71 @@ JavaScript that computes it. Both have to pass before a build ships.
 
 Markup and CSS only — no script changed, so nothing was added to the page's
 runtime cost.
+
+## Visual redesign (build 2026-10-18c)
+
+**What it is.** A visual pass over the Bill of Quantities interface. The data,
+the mark-up arithmetic, the row hierarchy, collapse/expand, the column set and
+the column order are all untouched — this build changes how the page looks and
+how the controls answer, not what it computes. The 21 `<th>` labels are still
+byte-identical to the previous build, and the same checks that guard them still
+run.
+
+**One type scale, four steps.** Everything now reads from a small set of
+variables at the top of the stylesheet: a label step (12px, semi-bold, lightly
+letter-spaced) for headings and field names, a body step for descriptions, a
+value step for the money cells, and larger steps for the summary totals and the
+grand total hero. Labels that used to be plain sentence case are now set in
+uppercase, so the summary reads `ESTIMATED BUDGET` / `ESTIMATED PROFIT` as it
+did before the redesign even though the markup carries the shorter wording.
+
+**A radius ladder.** Corner rounding is three sizes rather than one: a small
+size for controls (inputs, buttons, the search field), a medium size for cards
+and panels, and a large size for the table container. The card keeps its
+`overflow: hidden`, so the sticky header's top corners round with it.
+
+**The summary board is grouped, not tiled.** The six metrics sit in three
+labelled groups — Costs, Budget & profit, and the grand total on its own as a
+hero card — each with a small icon and the value right underneath. The grid is
+three columns on a wide screen, two at 1040px and one at 640px, and the hero
+group drops onto its own full-width row at the two-column size. Every metric
+still lives behind the same `#sumItems` … `#sumTotal` elements.
+
+**Buttons have three tiers instead of one look.** Add-row is the primary
+(solid navy), Expand / Collapse / Columns / Export are secondary (outlined),
+and Clear all / Delete row are destructive (outlined in the danger colour).
+All three share a height, a corner radius and the same hover, active and
+disabled states, so a row of mixed buttons lines up. No button in the markup
+changed class — the tiers are the existing `.btn-primary`, `.btn-ghost` and
+`.btn-danger-ghost` doing the work.
+
+**Motion, and how it is kept out of the way.** Four moments move: the summary
+cards arrive, a new row fades in, a deleted row fades out before it is really
+removed, and buttons lift a pixel on hover and press down on click. There is no
+height animation — the list is fully re-rendered, so there is no height to
+tween — and the entrance only ever plays on rows that were not in the previous
+render. First paint is still, typing in a search is still, and a whole new
+result set is still. The ceiling is on how many rows may move at once rather
+than on how long the list is, so a single add animates wherever it happens
+while expanding a long list does not. The count-up rolls the summary numbers
+over 420ms, but the first time any value is written it lands on its final text
+at once, so loading a project never shows numbers counting up from nothing.
+Every one of these is CSS plus a few lines of script, and all of it is
+switched off under `prefers-reduced-motion: reduce`.
+
+**Readability.** The muted ink, the amber used for the owner badge and the
+focus ring colour were each nudged until they clear a 4.5:1 contrast ratio in
+both the light and the dark theme; two hover states that had picked up a navy
+text colour now use the foreground ink, which was invisible against the dark
+theme's steel background. Numeric cells keep tabular figures, and the summary
+values overflow with an ellipsis rather than pushing the card wider.
+
+**Checks.** A new harness drives the app against a DOM shim and asserts the
+motion layer cannot change what the list contains: first paint adds no class,
+a plain re-render adds no class, a search adds no class, an add marks exactly
+the new row, a delete removes the right row after its fade, saying no to the
+prompt changes nothing, the ceiling suppresses a mass arrival, and a
+reduced-motion preference stops all of it. It also pins the count-up's
+behaviour: the first write of a value is immediate, an unchanged value is not
+rewritten, a changed value rolls and then lands on exactly the text it was
+given, and a missing element returns quietly.
