@@ -782,7 +782,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19a (Accounts, feedback, permissions)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-19b (Accounts, feedback, permissions)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -1273,7 +1273,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-10-19a (Accounts, feedback, permissions)");
+  console.log("Site Ledger — build 2026-10-19b (Accounts, feedback, permissions)");
   let state = null;
   let me = null;
   let stateSaved = null;
@@ -4721,10 +4721,19 @@
         });
         if (error) { regErr.textContent = error.message; return; }
         if (data && data.session) {
+          // The trigger has already given the account a default name derived
+          // from the email; this replaces it with the one just typed.
+          const uname = document.getElementById("regUsername").value.trim();
+          if (uname) {
+            const { error: uerr } = await supabase.rpc("profiles_set_username", { new_name: uname });
+            if (uerr) console.warn("Could not save username:", uerr.message);
+          }
           await enterApp(data.session);
         } else {
-          // Email confirmation is enabled on this Supabase project.
-          regErr.textContent = "Account created. Check your inbox, confirm the email, then sign in.";
+          // Email confirmation is enabled on this Supabase project, so there is
+          // no session yet and the rename RPC would be refused.
+          regErr.textContent = "Account created. Check your inbox, confirm the email, then sign in. " +
+            "Your username will be based on your email until you change it after signing in.";
           document.getElementById("toLogin").click();
         }
       } catch (ex) { regErr.textContent = "Could not reach the server"; }
@@ -4733,6 +4742,26 @@
 
     document.getElementById("toRegister").addEventListener("click", function () { showAuthScreen("register"); });
     document.getElementById("toLogin").addEventListener("click", function () { showAuthScreen("login"); });
+
+    // No form: the browser hands off to Google and comes back to the redirect
+    // URL. The account and its username are created by handle_new_user().
+    const gBtn = document.getElementById("googleLogin");
+    if (gBtn) {
+      gBtn.addEventListener("click", async function () {
+        if (!supabase) return;
+        const gErr = document.getElementById("loginErr");
+        gErr.textContent = "";
+        gBtn.disabled = true;
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: { redirectTo: window.location.origin + window.location.pathname }
+          });
+          if (error) gErr.textContent = error.message;
+        } catch (ex) { gErr.textContent = "Could not reach the server"; }
+        finally { gBtn.disabled = false; }
+      });
+    }
   }
 
   async function bootAuth() {
@@ -4775,7 +4804,7 @@
 
   async function enterApp(session) {
     const { data: prof, error } = await supabase
-      .from("profiles").select("id,email,role,is_active,created_at")
+      .from("profiles").select("id,email,username,role,is_active,created_at")
       .eq("id", session.user.id).maybeSingle();
     if (error || !prof || prof.is_active === false) {
       await supabase.auth.signOut();
@@ -4790,6 +4819,7 @@
   }
 
   async function signOut() {
+    stopPresenceBeat();
     if (presenceChannel) {
       try { await presenceChannel.untrack(); } catch (e) { /* noop */ }
       try { await supabase.removeChannel(presenceChannel); } catch (e) { /* noop */ }
@@ -4824,6 +4854,7 @@
       renderAll();
       if (me.role === "admin" || me.role === "moderator") loadAdminPanel();
       startPresence();
+      startPresenceBeat();
     }).catch(function () {
       showToast("Could not load the ledger \u2014 check your connection");
     });
@@ -4833,6 +4864,23 @@
   let presenceChannel = null;
   let presenceOnline = {};
   let onlineProfiles = [];
+  let presenceBeatTimer = null;
+
+  // last_seen is what makes the offline rows say "3 min ago" instead of
+  // nothing. Cheap: one indexed update every couple of minutes.
+  function startPresenceBeat() {
+    stopPresenceBeat();
+    if (!supabase) return;
+    try { supabase.rpc("presence_beat"); } catch (e) { /* noop */ }
+    presenceBeatTimer = setInterval(function () {
+      if (!me) { stopPresenceBeat(); return; }
+      try { supabase.rpc("presence_beat"); } catch (e) { /* noop */ }
+    }, 120000);
+  }
+
+  function stopPresenceBeat() {
+    if (presenceBeatTimer) { clearInterval(presenceBeatTimer); presenceBeatTimer = null; }
+  }
 
   function startPresence() {
     if (!supabase || !me || presenceChannel) return;
