@@ -241,3 +241,34 @@ None of it touches the ledger itself: the values, the mark-up arithmetic, the
 row hierarchy and collapse/expand behave exactly as before, and the footer's
 Total / Budget / Profit / Remark cells stay aligned under the columns that are
 actually visible.
+## Column legend (build 2026-10-18b)
+
+**What it is.** A collapsible *Column legend* panel now sits at the bottom of
+the Bill of Quantities card, directly under the bill. It has one row per
+column — all 21 of them, in the same order as the headings — and three parts
+each: the column's name, what it means in plain English, and where the number
+comes from. It is open by default and folds away with one click once it has
+been read.
+
+**The formulas are the real ones.** Every entry in the third column is taken
+from the arithmetic the app actually performs, not from a description of it:
+
+- `Charged Quantity = ROUNDUP(Quantity × (1 + Quantity Mark-up % ÷ 100))`
+- `Rate = ROUNDUP(Original Rate × (1 + Mark-up % ÷ 100))` — material and labour worked out separately
+- `Total — Material = Rate — Material × Charged Quantity`, and likewise for Labour
+- `Amount = Total — Material + Total — Labour`
+- `Budget = (Original Rate — Material + Original Rate — Labour) × Charged Quantity`
+- `Profit = Amount - Budget`
+
+ROUNDUP always rounds up to two decimals, the way the reference Excel sheets
+do it. The panel also spells out the fallback chain — a blank Original Rate
+falls back to the row's own Material / Labour Price and then to the rate list —
+and what a heading row shows in place of its own rates.
+
+**The names match the headings exactly.** One check compares the legend's 21
+column names against the 21 `<th>` labels byte for byte, so the two can never
+drift apart; a second check compares each stated formula against the
+JavaScript that computes it. Both have to pass before a build ships.
+
+Markup and CSS only — no script changed, so nothing was added to the page's
+runtime cost.

@@ -287,6 +287,44 @@
   #boqTable .pin-5 { left: var(--pin-5, 0px); }
   #boqTable .pin-6 { left: var(--pin-6, 0px); }
   #boqTable .pin-7 { left: var(--pin-7, 0px); }
+  /* ---- Column legend: what each bill column means and how it is figured ---- */
+  .boq-legend { border-top: 1px solid var(--line); }
+  .boq-legend > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; background: var(--surface-alt);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted);
+  }
+  .boq-legend > summary::-webkit-details-marker { display: none; }
+  .boq-legend > summary:hover { color: var(--ink); }
+  .boq-legend > summary .twist { transition: transform 0.15s ease; }
+  .boq-legend[open] > summary .twist { transform: rotate(90deg); }
+  .boq-legend-body { padding: 12px 14px 14px; overflow-x: auto; }
+  .boq-legend table { table-layout: auto; min-width: 700px; }
+  .boq-legend th, .boq-legend td {
+  text-align: left; vertical-align: top; line-height: 1.45;
+  padding: 7px 10px; border-bottom: 1px solid var(--line);
+  }
+  .boq-legend thead th {
+  background: var(--surface-alt); border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap; font-weight: 600;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted);
+  }
+  .boq-legend tbody th[scope="row"] { white-space: nowrap; font-weight: 600; }
+  .boq-legend tbody td.col-how {
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted);
+  }
+  .boq-legend tbody td.col-how .fx { color: var(--ink); display: block; }
+  .boq-legend tbody tr:last-child th, .boq-legend tbody tr:last-child td { border-bottom: 0; }
+  .boq-legend-note {
+  margin: 12px 0 0; padding: 9px 11px; line-height: 1.55; font-size: 12px;
+  color: var(--ink-muted); background: var(--surface-alt);
+  border-left: 3px solid var(--steel); border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .boq-legend-note strong { color: var(--ink); }
+
   .th-menu {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
   width: 18px; height: 18px; padding: 0; line-height: 1; cursor: pointer;
@@ -526,7 +564,7 @@
     <button data-theme-choice="light" id="themeLight">Light</button>
     <button data-theme-choice="dark" id="themeDark">Dark</button>
   </div>
-  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-18a (BoQ grid)</span>
+  <span>Edits are saved to the shared ledger and recorded per user. · build 2026-10-18b (BoQ column legend)</span>
   </div>
   </aside>
   <button type="button" class="rail-show-fab" id="btnRailShow" title="Show left panel" aria-label="Show left panel">
@@ -806,6 +844,102 @@
     <div class="glyph">◻︎</div>
     <p>No work items match. Clear the filters or add a new row to the bill.</p>
     </div>
+    <details class="boq-legend" id="boqLegend">
+    <summary title="What every column in this bill means and how each figure is worked out"><span class="twist">&#9656;</span> Column legend &#8212; meaning &amp; formula of every column</summary>
+    <div class="boq-legend-body">
+    <table>
+      <thead>
+      <tr><th>Column</th><th>What it means</th><th>Where the number comes from</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">Ref</th>
+      <td>The row's number in the bill's outline.</td>
+      <td class="col-how">Given by the row's position and depth: 1 &#8594; 1.1 &#8594; 1.1.1. Renumbered on its own when rows are added, moved or deleted.</td></tr>
+
+      <tr><th scope="row">Work description</th>
+      <td>The item of work, material or labour being priced.</td>
+      <td class="col-how">Typed by the user. A row with sub-rows is a heading and is never priced on its own &#8212; unless it also carries a quantity and a rate, which are then added to its subtotal.</td></tr>
+
+      <tr><th scope="row">Brand</th>
+      <td>The product make or brand used for the item.</td>
+      <td class="col-how">Typed by the user. Carried into the CSV and Excel exports.</td></tr>
+
+      <tr><th scope="row">Unit</th>
+      <td>The unit the quantity is measured in &#8212; m&#179;, m&#178;, m, nr, kg &#8230;</td>
+      <td class="col-how">Chosen from the Unit drop-down. The stored value is the symbol (m3, m2, nr &#8230;); the drop-down shows the full name.</td></tr>
+
+      <tr><th scope="row">Quantity (Drawing)</th>
+      <td>The quantity measured off the drawing.</td>
+      <td class="col-how">Typed by the user, or brought in with an imported bill.</td></tr>
+
+      <tr><th scope="row">Quantity Mark-up %</th>
+      <td>Mark-up % added on top of the drawing quantity.</td>
+      <td class="col-how">Typed per row. The reference sheets use 10%. Blank or 0 means the drawing quantity is charged as measured.</td></tr>
+
+      <tr><th scope="row">Charged Quantity</th>
+      <td>The quantity actually charged for: the drawing quantity plus its mark-up, always rounded up.</td>
+      <td class="col-how"><span class="fx">ROUNDUP(Quantity &#215; (1 + Quantity Mark-up % &#247; 100))</span>Rounded up to 2 decimals. 0 when the quantity is 0.</td></tr>
+
+      <tr><th scope="row">Material Price</th>
+      <td>Optional fixed material unit price for this one row.</td>
+      <td class="col-how">Typed per row. Used only when no Original Rate &#8212; Material is entered; otherwise the Material rate list price applies.</td></tr>
+
+      <tr><th scope="row">Labour Price</th>
+      <td>Optional fixed labour unit price for this one row.</td>
+      <td class="col-how">Typed per row. Used only when no Original Rate &#8212; Labour is entered; otherwise the Labour rate list price applies.</td></tr>
+
+      <tr><th scope="row">Original Rate &#8212; Material</th>
+      <td>The base material unit rate, before any mark-up.</td>
+      <td class="col-how">Typed per row. When it is blank the row falls back to Material Price, then to the Material rate list.</td></tr>
+
+      <tr><th scope="row">Original Rate &#8212; Labour</th>
+      <td>The base labour unit rate, before any mark-up.</td>
+      <td class="col-how">Typed per row. When it is blank the row falls back to Labour Price, then to the Labour rate list.</td></tr>
+
+      <tr><th scope="row">Mark-up % &#8212; Material</th>
+      <td>The mark-up % applied on top of the original material rate.</td>
+      <td class="col-how">Typed per row.</td></tr>
+
+      <tr><th scope="row">Mark-up % &#8212; Labour</th>
+      <td>The mark-up % applied on top of the original labour rate.</td>
+      <td class="col-how">Typed per row.</td></tr>
+
+      <tr><th scope="row">Rate &#8212; Material</th>
+      <td>The material unit rate actually used to price the row.</td>
+      <td class="col-how"><span class="fx">ROUNDUP(Original Rate &#8212; Material &#215; (1 + Mark-up % &#8212; Material &#247; 100))</span>Rounded up to 2 decimals, the way the Excel sheets do it. With no Original Rate the row keeps its Material Price / rate-list price instead.</td></tr>
+
+      <tr><th scope="row">Rate &#8212; Labour</th>
+      <td>The labour unit rate actually used to price the row.</td>
+      <td class="col-how"><span class="fx">ROUNDUP(Original Rate &#8212; Labour &#215; (1 + Mark-up % &#8212; Labour &#247; 100))</span>Rounded up to 2 decimals, the way the Excel sheets do it. With no Original Rate the row keeps its Labour Price / rate-list price instead.</td></tr>
+
+      <tr><th scope="row">Total &#8212; Material</th>
+      <td>The material cost of the line.</td>
+      <td class="col-how"><span class="fx">Total &#8212; Material = Rate &#8212; Material &#215; Charged Quantity</span></td></tr>
+
+      <tr><th scope="row">Total &#8212; Labour</th>
+      <td>The labour cost of the line.</td>
+      <td class="col-how"><span class="fx">Total &#8212; Labour = Rate &#8212; Labour &#215; Charged Quantity</span></td></tr>
+
+      <tr><th scope="row">Amount</th>
+      <td>What the line is worth to the bill.</td>
+      <td class="col-how"><span class="fx">Amount = Total &#8212; Material + Total &#8212; Labour</span></td></tr>
+
+      <tr><th scope="row">Budget</th>
+      <td>What the line costs at the original rates &#8212; the cost side, before any mark-up.</td>
+      <td class="col-how"><span class="fx">Budget = (Original Rate &#8212; Material + Original Rate &#8212; Labour) &#215; Charged Quantity</span>Falls back to the Material / Labour Price or rate-list price when an Original Rate is blank.</td></tr>
+
+      <tr><th scope="row">Profit</th>
+      <td>The mark-up earned on the line.</td>
+      <td class="col-how"><span class="fx">Profit = Amount - Budget</span>This is the difference between the marked-up rates and the original ones.</td></tr>
+
+      <tr><th scope="row">Remark</th>
+      <td>A free-text note about the row.</td>
+      <td class="col-how">Typed by the user. Carried into the CSV and Excel exports.</td></tr>
+      </tbody>
+      </table>
+      <div class="boq-legend-note">Prices, rates and totals are worked out on every keystroke, so you never re-enter a figure by hand. Every money figure is shown rounded to 2 decimals with a <strong>$</strong> sign &#8212; that rounding is for display only. On a <strong>heading row</strong> (a row with sub-items) the price, mark-up, rate and total columns show &#8212;, while <strong>Amount</strong>, <strong>Budget</strong> and <strong>Profit</strong> become the total of everything beneath that heading. The <strong>footer</strong> repeats those same three figures across the whole bill.</div>
+    </div>
+    </details>
   </div>
   <footer class="hint">
     <span>ⓘ</span>
@@ -876,7 +1010,7 @@
 <script>
 (function () {
   "use strict";
-  console.log("Site Ledger — build 2026-10-18a (BoQ grid)");
+  console.log("Site Ledger — build 2026-10-18b (BoQ column legend)");
   let state = null;
   let me = null;
   let stateSaved = null;
