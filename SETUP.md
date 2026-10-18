@@ -396,3 +396,41 @@ work done since.
 **Checks.** The existing harnesses still pass: syntax 0, static 113/0, search
 113/0, go-to-top 0 and 0, legend 0, grid 78/0. The legend check now asserts the
 new stamp, and the bill header remains byte-identical to the previous build.
+
+## Build 2026-10-19b/c — controls that were never wired
+
+The 2026-10-19a build added markup for several features but never attached
+anything to them, so the controls rendered and did nothing. Three were fixed
+in `6b3f37f`:
+
+- **Google sign-in.** The button had no click handler. It now calls
+  `signInWithOAuth` and redirects back to the page it was opened from.
+  Until the Google provider and the redirect URLs are configured in Supabase,
+  clicking it reports the provider error in place.
+- **Username at registration.** The field was collected and discarded. It is now
+  saved through `profiles_set_username` once a session exists. With email
+  confirmation on there is no session yet, so the message says the name will be
+  based on the email and can be changed after signing in.
+- **Presence heartbeat.** `last_seen` was never written. `presence_beat()` now
+  fires on entry and every two minutes, and stops on sign-out. `enterApp` also
+  fetches `username` so the chip, the online list and the project owner have a
+  name to show.
+
+**Feedback, 2026-10-19c.** The same defect: the dialog had no JavaScript at all,
+so nothing could open and Cancel and Submit were unreachable. It is now a small
+popover card above the button rather than a full-screen overlay — no backdrop,
+so the page behind stays visible and clickable, and the rest of the layout is
+untouched. Cancel, the X, Escape and clicking elsewhere all close it; a
+successful submit validates the message, writes the row, toasts `Feedback sent`
+and resets the form; a failed submit keeps the card open with the message intact.
+Below 560px it becomes a bottom sheet, still without a backdrop. The `feedback`
+policies are unchanged: any signed-in user may insert their own row, and reading
+requires `is_staff()`.
+
+**Checks.** `check_static` had no failure count and no exit code, so a failing
+assertion printed a line and was still treated as green. It now reports
+`structural checks: N failures: M` and exits 1, and it asserts the Google,
+username, presence and feedback handlers stay bound and that no full-screen
+feedback backdrop returns. `fbtest.js` drives the popover through the DOM shim —
+open, Cancel, X, Escape, click-away, click-inside, empty validation and the
+failed-save path — so a control that is rendered but unbound fails the build.
