@@ -1,4 +1,4 @@
-# Site Ledger — Bill of Quantities (GitHub Pages + Supabase)
+# Site Ledger — Build of Quantity (GitHub Pages + Supabase)
 
 This is the **accounts edition** of the Site Ledger BOQ web tool, still
 published at the GitHub Pages address.

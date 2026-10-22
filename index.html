@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Site Ledger — Bill of Quantities</title>
+<title>Site Ledger — Build of Quantity</title>
 <link rel="icon" type="image/png" href="favicon.png">
 <style>
   :root {
@@ -350,7 +350,7 @@
   .th-grip::after { content: ""; position: absolute; top: 20%; bottom: 20%; right: 3px; width: 2px; border-radius: 1px; background: transparent; }
   .th-grip:hover::after { background: var(--steel); }
   body.col-resizing, body.col-resizing * { cursor: col-resize !important; user-select: none !important; }
-  /* Bill of Quantities grid. The wrapper is the scroll pane on both axes, so the
+  /* Build of Quantity grid. The wrapper is the scroll pane on both axes, so the
      sticky header and the pinned columns stick to the pane instead of to the
      page, and the bottom scrollbar stays in reach however long the bill is. */
   .boq-wrap { overflow-x: scroll; overflow-y: auto; max-height: calc(100vh - 340px); min-height: 300px; }
@@ -851,7 +851,7 @@
   <div class="topline">
     <div>
     <h2>Material rates</h2>
-    <p>Unit prices used to cost material against each line of the bill of quantities.</p>
+    <p>Unit prices used to cost material against each line of the Build of Quantity.</p>
     </div>
     <button class="btn btn-primary" id="btnAddMaterial">+ Add level 1 row</button>
   </div>
@@ -913,7 +913,7 @@
   <div class="topline">
     <div>
     <h2>Labor rates</h2>
-    <p>Crew or trade rates used to cost labor against each line of the bill of quantities.</p>
+    <p>Crew or trade rates used to cost labor against each line of the Build of Quantity.</p>
     </div>
     <button class="btn btn-primary" id="btnAddLabor">+ Add level 1 row</button>
   </div>
@@ -1028,7 +1028,7 @@
   <section class="panel" id="panel-boq">
   <div class="topline">
     <div>
-    <h2>Bill of quantities</h2>
+    <h2>Build of Quantity</h2>
     <p>Every work item, priced from the material and labor rates, or a custom price you enter directly.</p>
     </div>
     <div class="project-field">
@@ -1313,7 +1313,7 @@
   <form class="auth-card" id="loginForm">
   <span class="mark">📐 SITE LEDGER</span>
   <h1>Sign in to Site Ledger</h1>
-  <p>The bill of quantities is shared by everyone with an account — every change is saved and tracked per user.</p>
+  <p>The Build of Quantity is shared by everyone with an account — every change is saved and tracked per user.</p>
   <label for="loginEmail">Email</label>
   <input id="loginEmail" type="email" autocomplete="email" required>
   <label for="loginPassword">Password</label>
@@ -2158,7 +2158,7 @@
   { id: "materials", label: "Materials" },
   { id: "labor", label: "Labor" },
   { id: "lumpsum", label: "Lump Sum Work" },
-  { id: "boq", label: "Bill of quantities" }
+  { id: "boq", label: "Build of Quantity" }
   ];
   let activeTab = "boq";
 
@@ -2295,7 +2295,7 @@
   if (idx < 0) return;
   const p = list[idx];
   if (!confirm("Delete the whole project \u201C" + (p.name || "untitled") +
-  "\u201D and its bill of quantities? This cannot be undone.")) return;
+  "\u201D and its Build of Quantity? This cannot be undone.")) return;
   list.splice(idx, 1);
   if (!list.length) {
   const fresh = { id: uid("p"), name: "Project 1", boq: [] };
@@ -2402,10 +2402,10 @@
     deleteProject(p.id);
   });
 
-  const boq = ledgerNode("\uD83D\uDCCB", "Bill of Quantities (BOQ)", {
+  const boq = ledgerNode("\uD83D\uDCCB", "Build of Quantity (BOQ)", {
     cls: "ledger-bill",
     active: isActive,
-    title: "Open the bill of quantities for \u201C" + (p.name || "Untitled project") + "\u201D",
+    title: "Open the Build of Quantity for \u201C" + (p.name || "Untitled project") + "\u201D",
     click: function () { switchProject(p.id); }
   });
 
@@ -2837,7 +2837,7 @@
   bindSearch("lumpSumSearch", "lumpSumSearchCount", "lumpSumSearchNote",
   function (v) { lumpSumSearchTerm = v; if (v.trim()) lumpSumBranchActive = "All"; },
   function () { renderLumpSum(); });
-  /* ================= BILL OF QUANTITIES ================= */
+  /* ================= Build of Quantity ================= */
   let boqBranchActive = "All";
   let boqSearchTerm = "";
 
@@ -3184,11 +3184,11 @@
   document.getElementById("btnClearBoq").addEventListener("click", () => {
   const p = activeProject();
   if (!p || !p.boq.length) return;
-  if (confirm("Remove all work items from the bill of quantities? This cannot be undone.")) {
+  if (confirm("Remove all work items from the Build of Quantity? This cannot be undone.")) {
   p.boq = [];
   syncBoqRef();
   persist(); renderAll();
-  showToast("Bill of quantities cleared");
+  showToast("Build of Quantity cleared");
   }
   });
   document.getElementById("projectName").addEventListener("change", e => {

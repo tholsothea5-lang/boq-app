@@ -101,7 +101,7 @@ now it starts with a **sign-in screen**:
 now go to the shared ledger, so everyone with an account sees the same numbers.
 That is exactly what an audit log depends on.
 
-## Bill of Quantities columns (build 2026-09-26a)
+## Build of Quantity columns (build 2026-09-26a)
 
 The BOQ table mirrors your `Blank BOQ.xlsx` detail sheets (1.1–1.4). Per row:
 
@@ -147,7 +147,7 @@ always means new content further up the page.
 
 ## Search speed (build 2026-09-27b)
 
-Typing in the Materials, Labor, Lump Sum Work or Bill of Quantities search box
+Typing in the Materials, Labor, Lump Sum Work or Build of Quantity search box
 used to rebuild the whole matching list on every keystroke. Because a match
 keeps its parent headings, a broad letter dragged in most of the ledger: `c`
 matched 844 of the 1,061 material rows, and each rebuild built around 19,000
@@ -193,7 +193,7 @@ four lists had simply never been given the same treatment.
 
 ## BoQ grid (build 2026-10-18a)
 
-The Bill of Quantities table has 21 columns and used to be laid out at a fixed
+The Build of Quantity table has 21 columns and used to be laid out at a fixed
 1,560px inside a panel that is narrower than that on most laptops. Everything
 past the panel edge was simply gone: no scrollbar to reach it, and the header
 text cut mid-word, so *Quantity Mark-up %* read as `QUANTITY MARK-UP %` on one
@@ -244,7 +244,7 @@ actually visible.
 ## Column legend (build 2026-10-18b)
 
 **What it is.** A collapsible *Column legend* panel now sits at the bottom of
-the Bill of Quantities card, directly under the bill. It has one row per
+the Build of Quantity card, directly under the bill. It has one row per
 column — all 21 of them, in the same order as the headings — and three parts
 each: the column's name, what it means in plain English, and where the number
 comes from. It is open by default and folds away with one click once it has
@@ -275,7 +275,7 @@ runtime cost.
 
 ## Visual redesign (build 2026-10-18c)
 
-**What it is.** A visual pass over the Bill of Quantities interface. The data,
+**What it is.** A visual pass over the Build of Quantity interface. The data,
 the mark-up arithmetic, the row hierarchy, collapse/expand, the column set and
 the column order are all untouched — this build changes how the page looks and
 how the controls answer, not what it computes. The 21 `<th>` labels are still
